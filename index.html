@@ -766,7 +766,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     </div>
     <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
       <button onclick="closeAddProgModal()" style="padding:7px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer">Cancel</button>
-      <button onclick="saveAddProg()" style="padding:7px 20px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Add Program</button>
+      <button id="ap-save-btn" onclick="saveAddProg()" style="padding:7px 20px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Add Program</button>
     </div>
   </div>
 </div>
@@ -1575,8 +1575,16 @@ const PROGRAMS_RAW = [
 ];
 
 /* ── Custom program storage ──────────────────────────────────── */
-const CUSTOM_KEY   = "phd_custom_2027";
-const DELETED_KEY  = "phd_deleted_2027";
+const CUSTOM_KEY    = "phd_custom_2027";
+const DELETED_KEY   = "phd_deleted_2027";
+const OVERRIDES_KEY = "phd_overrides_2027";
+
+function loadOverrides() {
+  try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || "{}"); } catch(e) { return {}; }
+}
+function saveOverrides(obj) {
+  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(obj)); } catch(e) {}
+}
 
 function loadCustomProgs() {
   try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch(e) { return []; }
@@ -1601,10 +1609,14 @@ function nextCustomId() {
 
 let PORTFOLIO = [];
 function rebuildPortfolio() {
-  const deleted = loadDeleted();
-  const custom  = loadCustomProgs();
-  PORTFOLIO = [...PROGRAMS_RAW.filter(p => !deleted.has(p.id)), ...custom]
-    .sort((a, b) => b.avs - a.avs);
+  const deleted   = loadDeleted();
+  const custom    = loadCustomProgs();
+  const overrides = loadOverrides();
+  PORTFOLIO = [
+    ...PROGRAMS_RAW.filter(p => !deleted.has(p.id))
+                   .map(p => overrides[p.id] ? Object.assign({}, p, overrides[p.id]) : p),
+    ...custom
+  ].sort((a, b) => b.avs - a.avs);
 }
 
 const POOL_REJECTED = [
@@ -1915,7 +1927,7 @@ function renderPortfolio() {
   });
 
   document.getElementById("portfolio-body").innerHTML = filtered.map((p, i) => {
-    return `<tr>
+    return `<tr onclick="handleRowClick(event,${p.id})" style="cursor:pointer" title="Click row to edit">
       <td class="num" style="color:var(--muted)">${i+1}</td>
       <td><span style="font-weight:600;color:var(--text)">${p.name}</span><br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
       <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td>
@@ -2133,68 +2145,126 @@ initAllUI();   // Apply saved localStorage state to all UI elements
 
 // ── Add / Delete / Restore Program ──────────────────────────────────────────
 
+let editProgId = null;
+
+function _fillProgForm(p) {
+  document.getElementById("ap-name").value     = p.name     || "";
+  document.getElementById("ap-dept").value     = (p.dept    === "—" ? "" : p.dept    || "");
+  document.getElementById("ap-location").value = (p.location=== "—" ? "" : p.location|| "");
+  document.getElementById("ap-avs").value      = p.avs      ?? 60;
+  document.getElementById("ap-fee").value      = p.fee      ?? "";
+  document.getElementById("ap-stipend").value  = p.stipend  ?? "";
+  document.getElementById("ap-deadline").value = (p.deadline=== "TBD" ? "" : p.deadline|| "");
+  document.getElementById("ap-faculty").value  = (p.faculty || []).join(", ");
+  document.getElementById("ap-threads").value  = (p.threads || []).join(", ");
+  document.getElementById("ap-toefl").value    = p.toefl    || "";
+  document.getElementById("ap-soplen").value   = p.sopLen   || "";
+  document.getElementById("ap-wt").value       = p.wt       || "";
+  document.getElementById("ap-notes").value    = p.notes    || "";
+  document.getElementById("ap-gre").value      = p.gre      || "Not required";
+  document.getElementById("ap-fw").checked     = !!p.fw;
+  document.getElementById("ap-nynj").checked   = !!p.nynj;
+}
+
 function openAddProgModal() {
+  editProgId = null;
+  document.getElementById("ap-modal-title").textContent = "Add Program";
+  document.getElementById("ap-save-btn").textContent    = "Add Program";
   ["ap-name","ap-dept","ap-location","ap-fee","ap-stipend","ap-deadline",
    "ap-faculty","ap-threads","ap-toefl","ap-soplen","ap-notes","ap-wt"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
+    const el = document.getElementById(id); if (el) el.value = "";
   });
-  const avs = document.getElementById("ap-avs");
-  if (avs) avs.value = "60";
-  const gre = document.getElementById("ap-gre");
-  if (gre) gre.value = "Not required";
-  const fw = document.getElementById("ap-fw");
-  if (fw) fw.checked = false;
-  const nynj = document.getElementById("ap-nynj");
-  if (nynj) nynj.checked = false;
+  document.getElementById("ap-avs").value  = "60";
+  document.getElementById("ap-gre").value  = "Not required";
+  document.getElementById("ap-fw").checked = false;
+  document.getElementById("ap-nynj").checked = false;
   document.getElementById("ap-modal").style.display = "flex";
   setTimeout(() => { const n = document.getElementById("ap-name"); if (n) n.focus(); }, 60);
 }
 
+function openEditProgModal(id) {
+  const prog = PORTFOLIO.find(p => p.id === id);
+  if (!prog) return;
+  editProgId = id;
+  document.getElementById("ap-modal-title").textContent = "Edit Program";
+  document.getElementById("ap-save-btn").textContent    = "Save Changes";
+  _fillProgForm(prog);
+  document.getElementById("ap-modal").style.display = "flex";
+  setTimeout(() => { const n = document.getElementById("ap-name"); if (n) n.focus(); }, 60);
+}
+
+function handleRowClick(event, id) {
+  // Ignore clicks on interactive elements
+  const tag = event.target.tagName;
+  if (["BUTTON","A","INPUT","SELECT","TEXTAREA"].includes(tag)) return;
+  const closest = event.target.closest("button, a, input, select, textarea");
+  if (closest) return;
+  openEditProgModal(id);
+}
+
 function closeAddProgModal() {
   document.getElementById("ap-modal").style.display = "none";
+  editProgId = null;
+}
+
+function _readProgForm(existingId) {
+  const v = id => (document.getElementById(id) || {}).value || "";
+  const ch = id => !!(document.getElementById(id) || {}).checked;
+  return {
+    id:       existingId,
+    name:     v("ap-name").trim() || "—",
+    dept:     v("ap-dept").trim() || "—",
+    location: v("ap-location").trim() || "—",
+    avs:      parseInt(v("ap-avs")) || 60,
+    fee:      parseInt(v("ap-fee")) || 0,
+    fw:       ch("ap-fw"),
+    wt:       v("ap-wt").trim() || null,
+    ws:       "estimated",
+    stipend:  parseInt(v("ap-stipend")) || 28000,
+    faculty:  v("ap-faculty").split(",").map(s=>s.trim()).filter(Boolean),
+    threads:  v("ap-threads").split(",").map(s=>s.trim()).filter(Boolean),
+    deadline: v("ap-deadline").trim() || "TBD",
+    dlSrc:    "estimated",
+    feeSrc:   "estimated",
+    gre:      v("ap-gre") || "Not required",
+    toefl:    v("ap-toefl").trim() || "80+ iBT",
+    sopLen:   v("ap-soplen").trim() || "2 pages",
+    nynj:     ch("ap-nynj"),
+    op:       2,
+    notes:    v("ap-notes").trim() || "",
+  };
 }
 
 function saveAddProg() {
   const name = (document.getElementById("ap-name").value || "").trim();
   if (!name) { alert("Program name is required."); return; }
 
-  const fwChecked = document.getElementById("ap-fw") && document.getElementById("ap-fw").checked;
-  const wtVal     = (document.getElementById("ap-wt")  ? document.getElementById("ap-wt").value.trim()  : "") || null;
+  if (editProgId !== null) {
+    // ── EDIT MODE ──────────────────────────────────────────────
+    const isCustom = editProgId >= 1001;
+    const fields = _readProgForm(editProgId);
+    if (isCustom) {
+      const custom = loadCustomProgs().map(p => p.id === editProgId ? Object.assign({}, p, fields) : p);
+      saveCustomProgs(custom);
+    } else {
+      // For built-in programs store only the changed fields as overrides
+      const overrides = loadOverrides();
+      overrides[editProgId] = fields;
+      saveOverrides(overrides);
+    }
+  } else {
+    // ── ADD MODE ───────────────────────────────────────────────
+    const prog = Object.assign(_readProgForm(nextCustomId()), { tier:"none", ws:"estimated", dlSrc:"estimated", feeSrc:"estimated" });
+    if (!prog.notes) prog.notes = "Custom program added by user.";
+    const custom = loadCustomProgs();
+    custom.push(prog);
+    saveCustomProgs(custom);
+  }
 
-  const prog = {
-    id:       nextCustomId(),
-    name,
-    dept:     (document.getElementById("ap-dept")     ? document.getElementById("ap-dept").value.trim()     : "") || "—",
-    tier:     "none",
-    nynj:     !!(document.getElementById("ap-nynj") && document.getElementById("ap-nynj").checked),
-    avs:      parseInt(document.getElementById("ap-avs")  ? document.getElementById("ap-avs").value  : "60") || 60,
-    fee:      parseInt(document.getElementById("ap-fee")  ? document.getElementById("ap-fee").value  : "0")  || 0,
-    fw:       !!fwChecked,
-    wt:       wtVal,
-    ws:       "estimated",
-    stipend:  parseInt(document.getElementById("ap-stipend") ? document.getElementById("ap-stipend").value : "28000") || 28000,
-    faculty:  (document.getElementById("ap-faculty")  ? document.getElementById("ap-faculty").value  : "").split(",").map(s=>s.trim()).filter(Boolean),
-    threads:  (document.getElementById("ap-threads")  ? document.getElementById("ap-threads").value  : "").split(",").map(s=>s.trim()).filter(Boolean),
-    deadline: (document.getElementById("ap-deadline") ? document.getElementById("ap-deadline").value.trim() : "") || "TBD",
-    dlSrc:    "estimated",
-    feeSrc:   "estimated",
-    gre:      document.getElementById("ap-gre")    ? document.getElementById("ap-gre").value    : "Not required",
-    toefl:    (document.getElementById("ap-toefl") ? document.getElementById("ap-toefl").value.trim() : "") || "80+ iBT",
-    sopLen:   (document.getElementById("ap-soplen")? document.getElementById("ap-soplen").value.trim(): "") || "2 pages",
-    location: (document.getElementById("ap-location") ? document.getElementById("ap-location").value.trim() : "") || "—",
-    op:       2,
-    notes:    (document.getElementById("ap-notes") ? document.getElementById("ap-notes").value.trim() : "") || "Custom program added by user.",
-  };
-
-  const custom = loadCustomProgs();
-  custom.push(prog);
-  saveCustomProgs(custom);
   rebuildPortfolio();
   refreshPortfolioHeader();
-  renderPortfolio();
+  renderAllTabs();
   refreshTierCounts();
-  // Reset IS modal dropdown so new program appears next open
   const sel = document.getElementById("is-f-program");
   if (sel) { while (sel.options.length > 2) sel.remove(2); }
   closeAddProgModal();
