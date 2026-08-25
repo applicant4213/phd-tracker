@@ -1926,10 +1926,21 @@ function renderPortfolio() {
     el.style.color = PS.col === col ? "var(--text)" : "";
   });
 
+  const COL_COUNT = 13;
   document.getElementById("portfolio-body").innerHTML = filtered.map((p, i) => {
-    return `<tr onclick="handleRowClick(event,${p.id})" style="cursor:pointer" title="Click row to edit">
+    const notes = (p.notes || "").trim();
+    const noteIcon = notes ? ` <span style="font-size:11px;color:var(--muted);vertical-align:middle;opacity:.7">📝</span>` : "";
+    const notesRow = notes
+      ? `<tr id="notes-row-${p.id}" style="display:none">
+           <td colspan="${COL_COUNT}" style="padding:0 12px 10px 40px;background:var(--surface2);border-bottom:1px solid var(--border)">
+             <div style="font-size:12px;color:var(--text2);font-style:italic;line-height:1.6;max-width:780px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 6px 6px 0">${notes}</div>
+             <div style="font-size:10.5px;color:var(--muted);margin-top:5px">Click the row again to edit</div>
+           </td>
+         </tr>`
+      : "";
+    return `<tr onclick="handleRowClick(event,${p.id})" style="cursor:pointer" data-has-notes="${notes ? '1' : '0'}" title="${notes ? 'Click to see notes · click again to edit' : 'Click row to edit'}">
       <td class="num" style="color:var(--muted)">${i+1}</td>
-      <td><span style="font-weight:600;color:var(--text)">${p.name}</span><br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
+      <td><span style="font-weight:600;color:var(--text)">${p.name}</span>${noteIcon}<br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
       <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td>
       <td>${tierBadge(getEffectiveTier(p.id), p.id)}</td>
       <td style="font-size:12px">${p.faculty.join(", ")}</td>
@@ -1941,7 +1952,7 @@ function renderPortfolio() {
       <td class="fw-cell" data-id="${p.id}">${fwLinkHTML(p.id)}</td>
       <td>${compactProgHTML(p.id)}</td>
       <td><button onclick="deleteProgram(${p.id})" title="Hide this program" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 4px;opacity:.5;transition:opacity .15s" onmouseover="this.style.opacity=1;this.style.color='var(--red)'" onmouseout="this.style.opacity=.5;this.style.color='var(--muted)'">×</button></td>
-    </tr>`;
+    </tr>${notesRow}`;
   }).join("");
 
   // Refresh interactive UI elements after innerHTML replacement
@@ -2199,7 +2210,27 @@ function handleRowClick(event, id) {
   if (["BUTTON","A","INPUT","SELECT","TEXTAREA"].includes(tag)) return;
   const closest = event.target.closest("button, a, input, select, textarea");
   if (closest) return;
-  openEditProgModal(id);
+
+  const notesRow = document.getElementById("notes-row-" + id);
+  const tr = event.currentTarget;
+  const hasNotes = tr.dataset.hasNotes === "1";
+
+  if (hasNotes && notesRow) {
+    const visible = notesRow.style.display !== "none";
+    if (!visible) {
+      // First click: show notes
+      notesRow.style.display = "";
+      tr.style.background = "var(--surface2)";
+    } else {
+      // Second click: hide notes and open edit modal
+      notesRow.style.display = "none";
+      tr.style.background = "";
+      openEditProgModal(id);
+    }
+  } else {
+    // No notes: open edit modal directly
+    openEditProgModal(id);
+  }
 }
 
 function closeAddProgModal() {
