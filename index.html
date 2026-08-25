@@ -270,8 +270,18 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent-glow); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
+
+<!-- Firebase loading overlay -->
+<div id="fb-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px">
+  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <div style="font-size:13px;color:var(--muted);font-family:var(--sans)">Connecting to Firebase…</div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 
 <div class="app">
 
@@ -994,16 +1004,15 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </table></div>
 
   <!-- Storage note -->
-  <div class="section-head"><span>💾</span> How Your Data Is Saved</div>
+  <div class="section-head"><span>☁️</span> How Your Data Is Saved</div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-size:12.5px;color:var(--text2);line-height:1.7">
-    All progress (tier labels, checklist ticks, My Fit selections, LinkedIn tasks, resume URL) is stored in <strong style="color:var(--text)">your browser's localStorage</strong> under three keys:
+    All progress is stored in <strong style="color:var(--text)">Firebase Realtime Database</strong> — changes sync instantly across all devices and collaborators.
     <div style="margin-top:10px;display:grid;gap:6px">
-      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_prog_2027</code> — all per-program state (tiers, checklist, fit)</div>
-      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_li_2027</code> — LinkedIn optimization task state</div>
-      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_is_2027</code> — info session log</div>
-      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_resume_url</code> — your resume URL</div>
+      <div>✅ Changes appear in real-time for everyone viewing this page</div>
+      <div>✅ Data persists across devices, browsers, and sessions</div>
+      <div>✅ No login required for collaborators — just share the URL</div>
     </div>
-    <div style="margin-top:10px;color:var(--muted)">⚠ Data is local to this browser. Clearing site data or opening in a private window will reset progress. Export a backup if you change devices.</div>
+    <div style="margin-top:10px;color:var(--muted)">ℹ️ Hosted at <code style="font-family:var(--mono);font-size:11px">phd-applicant-tracker-default-rtdb.firebaseio.com</code></div>
   </div>
 
 </div>
@@ -1012,6 +1021,86 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 </div>
 
 <script>
+/* ────────────────────────────────────────────────────────────
+   FIREBASE INIT
+──────────────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyAg5pBlcLAv5466oTtMMB_owUE1W0IHixg",
+  authDomain: "phd-applicant-tracker.firebaseapp.com",
+  databaseURL: "https://phd-applicant-tracker-default-rtdb.firebaseio.com",
+  projectId: "phd-applicant-tracker",
+  storageBucket: "phd-applicant-tracker.firebasestorage.app",
+  messagingSenderId: "40681652250",
+  appId: "1:40681652250:web:d0a787f1ad993375d091a3"
+};
+firebase.initializeApp(firebaseConfig);
+const _db = firebase.database();
+function _fbRef(path) { return _db.ref("phd/" + path); }
+
+/* In-memory cache — mirrors Firebase, makes all reads synchronous */
+let _cache = {
+  prog: {}, custom: [], deleted: {}, overrides: {},
+  nextId: 1001, is: null, li: {}, resume: ""
+};
+
+/* Write helpers — update cache immediately, then sync to Firebase */
+function _fbSet(path, val) { _fbRef(path).set(val); }
+
+let _renderTimer = null;
+function _scheduleRender() {
+  clearTimeout(_renderTimer);
+  _renderTimer = setTimeout(() => {
+    rebuildPortfolio();
+    renderAllTabs();
+    initAllUI();
+  }, 80);
+}
+
+/* Master real-time listener — fires on load and whenever any client writes */
+let _fbReady = false;
+_fbRef("").on("value", snap => {
+  const data = snap.val() || {};
+  _cache.prog     = data.prog     || {};
+  _cache.custom   = data.custom   ? Object.values(data.custom)   : [];
+  _cache.deleted  = data.deleted  || {};
+  _cache.overrides= data.overrides|| {};
+  _cache.nextId   = data.nextId   || 1001;
+  _cache.li       = data.li       || {};
+  _cache.resume   = data.resume   || "";
+
+  // IS: seed on first load if empty
+  if (!data.is) {
+    _fbSet("is", _arrToObj(IS_SEED));
+    _cache.is = IS_SEED.slice();
+  } else {
+    _cache.is = Object.values(data.is);
+  }
+
+  if (!_fbReady) {
+    _fbReady = true;
+    rebuildPortfolio();
+    renderPortfolio();
+    renderPool();
+    renderRequirements();
+    renderOutreach();
+    renderWaivers();
+    renderBudget();
+    renderAppTracker();
+    renderQA();
+    initAllUI();
+    const overlay = document.getElementById("fb-loading");
+    if (overlay) overlay.style.display = "none";
+  } else {
+    _scheduleRender();
+  }
+});
+
+function _arrToObj(arr) {
+  const o = {};
+  arr.forEach((v, i) => { o[v.id || i] = v; });
+  return o;
+}
+
 /* ────────────────────────────────────────────────────────────
    CHECKLIST DEFINITION
 ──────────────────────────────────────────────────────────── */
@@ -1099,16 +1188,10 @@ const DEFAULT_FIT = {
 };
 
 /* ────────────────────────────────────────────────────────────
-   LOCALSTORAGE
+   STORAGE — Firebase-backed (cache → Firebase)
 ──────────────────────────────────────────────────────────── */
-function loadProg() {
-  try { return JSON.parse(localStorage.getItem("phd_prog_2027") || "{}"); }
-  catch(e) { return {}; }
-}
-function saveProg(data) {
-  try { localStorage.setItem("phd_prog_2027", JSON.stringify(data)); }
-  catch(e) {}
-}
+function loadProg() { return _cache.prog || {}; }
+function saveProg(data) { _cache.prog = data; _fbSet("prog", data); }
 function getProg(id) {
   const all = loadProg();
   const defaults = {loginId:false, sop:false, faculty:false, researchDoc:false, feeWaiver:false, fit: DEFAULT_FIT[id] || null};
@@ -1244,19 +1327,12 @@ const IS_SEED = [
   {id:"seed_12", program:"Rice CS",                date:"2026-10-01", time:"", format:"Virtual",   topic:"Rice CS PhD Virtual Academic Information Session",       registered:"no", status:"upcoming", notes:"Check riceadmission.rice.edu/portal/virtual-academic for fall schedule"},
 ];
 
-function seedIS() {
-  try {
-    const existing = JSON.parse(localStorage.getItem(IS_KEY) || "[]");
-    if (existing.length > 0) return; // don't overwrite user data
-    localStorage.setItem(IS_KEY, JSON.stringify(IS_SEED));
-  } catch(e) {}
-}
+function seedIS() { /* handled by Firebase listener on first load */ }
 
-function loadIS() {
-  try { return JSON.parse(localStorage.getItem(IS_KEY) || "[]"); } catch(e) { return []; }
-}
+function loadIS() { return _cache.is || []; }
 function saveIS(arr) {
-  try { localStorage.setItem(IS_KEY, JSON.stringify(arr)); } catch(e) {}
+  _cache.is = arr;
+  _fbSet("is", _arrToObj(arr));
 }
 
 function isStatusChip(s) {
@@ -1440,12 +1516,8 @@ function filterIS(f, btn) {
    LINKEDIN TRACKER
 ──────────────────────────────────────────────────────────── */
 const LI_KEYS = ["headline","about","skills","faculty","posts"];
-function loadLI() {
-  try { return JSON.parse(localStorage.getItem("phd_li_2027") || "{}"); } catch(e) { return {}; }
-}
-function saveLI(data) {
-  try { localStorage.setItem("phd_li_2027", JSON.stringify(data)); } catch(e) {}
-}
+function loadLI() { return _cache.li || {}; }
+function saveLI(data) { _cache.li = data; _fbSet("li", data); }
 function toggleLI(key) {
   const d = loadLI();
   d[key] = !d[key];
@@ -1464,12 +1536,8 @@ function initLI() {
 /* ────────────────────────────────────────────────────────────
    RESUME LINK
 ──────────────────────────────────────────────────────────── */
-function loadResume() {
-  try { return localStorage.getItem("phd_resume_url") || ""; } catch(e) { return ""; }
-}
-function saveResume(url) {
-  try { localStorage.setItem("phd_resume_url", url); } catch(e) {}
-}
+function loadResume() { return _cache.resume || ""; }
+function saveResume(url) { _cache.resume = url; _fbSet("resume", url); }
 function initResume() {
   const url = loadResume();
   const link = document.getElementById("resume-link");
@@ -1575,36 +1643,27 @@ const PROGRAMS_RAW = [
 ];
 
 /* ── Custom program storage ──────────────────────────────────── */
-const CUSTOM_KEY    = "phd_custom_2027";
-const DELETED_KEY   = "phd_deleted_2027";
-const OVERRIDES_KEY = "phd_overrides_2027";
+function loadOverrides() { return _cache.overrides || {}; }
+function saveOverrides(obj) { _cache.overrides = obj; _fbSet("overrides", obj); }
 
-function loadOverrides() {
-  try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || "{}"); } catch(e) { return {}; }
-}
-function saveOverrides(obj) {
-  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(obj)); } catch(e) {}
-}
-
-function loadCustomProgs() {
-  try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch(e) { return []; }
-}
+function loadCustomProgs() { return _cache.custom || []; }
 function saveCustomProgs(arr) {
-  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(arr)); } catch(e) {}
+  _cache.custom = arr;
+  _fbSet("custom", _arrToObj(arr));
 }
 function loadDeleted() {
-  try { return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || "[]")); } catch(e) { return new Set(); }
+  const d = _cache.deleted || {};
+  return new Set(Object.keys(d).filter(k => d[k]).map(Number));
 }
 function saveDeleted(s) {
-  try { localStorage.setItem(DELETED_KEY, JSON.stringify([...s])); } catch(e) {}
+  const obj = {};
+  s.forEach(id => { obj[id] = true; });
+  _cache.deleted = obj;
+  _fbSet("deleted", obj);
 }
 function nextCustomId() {
-  const key = "phd_next_id";
-  try {
-    const n = parseInt(localStorage.getItem(key) || "1001");
-    localStorage.setItem(key, String(n + 1));
-    return n;
-  } catch(e) { return Date.now(); }
+  // Use timestamp for collision-free IDs across concurrent users
+  return Date.now();
 }
 
 let PORTFOLIO = [];
@@ -1669,7 +1728,7 @@ const TIER_CYCLE = ["green","yellow","red","none"];
 
 function getEffectiveTier(id) {
   try {
-    const all = JSON.parse(localStorage.getItem("phd_prog_2027") || "{}");
+    const all = _cache.prog || {};
     if (all[id] && all[id].tier !== undefined) return all[id].tier;
   } catch(e) {}
   const prog = PORTFOLIO.find(p => p.id === id);
@@ -2143,16 +2202,8 @@ function showTab(name, btn) {
 /* ────────────────────────────────────────────────────────────
    INIT
 ──────────────────────────────────────────────────────────── */
-rebuildPortfolio();   // populate PORTFOLIO before any render
-renderPortfolio();
-renderPool();
-renderRequirements();
-renderOutreach();
-renderWaivers();
-renderBudget();
-renderAppTracker();
-renderQA();
-initAllUI();   // Apply saved localStorage state to all UI elements
+// Initial render triggered by Firebase listener (_fbRef("").on("value",...)) above.
+// Shows a loading state until Firebase responds.
 
 // ── Add / Delete / Restore Program ──────────────────────────────────────────
 
