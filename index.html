@@ -1843,11 +1843,10 @@ function saveFwModal() {
   all[fwModalId].fwLink  = url;
   all[fwModalId].fwNotes = notes;
   saveProg(all);
-  // Update cells in place
-  document.querySelectorAll(`.fw-cell[data-id="${fwModalId}"]`).forEach(el => {
-    el.innerHTML = fwLinkHTML(fwModalId);
-  });
+  const savedId = fwModalId;
   closeFwModal();
+  // Re-render portfolio so the link column refreshes reliably
+  renderPortfolio();
 }
 
 function greBadge(gre) {
