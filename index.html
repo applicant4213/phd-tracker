@@ -337,6 +337,42 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 <!-- ── Main ──────────────────────────────────────────────────── -->
 <main class="main">
 
+<!-- ══ GLOBAL FILTER BAR (always visible across all tabs) ══════ -->
+<div id="global-filter-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 32px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100">
+  <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Filter:</span>
+  <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-tier-filters">
+    <button class="filter-btn active" onclick="pfFilter('tier','all',this)">All tiers</button>
+    <button class="filter-btn" onclick="pfFilter('tier','green',this)">🟢 Top Choice</button>
+    <button class="filter-btn" onclick="pfFilter('tier','yellow',this)">🟡 Interest</button>
+    <button class="filter-btn" onclick="pfFilter('tier','red',this)">🔴 Last Resort</button>
+    <button class="filter-btn" onclick="pfFilter('tier','none',this)">— Unset</button>
+  </div>
+  <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-fit-filters">
+    <button class="filter-btn active" onclick="pfFilter('fit','all',this)">All fits</button>
+    <button class="filter-btn" onclick="pfFilter('fit','reach',this)">Reach</button>
+    <button class="filter-btn" onclick="pfFilter('fit','match',this)">Match</button>
+    <button class="filter-btn" onclick="pfFilter('fit','safety',this)">Safety</button>
+  </div>
+  <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-gre-filters">
+    <button class="filter-btn active" onclick="pfFilter('gre','all',this)">All GRE</button>
+    <button class="filter-btn" onclick="pfFilter('gre','Not required',this)">Not Required</button>
+    <button class="filter-btn" onclick="pfFilter('gre','Optional',this)">Optional</button>
+    <button class="filter-btn" onclick="pfFilter('gre','Not considered',this)">Not Considered</button>
+    <button class="filter-btn" onclick="pfFilter('gre','Required',this)">Required</button>
+  </div>
+  <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+  <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
+  <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
+  <div style="flex:1"></div>
+  <button onclick="openAddProgModal()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Program
+  </button>
+  <button onclick="openHiddenProgs()" title="Restore hidden programs" style="padding:6px 10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">🗑 Hidden</button>
+</div>
+
 <!-- ══ TAB 1 · PORTFOLIO ══════════════════════════════════════ -->
 <div class="tab-panel active" id="tab-portfolio">
   <div class="page-header">
@@ -353,48 +389,13 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div class="tile" id="progress-tile"><div class="tile-num" id="global-prog">0/5</div><div class="tile-label">Tasks done</div></div>
   </div>
 
-  <!-- Filter bar -->
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Filter:</span>
-    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-tier-filters">
-      <button class="filter-btn active" onclick="pfFilter('tier','all',this)">All tiers</button>
-      <button class="filter-btn" onclick="pfFilter('tier','green',this)">🟢 Top Choice</button>
-      <button class="filter-btn" onclick="pfFilter('tier','yellow',this)">🟡 Interest</button>
-      <button class="filter-btn" onclick="pfFilter('tier','red',this)">🔴 Last Resort</button>
-      <button class="filter-btn" onclick="pfFilter('tier','none',this)">— Unset</button>
-    </div>
-    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-fit-filters">
-      <button class="filter-btn active" onclick="pfFilter('fit','all',this)">All fits</button>
-      <button class="filter-btn" onclick="pfFilter('fit','reach',this)">Reach</button>
-      <button class="filter-btn" onclick="pfFilter('fit','match',this)">Match</button>
-      <button class="filter-btn" onclick="pfFilter('fit','safety',this)">Safety</button>
-    </div>
-    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-gre-filters">
-      <button class="filter-btn active" onclick="pfFilter('gre','all',this)">All GRE</button>
-      <button class="filter-btn" onclick="pfFilter('gre','Not required',this)">Not Required</button>
-      <button class="filter-btn" onclick="pfFilter('gre','Optional',this)">Optional</button>
-      <button class="filter-btn" onclick="pfFilter('gre','Not considered',this)">Not Considered</button>
-      <button class="filter-btn" onclick="pfFilter('gre','Required',this)">Required</button>
-    </div>
-    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
-    <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
-    <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
-    <div style="flex:1"></div>
-    <button onclick="openAddProgModal()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Program
-    </button>
-    <button onclick="openHiddenProgs()" title="Restore hidden programs" style="padding:6px 10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">🗑 Hidden</button>
-  </div>
-
   <div class="table-wrap">
     <table id="portfolio-table">
       <thead>
         <tr>
           <th>#</th>
           <th id="th-name"     onclick="pfSort('name')"     style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th style="white-space:nowrap">City</th>
           <th id="th-tier"     onclick="pfSort('tier')"     style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
           <th id="th-faculty"  onclick="pfSort('faculty')"  style="cursor:pointer;user-select:none">Key Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
           <th id="th-avs"      onclick="pfSort('avs')"      style="cursor:pointer;user-select:none;color:var(--text)">AVS<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
@@ -439,7 +440,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <p>Verify all dates at program websites — most reflect previous cycle. <span class="src src-p">P</span> = provisional.</p>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th>
+    <th>Program</th><th>City</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th>
   </tr></thead><tbody id="req-body"></tbody></table></div>
 </div>
 
@@ -484,7 +485,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div class="tile"><div class="tile-num" style="color:var(--green)">~$1,125</div><div class="tile-label">Scenario B (60%)</div></div>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>Fee</th><th>Waiver Type</th><th>Status</th><th>How to Apply</th><th>Deadline</th><th>Savings</th>
+    <th>Program</th><th>City</th><th>Fee</th><th>Waiver Type</th><th>Status</th><th>How to Apply</th><th>Deadline</th><th>Savings</th>
   </tr></thead><tbody id="waiver-body"></tbody></table></div>
   <div class="section-head">International Applicant Note</div>
   <div class="card" style="max-width:640px">
@@ -523,7 +524,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
   <div class="section-head">Fee Breakdown by Program</div>
   <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>Tier</th><th>Fee</th><th>Source</th><th>Waiver Available</th><th>Priority</th>
+    <th>Program</th><th>City</th><th>Tier</th><th>Fee</th><th>Source</th><th>Waiver Available</th><th>Priority</th>
   </tr></thead><tbody id="budget-breakdown-body"></tbody></table></div>
 </div>
 
@@ -572,6 +573,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <table>
       <thead><tr>
         <th>Program</th>
+        <th>City</th>
         <th>Tier</th>
         <th>Deadline</th>
         <th>My Fit</th>
@@ -614,7 +616,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   <div class="section-head">④ Fee Waiver Tracker</div>
   <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>Fee</th><th>Waiver Type</th><th>Applied</th><th>Status</th><th>Savings</th>
+    <th>Program</th><th>City</th><th>Fee</th><th>Waiver Type</th><th>Applied</th><th>Status</th><th>Savings</th>
   </tr></thead><tbody id="waiver-tracker-body"></tbody></table></div>
 </div>
 
@@ -753,7 +755,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
             <input type="checkbox" id="ap-fw" style="width:14px;height:14px"> Fee waiver available
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
-            <input type="checkbox" id="ap-nynj" style="width:14px;height:14px"> NY/NJ
+            <input type="checkbox" id="ap-nynj" style="width:14px;height:14px"> NY/NJ area (for filter)
           </label>
         </div>
       </div>
@@ -1748,17 +1750,44 @@ function fullChecklistHTML(id) {
 const PF = { tier:"all", fit:"all", gre:"all", nynj:false };
 const PS = { col:"avs", dir:-1 }; // col = sort key, dir = 1 asc / -1 desc
 
+/* Returns PORTFOLIO filtered by current PF state — used by all tabs */
+function filteredPortfolio() {
+  return PORTFOLIO.filter(p => {
+    if (PF.nynj && !p.nynj) return false;
+    if (PF.tier !== "all" && getEffectiveTier(p.id) !== PF.tier) return false;
+    if (PF.fit  !== "all") {
+      const f = getProg(p.id).fit;
+      if ((f || "reach") !== PF.fit) return false;
+    }
+    if (PF.gre  !== "all") {
+      const g = (p.gre || "").toLowerCase();
+      if (g !== PF.gre.toLowerCase()) return false;
+    }
+    return true;
+  });
+}
+
+/* Re-renders every data tab so filters apply everywhere */
+function renderAllTabs() {
+  renderPortfolio();
+  renderPool();
+  renderRequirements();
+  renderWaivers();
+  renderBudget();
+  renderAppTracker();
+}
+
 function pfFilter(dim, val, btn) {
   PF[dim] = val;
   const grp = {"tier":"pf-tier-filters","fit":"pf-fit-filters","gre":"pf-gre-filters"}[dim];
   document.querySelectorAll(`#${grp} .filter-btn`).forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
-  renderPortfolio();
+  renderAllTabs();
 }
 function pfToggleNYNJ(btn) {
   PF.nynj = !PF.nynj;
   btn.classList.toggle("active", PF.nynj);
-  renderPortfolio();
+  renderAllTabs();
 }
 function pfSort(col) {
   if (PS.col === col) PS.dir *= -1; else { PS.col = col; PS.dir = col === "avs" ? -1 : 1; }
@@ -1862,19 +1891,7 @@ function greBadge(gre) {
 }
 
 function renderPortfolio() {
-  const filtered = PORTFOLIO.filter(p => {
-    if (PF.nynj && !p.nynj) return false;
-    if (PF.tier !== "all" && getEffectiveTier(p.id) !== PF.tier) return false;
-    if (PF.fit  !== "all") {
-      const f = getProg(p.id).fit;
-      if ((f || "reach") !== PF.fit) return false;
-    }
-    if (PF.gre  !== "all") {
-      const g = (p.gre || "").toLowerCase();
-      if (g !== PF.gre.toLowerCase()) return false;
-    }
-    return true;
-  });
+  const filtered = filteredPortfolio();
 
   // Sort
   filtered.sort((a, b) => {
@@ -1898,10 +1915,10 @@ function renderPortfolio() {
   });
 
   document.getElementById("portfolio-body").innerHTML = filtered.map((p, i) => {
-    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
     return `<tr>
       <td class="num" style="color:var(--muted)">${i+1}</td>
-      <td><span style="font-weight:600;color:var(--text)">${nynj}${p.name}</span><br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
+      <td><span style="font-weight:600;color:var(--text)">${p.name}</span><br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
+      <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td>
       <td>${tierBadge(getEffectiveTier(p.id), p.id)}</td>
       <td style="font-size:12px">${p.faculty.join(", ")}</td>
       <td>${avsBar(p.avs)}</td>
@@ -1942,7 +1959,7 @@ function renderPortfolio() {
 ──────────────────────────────────────────────────────────── */
 function renderPool() {
   window._poolRows = [
-    ...PORTFOLIO.map(p => ({id:p.id,name:p.name,dept:p.dept,loc:p.location,status:"selected",tier:p.tier,faculty:p.faculty.join(", "),nynj:p.nynj,reason:"—"})),
+    ...filteredPortfolio().map(p => ({id:p.id,name:p.name,dept:p.dept,loc:p.location,status:"selected",tier:p.tier,faculty:p.faculty.join(", "),nynj:p.nynj,reason:"—"})),
     ...POOL_REJECTED.map(r => ({name:r.name,dept:"—",loc:r.location,status:"not-selected",tier:null,faculty:r.faculty,nynj:r.location.includes("NY")||r.location.includes("NJ"),reason:r.reason}))
   ];
   renderPoolTable(window._poolRows);
@@ -1950,8 +1967,7 @@ function renderPool() {
 function renderPoolTable(rows) {
   document.getElementById("pool-body").innerHTML = rows.map(r => {
     const badge = r.status==="selected" ? tierBadge(getEffectiveTier(r.id), r.id) : `<span class="status-chip" style="background:var(--red-bg);color:var(--red)">Not Selected</span>`;
-    const nynj = r.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
-    return `<tr><td><span style="font-weight:600;color:var(--text)">${nynj}${r.name}</span></td><td style="font-size:11.5px;color:var(--muted)">${r.dept}</td><td style="font-size:11.5px;color:var(--muted)">${r.loc}</td><td>${badge}</td><td style="font-size:12px">${r.faculty}</td><td style="font-size:11.5px;color:var(--muted);max-width:260px">${r.reason}</td></tr>`;
+    return `<tr><td><span style="font-weight:600;color:var(--text)">${r.name}</span></td><td style="font-size:11.5px;color:var(--muted)">${r.dept}</td><td style="font-size:11.5px;color:var(--muted)">${r.loc}</td><td>${badge}</td><td style="font-size:12px">${r.faculty}</td><td style="font-size:11.5px;color:var(--muted);max-width:260px">${r.reason}</td></tr>`;
   }).join("");
 }
 function filterPool(f,btn) {
@@ -1966,9 +1982,8 @@ function filterPool(f,btn) {
    RENDER REQUIREMENTS
 ──────────────────────────────────────────────────────────── */
 function renderRequirements() {
-  document.getElementById("req-body").innerHTML = PORTFOLIO.map(p => {
-    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
-    return `<tr><td><span style="font-weight:600;color:var(--text)">${nynj}${p.name}</span></td><td><span class="mono">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td><td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td><td style="font-size:12px">${p.gre}</td><td style="font-size:12px">${p.toefl}</td><td style="font-size:12px">${p.sopLen}</td><td class="num">3</td><td style="font-size:11.5px;color:var(--muted)">Not required</td></tr>`;
+  document.getElementById("req-body").innerHTML = filteredPortfolio().map(p => {
+    return `<tr><td><span style="font-weight:600;color:var(--text)">${p.name}</span></td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td><td><span class="mono">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td><td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td><td style="font-size:12px">${p.gre}</td><td style="font-size:12px">${p.toefl}</td><td style="font-size:12px">${p.sopLen}</td><td class="num">3</td><td style="font-size:11.5px;color:var(--muted)">Not required</td></tr>`;
   }).join("");
 }
 
@@ -2013,9 +2028,10 @@ function renderOutreach() {
 function getWaiverHow(id){const m={1:"Automatically free — no action needed",2:"Apply via UCSD Graduate Division international waiver portal",5:"Submit financial hardship waiver form with application",6:"Attend WashU BME recruitment event for waiver code",7:"Attend CMU HCII virtual info session for waiver code"};return m[id]||"Check program website";}
 function getWaiverDl(id){const m={1:"N/A",2:"With application (Jan 5)",5:"With application (Jan 3)",6:"Oct–Nov (before event)",7:"Oct–Nov (before session)"};return m[id]||"Check program website";}
 function renderWaivers() {
-  const rows = PORTFOLIO.map(p=>({name:p.name,tier:p.tier,fee:p.fee,feeSrc:p.feeSrc,avail:p.fw,type:p.wt||"None confirmed",status:p.ws,how:getWaiverHow(p.id),dl:getWaiverDl(p.id)}));
+  const rows = filteredPortfolio().map(p=>({name:p.name,location:p.location||"—",tier:p.tier,fee:p.fee,feeSrc:p.feeSrc,avail:p.fw,type:p.wt||"None confirmed",status:p.ws,how:getWaiverHow(p.id),dl:getWaiverDl(p.id)}));
   document.getElementById("waiver-body").innerHTML = rows.sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.name}</td>
+    <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${r.location}</td>
     <td>${fmtFee(r.fee)} ${srcBadge(r.feeSrc)}</td>
     <td style="font-size:11.5px">${r.type}</td>
     <td class="${wsc(r.status)}" style="font-size:12px">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</td>
@@ -2024,7 +2040,7 @@ function renderWaivers() {
     <td>${r.avail?`<span class="savings-badge">-$${r.fee}</span>`:`<span style="color:var(--muted)">—</span>`}</td>
   </tr>`).join("");
   document.getElementById("waiver-tracker-body").innerHTML = rows.filter(r=>r.avail).sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
-    <td style="font-weight:600;color:var(--text)">${r.name}</td><td>${fmtFee(r.fee)}</td>
+    <td style="font-weight:600;color:var(--text)">${r.name}</td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${r.location}</td><td>${fmtFee(r.fee)}</td>
     <td style="font-size:11.5px">${r.type}</td>
     <td><span class="status-chip chip-not-started">Not Applied</span></td>
     <td><span class="status-chip chip-not-started">Pending</span></td>
@@ -2036,8 +2052,8 @@ function renderWaivers() {
    RENDER BUDGET BREAKDOWN
 ──────────────────────────────────────────────────────────── */
 function renderBudget() {
-  document.getElementById("budget-breakdown-body").innerHTML = [...PORTFOLIO].sort((a,b)=>b.fee-a.fee).map(p=>`<tr>
-    <td style="font-weight:600;color:var(--text)">${p.name}</td><td>${tierBadge(p.tier)}</td>
+  document.getElementById("budget-breakdown-body").innerHTML = [...filteredPortfolio()].sort((a,b)=>b.fee-a.fee).map(p=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${p.name}</td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location||"—"}</td><td>${tierBadge(p.tier)}</td>
     <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
     <td style="font-size:11.5px">${p.feeSrc}</td>
     <td style="font-size:12px">${p.fw?`<span class="${wsc(p.ws)}">${p.wt}</span>`:'<span style="color:var(--muted)">None confirmed</span>'}</td>
@@ -2049,14 +2065,13 @@ function renderBudget() {
    RENDER APPLICATION TRACKER (with full checkboxes)
 ──────────────────────────────────────────────────────────── */
 function renderAppTracker() {
-  const sorted = [...PORTFOLIO].sort((a,b) => new Date(a.deadline.replace(/,/,"")) - new Date(b.deadline.replace(/,/,"")));
+  const sorted = [...filteredPortfolio()].sort((a,b) => new Date(a.deadline.replace(/,/,"")) - new Date(b.deadline.replace(/,/,"")));
   document.getElementById("app-tracker-body").innerHTML = sorted.map(p => {
-    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
     return `<tr>
       <td class="tracker-prog-cell">
-        <div style="font-weight:600;color:var(--text);margin-bottom:2px">${nynj}${p.name}</div>
-        <div style="font-size:11px;color:var(--muted)">${p.location}</div>
+        <div style="font-weight:600;color:var(--text)">${p.name}</div>
       </td>
+      <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location||"—"}</td>
       <td>${tierBadge(p.tier)}</td>
       <td><span class="mono" style="font-size:11px">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td>
       <td>${fitBtnHTML(p.id)}</td>
