@@ -340,16 +340,16 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 <!-- ══ TAB 1 · PORTFOLIO ══════════════════════════════════════ -->
 <div class="tab-panel active" id="tab-portfolio">
   <div class="page-header">
-    <h1>Final Portfolio — 58 Programs</h1>
+    <h1 id="portfolio-h1">Final Portfolio — 66 Programs</h1>
     <p>Ranked by Application Value Score. <strong>Click any tier badge</strong> to set your preference (🟢 Top Choice → 🟡 Interest → 🔴 Last Resort → — Unset). Use <strong>My Fit</strong> to track admissions probability (Reach / Match / Safety). All state saves in your browser.</p>
   </div>
   <div class="tiles">
-    <div class="tile"><div class="tile-num">58</div><div class="tile-label">Total programs</div></div>
+    <div class="tile"><div class="tile-num" id="tc-total">66</div><div class="tile-label">Total programs</div></div>
     <div class="tile"><div class="tile-num" id="tc-green" style="color:var(--green)">7</div><div class="tile-label">🟢 Top choice</div></div>
     <div class="tile"><div class="tile-num" id="tc-yellow" style="color:var(--yellow)">8</div><div class="tile-label">🟡 Strong interest</div></div>
     <div class="tile"><div class="tile-num" id="tc-red" style="color:var(--red)">10</div><div class="tile-label">🔴 Last resort</div></div>
     <div class="tile"><div class="tile-num" id="tc-none" style="color:var(--muted)">33</div><div class="tile-label">— Unset (click tier to label)</div></div>
-    <div class="tile"><div class="tile-num">9</div><div class="tile-label">NY/NJ programs</div></div>
+    <div class="tile"><div class="tile-num" id="tc-nynj">9</div><div class="tile-label">NY/NJ programs</div></div>
     <div class="tile" id="progress-tile"><div class="tile-num" id="global-prog">0/5</div><div class="tile-label">Tasks done</div></div>
   </div>
 
@@ -381,6 +381,12 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
     <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
     <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
+    <div style="flex:1"></div>
+    <button onclick="openAddProgModal()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Program
+    </button>
+    <button onclick="openHiddenProgs()" title="Restore hidden programs" style="padding:6px 10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">🗑 Hidden</button>
   </div>
 
   <div class="table-wrap">
@@ -398,6 +404,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
           <th id="th-fit"      onclick="pfSort('fit')"      style="cursor:pointer;user-select:none">My Fit<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
           <th style="min-width:120px;white-space:nowrap">Fee Waiver Link</th>
           <th id="th-progress" onclick="pfSort('progress')" style="cursor:pointer;user-select:none;min-width:130px">Progress<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th style="width:36px"></th>
         </tr>
       </thead>
       <tbody id="portfolio-body"></tbody>
@@ -665,6 +672,115 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
       <tbody id="is-tbody"></tbody>
     </table>
     <div id="is-empty" style="padding:32px;text-align:center;color:var(--muted);font-size:13px;display:none">No sessions logged yet — click <strong style="color:var(--text)">+ Add Session</strong> to get started.</div>
+  </div>
+</div>
+
+<!-- Add Program Modal -->
+<div id="ap-modal" onclick="if(event.target===this)closeAddProgModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1002;align-items:center;justify-content:center;overflow-y:auto;padding:20px 0">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(600px,94vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4);margin:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)" id="ap-modal-title">Add Program</div>
+      <button onclick="closeAddProgModal()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">PROGRAM NAME *</label>
+          <input id="ap-name" placeholder="e.g. MIT Media Lab" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">AVS SCORE (0–100)</label>
+          <input id="ap-avs" type="number" min="0" max="100" placeholder="65" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">DEPARTMENT</label>
+          <input id="ap-dept" placeholder="e.g. Biomedical Engineering" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">LOCATION</label>
+          <input id="ap-location" placeholder="e.g. Boston, MA" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">APP FEE ($)</label>
+          <input id="ap-fee" type="number" min="0" placeholder="0 = free" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">STIPEND ($/yr)</label>
+          <input id="ap-stipend" type="number" min="0" placeholder="30000" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">DEADLINE</label>
+          <input id="ap-deadline" placeholder="Jan 15, 2027" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">KEY FACULTY (comma-separated)</label>
+          <input id="ap-faculty" placeholder="e.g. Jane Smith, John Doe" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">RESEARCH THREADS (comma-separated)</label>
+          <input id="ap-threads" placeholder="e.g. Wearable sensing, ECG ML" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">GRE</label>
+          <select id="ap-gre" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px">
+            <option>Not required</option><option>Optional</option><option>Required</option><option>Not considered</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">TOEFL</label>
+          <input id="ap-toefl" placeholder="80+ iBT" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">SOP LENGTH</label>
+          <input id="ap-soplen" placeholder="2 pages" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">FEE WAIVER TYPE (if any)</label>
+          <input id="ap-wt" placeholder="e.g. Email dept, Free week" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;padding-top:20px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" id="ap-fw" style="width:14px;height:14px"> Fee waiver available
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" id="ap-nynj" style="width:14px;height:14px"> NY/NJ
+          </label>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">NOTES</label>
+        <textarea id="ap-notes" rows="2" placeholder="Any notes about this program..." style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button onclick="closeAddProgModal()" style="padding:7px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="saveAddProg()" style="padding:7px 20px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Add Program</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Programs Modal -->
+<div id="hp-modal" onclick="if(event.target===this)closeHiddenProgs()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1002;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(500px,92vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)">Hidden / Deleted Programs</div>
+      <button onclick="closeHiddenProgs()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div id="hp-list" style="display:grid;gap:8px;max-height:360px;overflow-y:auto"></div>
+    <p id="hp-empty" style="color:var(--muted);font-size:13px;display:none">No hidden programs.</p>
+    <div style="margin-top:16px;text-align:right">
+      <button onclick="closeHiddenProgs()" style="padding:7px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer">Close</button>
+    </div>
   </div>
 </div>
 
@@ -1078,6 +1194,8 @@ function updateGlobalProgress() {
 }
 
 function initAllUI() {
+  rebuildPortfolio();
+  refreshPortfolioHeader();
   PORTFOLIO.forEach(p => {
     refreshFitUI(p.id);
     refreshProgUI(p.id);
@@ -1088,6 +1206,15 @@ function initAllUI() {
   initResume();
   seedIS();
   renderIS();
+}
+
+function refreshPortfolioHeader() {
+  const h1 = document.getElementById("portfolio-h1");
+  if (h1) h1.textContent = `Final Portfolio — ${PORTFOLIO.length} Programs`;
+  const tot = document.getElementById("tc-total");
+  if (tot) tot.textContent = PORTFOLIO.length;
+  const nynj = document.getElementById("tc-nynj");
+  if (nynj) nynj.textContent = PORTFOLIO.filter(p => p.nynj).length;
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -1203,7 +1330,7 @@ function openISModal(editId) {
   // Populate program dropdown if not yet done
   const sel = document.getElementById("is-f-program");
   if (sel.options.length <= 2) {
-    PROGRAMS_RAW.forEach(p => {
+    PORTFOLIO.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.name; opt.textContent = p.name;
       sel.insertBefore(opt, sel.options[sel.options.length - 1]);
@@ -1445,7 +1572,38 @@ const PROGRAMS_RAW = [
   {id:66, name:"FSU/FAMU BME",              dept:"Biomedical Engineering", tier:"none", nynj:false, avs:62, fee:0,   fw:true,  wt:"Free application",                   ws:"possible", stipend:25000, faculty:["Emmanuel Collins (verify)","Zucai Suo (verify)"],    threads:["Biomedical engineering","Neural systems","Health engineering"],         deadline:"Jan 15, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"Tallahassee, FL",      op:2, notes:"Free application. Joint FSU-FAMU engineering program. Accessible safety. Verify faculty fit."},
 ];
 
-const PORTFOLIO = PROGRAMS_RAW.sort((a,b) => b.avs - a.avs);
+/* ── Custom program storage ──────────────────────────────────── */
+const CUSTOM_KEY   = "phd_custom_2027";
+const DELETED_KEY  = "phd_deleted_2027";
+
+function loadCustomProgs() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch(e) { return []; }
+}
+function saveCustomProgs(arr) {
+  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+function loadDeleted() {
+  try { return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || "[]")); } catch(e) { return new Set(); }
+}
+function saveDeleted(s) {
+  try { localStorage.setItem(DELETED_KEY, JSON.stringify([...s])); } catch(e) {}
+}
+function nextCustomId() {
+  const key = "phd_next_id";
+  try {
+    const n = parseInt(localStorage.getItem(key) || "1001");
+    localStorage.setItem(key, String(n + 1));
+    return n;
+  } catch(e) { return Date.now(); }
+}
+
+let PORTFOLIO = [];
+function rebuildPortfolio() {
+  const deleted = loadDeleted();
+  const custom  = loadCustomProgs();
+  PORTFOLIO = [...PROGRAMS_RAW.filter(p => !deleted.has(p.id)), ...custom]
+    .sort((a, b) => b.avs - a.avs);
+}
 
 const POOL_REJECTED = [
   {name:"NYU Tandon ECE",          location:"Brooklyn, NY",   faculty:"Various",                  reason:"Superseded by NYU Courant (stronger CS + better ECG ML faculty fit)"},
@@ -1500,7 +1658,7 @@ function getEffectiveTier(id) {
     const all = JSON.parse(localStorage.getItem("phd_prog_2027") || "{}");
     if (all[id] && all[id].tier !== undefined) return all[id].tier;
   } catch(e) {}
-  const prog = PROGRAMS_RAW.find(p => p.id === id);
+  const prog = PORTFOLIO.find(p => p.id === id);
   return prog ? (prog.tier || "none") : "none";
 }
 
@@ -1514,7 +1672,7 @@ function tierBadge(t, id) {
 
 function refreshTierCounts() {
   const counts = {green:0, yellow:0, red:0, none:0};
-  PROGRAMS_RAW.forEach(p => { counts[getEffectiveTier(p.id)]++; });
+  PORTFOLIO.forEach(p => { counts[getEffectiveTier(p.id)]++; });
   ["green","yellow","red","none"].forEach(t => {
     const tc = document.getElementById(`tc-${t}`);
     const sc = document.getElementById(`sc-${t}`);
@@ -1657,7 +1815,7 @@ let fwModalId = null;
 function editFwLink(id) {
   fwModalId = id;
   const prog = getProg(id);
-  const raw = PROGRAMS_RAW.find(p => p.id === id);
+  const raw = PORTFOLIO.find(p => p.id === id);
   document.getElementById("fw-modal-prog").textContent = raw ? raw.name : "";
   document.getElementById("fw-modal-url").value = prog.fwLink || "";
   document.getElementById("fw-modal-notes").value = prog.fwNotes || "";
@@ -1754,6 +1912,7 @@ function renderPortfolio() {
       <td>${fitBtnHTML(p.id)}</td>
       <td class="fw-cell" data-id="${p.id}">${fwLinkHTML(p.id)}</td>
       <td>${compactProgHTML(p.id)}</td>
+      <td><button onclick="deleteProgram(${p.id})" title="Hide this program" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 4px;opacity:.5;transition:opacity .15s" onmouseover="this.style.opacity=1;this.style.color='var(--red)'" onmouseout="this.style.opacity=.5;this.style.color='var(--muted)'">×</button></td>
     </tr>`;
   }).join("");
 
@@ -1947,6 +2106,7 @@ function showTab(name, btn) {
 /* ────────────────────────────────────────────────────────────
    INIT
 ──────────────────────────────────────────────────────────── */
+rebuildPortfolio();   // populate PORTFOLIO before any render
 renderPortfolio();
 renderPool();
 renderRequirements();
@@ -1956,6 +2116,133 @@ renderBudget();
 renderAppTracker();
 renderQA();
 initAllUI();   // Apply saved localStorage state to all UI elements
+
+// ── Add / Delete / Restore Program ──────────────────────────────────────────
+
+function openAddProgModal() {
+  ["ap-name","ap-dept","ap-location","ap-fee","ap-stipend","ap-deadline",
+   "ap-faculty","ap-threads","ap-toefl","ap-soplen","ap-notes","ap-wt"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  const avs = document.getElementById("ap-avs");
+  if (avs) avs.value = "60";
+  const gre = document.getElementById("ap-gre");
+  if (gre) gre.value = "Not required";
+  const fw = document.getElementById("ap-fw");
+  if (fw) fw.checked = false;
+  const nynj = document.getElementById("ap-nynj");
+  if (nynj) nynj.checked = false;
+  document.getElementById("ap-modal").style.display = "flex";
+  setTimeout(() => { const n = document.getElementById("ap-name"); if (n) n.focus(); }, 60);
+}
+
+function closeAddProgModal() {
+  document.getElementById("ap-modal").style.display = "none";
+}
+
+function saveAddProg() {
+  const name = (document.getElementById("ap-name").value || "").trim();
+  if (!name) { alert("Program name is required."); return; }
+
+  const fwChecked = document.getElementById("ap-fw") && document.getElementById("ap-fw").checked;
+  const wtVal     = (document.getElementById("ap-wt")  ? document.getElementById("ap-wt").value.trim()  : "") || null;
+
+  const prog = {
+    id:       nextCustomId(),
+    name,
+    dept:     (document.getElementById("ap-dept")     ? document.getElementById("ap-dept").value.trim()     : "") || "—",
+    tier:     "none",
+    nynj:     !!(document.getElementById("ap-nynj") && document.getElementById("ap-nynj").checked),
+    avs:      parseInt(document.getElementById("ap-avs")  ? document.getElementById("ap-avs").value  : "60") || 60,
+    fee:      parseInt(document.getElementById("ap-fee")  ? document.getElementById("ap-fee").value  : "0")  || 0,
+    fw:       !!fwChecked,
+    wt:       wtVal,
+    ws:       "estimated",
+    stipend:  parseInt(document.getElementById("ap-stipend") ? document.getElementById("ap-stipend").value : "28000") || 28000,
+    faculty:  (document.getElementById("ap-faculty")  ? document.getElementById("ap-faculty").value  : "").split(",").map(s=>s.trim()).filter(Boolean),
+    threads:  (document.getElementById("ap-threads")  ? document.getElementById("ap-threads").value  : "").split(",").map(s=>s.trim()).filter(Boolean),
+    deadline: (document.getElementById("ap-deadline") ? document.getElementById("ap-deadline").value.trim() : "") || "TBD",
+    dlSrc:    "estimated",
+    feeSrc:   "estimated",
+    gre:      document.getElementById("ap-gre")    ? document.getElementById("ap-gre").value    : "Not required",
+    toefl:    (document.getElementById("ap-toefl") ? document.getElementById("ap-toefl").value.trim() : "") || "80+ iBT",
+    sopLen:   (document.getElementById("ap-soplen")? document.getElementById("ap-soplen").value.trim(): "") || "2 pages",
+    location: (document.getElementById("ap-location") ? document.getElementById("ap-location").value.trim() : "") || "—",
+    op:       2,
+    notes:    (document.getElementById("ap-notes") ? document.getElementById("ap-notes").value.trim() : "") || "Custom program added by user.",
+  };
+
+  const custom = loadCustomProgs();
+  custom.push(prog);
+  saveCustomProgs(custom);
+  rebuildPortfolio();
+  refreshPortfolioHeader();
+  renderPortfolio();
+  refreshTierCounts();
+  // Reset IS modal dropdown so new program appears next open
+  const sel = document.getElementById("is-f-program");
+  if (sel) { while (sel.options.length > 2) sel.remove(2); }
+  closeAddProgModal();
+}
+
+function deleteProgram(id) {
+  const isCustom = id >= 1001;
+  if (isCustom) {
+    if (!confirm("Permanently delete this custom program?")) return;
+    saveCustomProgs(loadCustomProgs().filter(p => p.id !== id));
+  } else {
+    if (!confirm("Hide this program from all tabs?\nYou can restore it from the Hidden panel.")) return;
+    const d = loadDeleted(); d.add(id); saveDeleted(d);
+  }
+  // Also remove any saved per-program state
+  const all = loadProg();
+  delete all[id];
+  saveProg(all);
+  rebuildPortfolio();
+  refreshPortfolioHeader();
+  renderPortfolio();
+  refreshTierCounts();
+  const sel = document.getElementById("is-f-program");
+  if (sel) { while (sel.options.length > 2) sel.remove(2); }
+}
+
+function openHiddenProgs() {
+  const deleted = loadDeleted();
+  const list  = document.getElementById("hp-list");
+  const empty = document.getElementById("hp-empty");
+  const hiddenBuiltIn = PROGRAMS_RAW.filter(p => deleted.has(p.id));
+  if (hiddenBuiltIn.length === 0) {
+    list.innerHTML = "";
+    empty.style.display = "block";
+  } else {
+    empty.style.display = "none";
+    list.innerHTML = hiddenBuiltIn.map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:7px;gap:10px">
+        <span style="font-size:13px;color:var(--text);flex:1">${p.name}</span>
+        <span style="font-size:11px;color:var(--muted)">${p.dept || ""}</span>
+        <button onclick="restoreProgram(${p.id})" style="padding:4px 12px;border-radius:5px;border:none;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0">Restore</button>
+      </div>`).join("");
+  }
+  document.getElementById("hp-modal").style.display = "flex";
+}
+
+function closeHiddenProgs() {
+  document.getElementById("hp-modal").style.display = "none";
+}
+
+function restoreProgram(id) {
+  const d = loadDeleted();
+  d.delete(id);
+  saveDeleted(d);
+  rebuildPortfolio();
+  refreshPortfolioHeader();
+  renderPortfolio();
+  refreshTierCounts();
+  const sel = document.getElementById("is-f-program");
+  if (sel) { while (sel.options.length > 2) sel.remove(2); }
+  openHiddenProgs(); // refresh the modal list in place
+}
 </script>
 </body>
 </html>
