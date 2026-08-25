@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhD Strategy — Fall 2027</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── Tokens ──────────────────────────────────────────────────── */
+:root {
+  --bg:          #F4F6FA;
+  --surface:     #FFFFFF;
+  --surface2:    #F0F3F8;
+  --border:      #DDE3EE;
+  --border2:     #C8D0E0;
+  --text:        #0E1623;
+  --text2:       #3D4E6A;
+  --muted:       #6B7B96;
+  --accent:      #1B5E3B;
+  --accent-bg:   #E6F4EC;
+  --accent-glow: #22C55E;
+  --red:         #C0180E;
+  --red-bg:      #FEF0EF;
+  --red-dot:     #EF4444;
+  --yellow:      #92610A;
+  --yellow-bg:   #FEF9EC;
+  --yellow-dot:  #F59E0B;
+  --green:       #1B5E3B;
+  --green-bg:    #E6F4EC;
+  --green-dot:   #22C55E;
+  --sidebar-w:   220px;
+  --mono:        "JetBrains Mono", "Cascadia Code", monospace;
+  --sans:        "Outfit", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #080D16; --surface: #0E1623; --surface2: #141D2E;
+    --border: #1E2D45; --border2: #263550; --text: #EBF0FA;
+    --text2: #8FA5C8; --muted: #4E6485; --accent: #22C55E;
+    --accent-bg: #0D2219; --accent-glow: #22C55E; --red: #F87171;
+    --red-bg: #1F0D0D; --red-dot: #EF4444; --yellow: #FBBF24;
+    --yellow-bg: #1F1608; --yellow-dot: #F59E0B; --green: #22C55E;
+    --green-bg: #0D2219; --green-dot: #22C55E;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #080D16; --surface: #0E1623; --surface2: #141D2E;
+  --border: #1E2D45; --border2: #263550; --text: #EBF0FA;
+  --text2: #8FA5C8; --muted: #4E6485; --accent: #22C55E;
+  --accent-bg: #0D2219; --accent-glow: #22C55E; --red: #F87171;
+  --red-bg: #1F0D0D; --red-dot: #EF4444; --yellow: #FBBF24;
+  --yellow-bg: #1F1608; --yellow-dot: #F59E0B; --green: #22C55E;
+  --green-bg: #0D2219; --green-dot: #22C55E;
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--accent); text-decoration: none; }
+button { cursor: pointer; font-family: var(--sans); }
+
+/* ── Layout ──────────────────────────────────────────────────── */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-header { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sidebar-logo svg { color: var(--accent-glow); flex-shrink: 0; }
+.sidebar-title { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: var(--text); line-height: 1.2; }
+.sidebar-subtitle { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+.sidebar-stats { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.stat-label { color: var(--muted); }
+.stat-val { font-family: var(--mono); font-weight: 500; color: var(--text2); }
+.stat-val.good { color: var(--green); }
+.sidebar-nav { flex: 1; padding: 8px 0; }
+.nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 16px; border: none; background: transparent; color: var(--muted); font-size: 12.5px; font-weight: 500; text-align: left; transition: color .15s, background .15s; border-left: 2px solid transparent; }
+.nav-btn:hover { background: var(--surface2); color: var(--text2); }
+.nav-btn.active { background: var(--accent-bg); color: var(--accent); border-left-color: var(--accent-glow); }
+.nav-btn .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+.nav-btn.active .nav-icon { opacity: 1; }
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); line-height: 1.6; }
+.main { flex: 1; overflow-x: hidden; }
+.tab-panel { display: none; padding: 28px 32px; }
+.tab-panel.active { display: block; }
+.page-header { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.page-header p { font-size: 13px; color: var(--muted); }
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); margin-top: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead { background: var(--surface2); }
+th { padding: 10px 14px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text2); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+.mono { font-family: var(--mono); font-size: 12px; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── Tier badges ─────────────────────────────────────────────── */
+.tier { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.tier-red    { background: var(--red-bg);    color: var(--red); }
+.tier-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.tier-green  { background: var(--green-bg);  color: var(--green); }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-red    { background: var(--red-dot); }
+.dot-yellow { background: var(--yellow-dot); }
+.dot-green  { background: var(--green-dot); }
+.tier-none  { background: var(--surface2); color: var(--muted); border: 1px dashed var(--border2); }
+.dot-none   { background: var(--border2); }
+
+/* ── LinkedIn tracker cards ─────────────────────────────────── */
+.li-card { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; background:var(--surface); border:1px solid var(--border); cursor:pointer; transition:border-color .15s, background .15s; }
+.li-card:hover { background:var(--surface2); border-color:var(--border2); }
+.li-card.done { background:var(--accent-bg); border-color:var(--accent-glow); }
+.li-check-ui { width:16px; height:16px; border-radius:4px; border:2px solid var(--border2); flex-shrink:0; transition:all .15s; position:relative; }
+.li-card.done .li-check-ui { background:var(--accent-glow); border-color:var(--accent-glow); }
+.li-card.done .li-check-ui::after { content:""; position:absolute; left:3px; top:1px; width:5px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg); }
+.li-title { font-size:12.5px; font-weight:600; color:var(--text); }
+.li-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+
+/* ── AVS score bar ───────────────────────────────────────────── */
+.avs-wrap { display: flex; align-items: center; gap: 8px; min-width: 80px; }
+.avs-score { font-family: var(--mono); font-weight: 500; font-size: 12px; width: 24px; text-align: right; }
+.avs-bar-bg { flex: 1; height: 5px; background: var(--border2); border-radius: 3px; overflow: hidden; min-width: 36px; }
+.avs-bar { height: 100%; border-radius: 3px; }
+
+/* ── Source labels ───────────────────────────────────────────── */
+.src { display: inline-block; font-size: 9.5px; font-family: var(--mono); padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; font-weight: 500; letter-spacing: .03em; }
+.src-c { background: var(--green-bg); color: var(--green); }
+.src-p { background: var(--yellow-bg); color: var(--yellow); }
+.src-e { background: var(--surface2); color: var(--muted); }
+
+/* ── NY/NJ tag ───────────────────────────────────────────────── */
+.nynj-tag { font-size: 10px; font-family: var(--mono); color: var(--accent); background: var(--accent-bg); padding: 1px 6px; border-radius: 3px; font-weight: 600; letter-spacing: .03em; }
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.card-name { font-weight: 700; font-size: 13.5px; margin-bottom: 4px; color: var(--text); }
+.card-dept { font-size: 11.5px; color: var(--muted); margin-bottom: 10px; }
+.card-row { display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 4px; }
+.card-label { color: var(--muted); }
+.card-val { font-family: var(--mono); color: var(--text2); font-size: 11px; }
+.card-faculty { font-size: 11.5px; color: var(--text2); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.tag { font-size: 10px; font-family: var(--mono); background: var(--surface2); color: var(--muted); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--border); }
+.section-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+.section-head::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.tiles { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.tile { flex: 1; min-width: 110px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.tile-num { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text); line-height: 1; }
+.tile-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Budget ──────────────────────────────────────────────────── */
+.budget-scenario { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-top: 12px; }
+.budget-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.budget-subtitle { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
+.budget-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+.budget-key { color: var(--text2); }
+.budget-amount { font-family: var(--mono); font-weight: 600; }
+.budget-bar-wrap { margin: 12px 0 4px; }
+.budget-bar-bg { height: 8px; background: var(--border2); border-radius: 4px; overflow: hidden; }
+.budget-bar-fill { height: 100%; border-radius: 4px; }
+.budget-status { font-size: 11.5px; margin-top: 6px; font-weight: 600; }
+
+/* ── Template ────────────────────────────────────────────────── */
+.template-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-top: 12px; font-size: 12.5px; line-height: 1.7; color: var(--text2); }
+.template-box .field { display: inline-block; background: var(--accent-bg); color: var(--accent); padding: 0 4px; border-radius: 3px; font-family: var(--mono); font-size: 11.5px; }
+
+/* ── Status chips ────────────────────────────────────────────── */
+.status-chip { display: inline-block; font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+.chip-not-started { background: var(--surface2); color: var(--muted); }
+.chip-done { background: var(--green-bg); color: var(--green); }
+
+/* ── Q&A ─────────────────────────────────────────────────────── */
+.qa-list { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.qa-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.qa-q { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; cursor: pointer; user-select: none; }
+.qa-q:hover { background: var(--surface2); }
+.qa-num { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); min-width: 24px; padding-top: 1px; }
+.qa-text { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.qa-arrow { color: var(--muted); font-size: 12px; padding-top: 2px; transition: transform .2s; }
+.qa-item.open .qa-arrow { transform: rotate(90deg); }
+.qa-a { display: none; padding: 12px 18px 16px 54px; font-size: 12.5px; color: var(--text2); line-height: 1.7; border-top: 1px solid var(--border); }
+.qa-item.open .qa-a { display: block; }
+.qa-verdict { display: inline-block; font-size: 10.5px; font-family: var(--mono); padding: 2px 8px; border-radius: 3px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.verdict-yes { background: var(--green-bg); color: var(--green); }
+.verdict-conditional { background: var(--yellow-bg); color: var(--yellow); }
+.verdict-no { background: var(--red-bg); color: var(--red); }
+
+/* ── Waiver / filter ─────────────────────────────────────────── */
+.savings-badge { font-family: var(--mono); font-size: 11px; color: var(--green); font-weight: 700; }
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-btn { font-size: 11px; font-family: var(--sans); font-weight: 500; padding: 5px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: 5px; transition: all .15s; }
+.filter-btn:hover { border-color: var(--border2); color: var(--text2); }
+.filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.waiver-confirmed { color: var(--green); font-weight: 600; }
+.waiver-possible { color: var(--yellow); }
+.waiver-unlikely { color: var(--muted); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PROGRESS CHECKBOXES + FIT BUTTON  (new)
+═══════════════════════════════════════════════════════════════ */
+
+/* Compact check-dots shown in Portfolio table */
+.check-dots { display: flex; gap: 3px; align-items: center; flex-wrap: nowrap; }
+.check-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.check-dot.done { background: var(--green-dot); border-color: var(--green-dot); }
+.check-dot[title]:hover { border-color: var(--muted); }
+
+/* Full-size checklist items (Tracker tab) */
+.check-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 0; cursor: pointer; user-select: none;
+  border-radius: 4px;
+}
+.check-row:hover .check-box-ui { border-color: var(--accent-glow); }
+.check-box-ui {
+  width: 15px; height: 15px; border-radius: 3px;
+  border: 1.5px solid var(--border2);
+  background: transparent; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.check-row.done .check-box-ui {
+  background: var(--green-dot); border-color: var(--green-dot);
+}
+.check-row.done .check-box-ui::after { content: "✓"; font-size: 9px; color: #fff; font-weight: 700; line-height: 1; }
+.check-row-label { font-size: 11.5px; color: var(--text2); }
+.check-row.done .check-row-label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border2); }
+
+/* Fit button */
+.fit-btn {
+  font-size: 10.5px; font-weight: 700; font-family: var(--mono);
+  padding: 4px 10px; border-radius: 5px; border: none;
+  cursor: pointer; white-space: nowrap; transition: all .15s;
+  letter-spacing: .02em;
+}
+.fit-unset  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+.fit-reach  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-dot); }
+.fit-match  { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-dot); }
+.fit-safety { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-dot); }
+.fit-btn:hover { filter: brightness(1.05); }
+
+/* Progress bar (compact, in portfolio column) */
+.prog-bar { display: flex; align-items: center; gap: 6px; }
+.prog-count { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 24px; }
+.prog-bar-bg { flex: 1; height: 4px; background: var(--border2); border-radius: 2px; min-width: 32px; overflow: hidden; }
+.prog-bar-fill { height: 100%; background: var(--green-dot); border-radius: 2px; transition: width .3s; }
+
+/* Tracker card layout for tracker tab */
+.tracker-prog-cell { min-width: 160px; }
+.tracker-checks { display: flex; flex-direction: column; gap: 2px; padding: 2px 0; }
+
+@media (max-width: 700px) {
+  .sidebar { width: 52px; }
+  .sidebar .sidebar-header, .sidebar .sidebar-stats, .sidebar .sidebar-footer { display: none; }
+  .nav-btn span { display: none; }
+  .tab-panel { padding: 20px 16px; }
+}
+:focus-visible { outline: 2px solid var(--accent-glow); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ── Sidebar ──────────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="sidebar-title">PhD Strategy<br>Fall 2027</span>
+    </div>
+    <div class="sidebar-subtitle">ECG · EEG · EMG · HCI · BCI</div>
+  </div>
+  <div class="sidebar-stats">
+    <div class="stat-row"><span class="stat-label">Programs</span><span class="stat-val">58</span></div>
+    <div class="stat-row"><span class="stat-label">NY/NJ</span><span class="stat-val">9</span></div>
+    <div class="stat-row"><span class="stat-label">Budget</span><span class="stat-val">$1,500</span></div>
+    <div class="stat-row"><span class="stat-label">🟢 Top choice</span><span class="stat-val" id="sc-green" style="color:var(--green)">7</span></div>
+    <div class="stat-row"><span class="stat-label">🟡 Strong interest</span><span class="stat-val" id="sc-yellow" style="color:var(--yellow)">8</span></div>
+    <div class="stat-row"><span class="stat-label">🔴 Last resort</span><span class="stat-val" id="sc-red" style="color:var(--red)">10</span></div>
+    <div class="stat-row"><span class="stat-label">— Untiered (set yours)</span><span class="stat-val" id="sc-none" style="color:var(--muted)">33</span></div>
+    <div class="stat-row"><span class="stat-label">Worst-case fees</span><span class="stat-val" style="color:var(--red)">$3,500</span></div>
+    <div class="stat-row"><span class="stat-label">Scenario A (~40% waivers)</span><span class="stat-val good">~$2,100</span></div>
+  </div>
+  <div class="sidebar-nav">
+    <button class="nav-btn active" onclick="showTab('portfolio',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Portfolio</span></button>
+    <button class="nav-btn" onclick="showTab('pool',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Candidate Pool</span></button>
+    <button class="nav-btn" onclick="showTab('requirements',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Requirements</span></button>
+    <button class="nav-btn" onclick="showTab('outreach',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>Faculty Outreach</span></button>
+    <button class="nav-btn" onclick="showTab('waivers',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Fee Waivers</span></button>
+    <button class="nav-btn" onclick="showTab('budget',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span>Budget</span></button>
+    <button class="nav-btn" onclick="showTab('trackers',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Trackers</span></button>
+    <button class="nav-btn" onclick="showTab('assessment',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Assessment</span></button>
+    <button class="nav-btn" onclick="showTab('infosessions',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Info Sessions</span></button>
+    <button class="nav-btn" onclick="showTab('legend',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Legend</span></button>
+  </div>
+  <div class="sidebar-footer">
+    <span class="src src-c">C</span> confirmed &nbsp;<span class="src src-p">P</span> provisional &nbsp;<span class="src src-e">E</span> estimated<br>
+    <span style="color:var(--accent-glow)">●</span> Progress saves in your browser<br>
+    <span style="color:var(--muted)">Click tier badge to set preference</span>
+  </div>
+</nav>
+
+<!-- ── Main ──────────────────────────────────────────────────── -->
+<main class="main">
+
+<!-- ══ TAB 1 · PORTFOLIO ══════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-portfolio">
+  <div class="page-header">
+    <h1>Final Portfolio — 58 Programs</h1>
+    <p>Ranked by Application Value Score. <strong>Click any tier badge</strong> to set your preference (🟢 Top Choice → 🟡 Interest → 🔴 Last Resort → — Unset). Use <strong>My Fit</strong> to track admissions probability (Reach / Match / Safety). All state saves in your browser.</p>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="tile-num">58</div><div class="tile-label">Total programs</div></div>
+    <div class="tile"><div class="tile-num" id="tc-green" style="color:var(--green)">7</div><div class="tile-label">🟢 Top choice</div></div>
+    <div class="tile"><div class="tile-num" id="tc-yellow" style="color:var(--yellow)">8</div><div class="tile-label">🟡 Strong interest</div></div>
+    <div class="tile"><div class="tile-num" id="tc-red" style="color:var(--red)">10</div><div class="tile-label">🔴 Last resort</div></div>
+    <div class="tile"><div class="tile-num" id="tc-none" style="color:var(--muted)">33</div><div class="tile-label">— Unset (click tier to label)</div></div>
+    <div class="tile"><div class="tile-num">9</div><div class="tile-label">NY/NJ programs</div></div>
+    <div class="tile" id="progress-tile"><div class="tile-num" id="global-prog">0/5</div><div class="tile-label">Tasks done</div></div>
+  </div>
+
+  <!-- Filter bar -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Filter:</span>
+    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-tier-filters">
+      <button class="filter-btn active" onclick="pfFilter('tier','all',this)">All tiers</button>
+      <button class="filter-btn" onclick="pfFilter('tier','green',this)">🟢 Top Choice</button>
+      <button class="filter-btn" onclick="pfFilter('tier','yellow',this)">🟡 Interest</button>
+      <button class="filter-btn" onclick="pfFilter('tier','red',this)">🔴 Last Resort</button>
+      <button class="filter-btn" onclick="pfFilter('tier','none',this)">— Unset</button>
+    </div>
+    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-fit-filters">
+      <button class="filter-btn active" onclick="pfFilter('fit','all',this)">All fits</button>
+      <button class="filter-btn" onclick="pfFilter('fit','reach',this)">Reach</button>
+      <button class="filter-btn" onclick="pfFilter('fit','match',this)">Match</button>
+      <button class="filter-btn" onclick="pfFilter('fit','safety',this)">Safety</button>
+    </div>
+    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap" id="pf-gre-filters">
+      <button class="filter-btn active" onclick="pfFilter('gre','all',this)">All GRE</button>
+      <button class="filter-btn" onclick="pfFilter('gre','Not required',this)">Not Required</button>
+      <button class="filter-btn" onclick="pfFilter('gre','Optional',this)">Optional</button>
+      <button class="filter-btn" onclick="pfFilter('gre','Not considered',this)">Not Considered</button>
+      <button class="filter-btn" onclick="pfFilter('gre','Required',this)">Required</button>
+    </div>
+    <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+    <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
+    <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="portfolio-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th id="th-name"     onclick="pfSort('name')"     style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-tier"     onclick="pfSort('tier')"     style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-faculty"  onclick="pfSort('faculty')"  style="cursor:pointer;user-select:none">Key Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-avs"      onclick="pfSort('avs')"      style="cursor:pointer;user-select:none;color:var(--text)">AVS<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
+          <th id="th-fee"      onclick="pfSort('fee')"      style="cursor:pointer;user-select:none">Fee<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-stipend"  onclick="pfSort('stipend')"  style="cursor:pointer;user-select:none">Stipend<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-gre"      onclick="pfSort('gre')"      style="cursor:pointer;user-select:none">GRE<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th id="th-fit"      onclick="pfSort('fit')"      style="cursor:pointer;user-select:none">My Fit<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+          <th style="min-width:120px;white-space:nowrap">Fee Waiver Link</th>
+          <th id="th-progress" onclick="pfSort('progress')" style="cursor:pointer;user-select:none;min-width:130px">Progress<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+        </tr>
+      </thead>
+      <tbody id="portfolio-body"></tbody>
+    </table>
+  </div>
+
+  <div class="section-head">Top 4 by Application Value Score</div>
+  <div class="cards" id="top-picks-cards"></div>
+</div>
+
+<!-- ══ TAB 2 · CANDIDATE POOL ════════════════════════════════ -->
+<div class="tab-panel" id="tab-pool">
+  <div class="page-header">
+    <h1>Candidate Pool — 41 Programs Evaluated</h1>
+    <p>All programs considered. 25 selected; 16 not selected with reasoning.</p>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterPool('all',this)">All (41)</button>
+    <button class="filter-btn" onclick="filterPool('selected',this)">Selected (25)</button>
+    <button class="filter-btn" onclick="filterPool('not-selected',this)">Not Selected (16)</button>
+    <button class="filter-btn" onclick="filterPool('nynj',this)">NY/NJ</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Program</th><th>Dept</th><th>Location</th><th>Status</th><th>Key Faculty Match</th><th>Reason (if not selected)</th>
+  </tr></thead><tbody id="pool-body"></tbody></table></div>
+</div>
+
+<!-- ══ TAB 3 · REQUIREMENTS ══════════════════════════════════ -->
+<div class="tab-panel" id="tab-requirements">
+  <div class="page-header">
+    <h1>Application Requirements Matrix</h1>
+    <p>Verify all dates at program websites — most reflect previous cycle. <span class="src src-p">P</span> = provisional.</p>
+  </div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Program</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th>
+  </tr></thead><tbody id="req-body"></tbody></table></div>
+</div>
+
+<!-- ══ TAB 4 · FACULTY OUTREACH ══════════════════════════════ -->
+<div class="tab-panel" id="tab-outreach">
+  <div class="page-header">
+    <h1>Faculty Outreach Plan</h1>
+    <p>Contact Green/Yellow faculty first (Sept–Oct). Red-tier only after SOP is polished.</p>
+  </div>
+  <div class="section-head">Email Template</div>
+  <div class="template-box">
+    <strong>Subject:</strong> Prospective PhD applicant — <span class="field">[Your specific topic]</span> × <span class="field">[their recent paper/project]</span><br><br>
+    Dear Prof. <span class="field">[Last Name]</span>,<br><br>
+    I am a Master's student at NYU working on <span class="field">[1–2 sentences on your ECG/EEG/VQ-VAE work]</span>. I recently read your paper "<span class="field">[exact title, year]</span>" and found that <span class="field">[specific connection to your work]</span>.<br><br>
+    I am applying to your PhD program for Fall 2027 and would be interested in joining your group to explore <span class="field">[specific direction — e.g., discrete codebook representations of ECG signals for cross-patient transfer learning]</span>. I believe my background in <span class="field">[signal processing / VQ-VAE / wearable sensing]</span> could contribute to <span class="field">[their specific project or direction]</span>.<br><br>
+    Would you be open to a brief 15-minute Zoom call to discuss whether there is mutual interest and if you plan to take new PhD students for Fall 2027? I have attached my CV.<br><br>
+    Thank you for your time.<br>
+    <span class="field">[Your name]</span>
+  </div>
+  <div class="section-head">Outreach Priority List</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Priority</th><th>Faculty</th><th>Program</th><th>Tier</th><th>Email (est.)</th><th>Research Hook</th><th>When to Contact</th>
+  </tr></thead><tbody id="outreach-body"></tbody></table></div>
+  <div class="section-head">Outreach Rules</div>
+  <div class="card" style="max-width:640px">
+    <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do reach out</strong> when you can name a specific paper of theirs and explain a concrete research connection. Target 8–12 emails total.</p>
+    <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do not reach out</strong> with generic interest. If you cannot name a specific paper, wait until you can.</p>
+    <p style="font-size:12.5px;line-height:1.7;color:var(--text2)"><strong style="color:var(--text)">Follow-up:</strong> One follow-up after 10 days is acceptable. After that, apply anyway — silence is not rejection.</p>
+  </div>
+</div>
+
+<!-- ══ TAB 5 · FEE WAIVERS ════════════════════════════════════ -->
+<div class="tab-panel" id="tab-waivers">
+  <div class="page-header">
+    <h1>Fee Waiver Plan</h1>
+    <p>Target ≥8 waivers to stay under $1,500. Worst-case without waivers: $2,405.</p>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="tile-num" style="color:var(--green)">$855</div><div class="tile-label">Max waiver savings</div></div>
+    <div class="tile"><div class="tile-num">$2,405</div><div class="tile-label">Worst-case total</div></div>
+    <div class="tile"><div class="tile-num" style="color:var(--yellow)">~$1,550</div><div class="tile-label">Scenario A (40%)</div></div>
+    <div class="tile"><div class="tile-num" style="color:var(--green)">~$1,125</div><div class="tile-label">Scenario B (60%)</div></div>
+  </div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Program</th><th>Fee</th><th>Waiver Type</th><th>Status</th><th>How to Apply</th><th>Deadline</th><th>Savings</th>
+  </tr></thead><tbody id="waiver-body"></tbody></table></div>
+  <div class="section-head">International Applicant Note</div>
+  <div class="card" style="max-width:640px">
+    <p style="font-size:12.5px;line-height:1.7;color:var(--text2)">Many US university fee waivers explicitly <strong style="color:var(--red)">exclude international students</strong>. Always verify eligibility before investing time. Confirmed to include international applicants: <strong>Rice</strong> ($0), <strong>UCSD CSE</strong> (intl waiver confirmed), <strong>Cornell Tech</strong> (financial hardship, intl eligible), <strong>WashU BME</strong> (no intl exclusion stated). CMU HCII — verify international eligibility before attending info session.</p>
+  </div>
+</div>
+
+<!-- ══ TAB 6 · BUDGET ════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-budget">
+  <div class="page-header">
+    <h1>Budget Analysis — 3 Scenarios</h1>
+    <p>All fees provisional unless noted. Budget ceiling: $1,500.</p>
+  </div>
+  <div class="budget-scenario">
+    <div class="budget-title">Scenario A — Moderate Waivers (40%)</div>
+    <div class="budget-subtitle">10 waivers: Rice (free), UCSD ($155), CMU ($100), Cornell ($105), WashU ($75), MIT ($75), Rutgers ($70), Stevens ($60), Stony Brook ($100 partial), Northeastern ($50 partial)</div>
+    <div class="budget-row"><span class="budget-key">Full-fee programs</span><span class="budget-amount">15 × avg $99</span></div>
+    <div class="budget-row"><span class="budget-key">Estimated total</span><span class="budget-amount" style="color:var(--yellow)">~$1,550</span></div>
+    <div class="budget-bar-wrap"><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:100%;background:var(--yellow-dot)"></div></div></div>
+    <div class="budget-status" style="color:var(--yellow)">⚠ Slightly over $1,500 — requires aggressive waiver pursuit.</div>
+  </div>
+  <div class="budget-scenario">
+    <div class="budget-title">Scenario B — Aggressive Waivers (60%)</div>
+    <div class="budget-subtitle">15 waivers: Scenario A + UMich ($90), UT Austin ($90), UNC ($95), NYU Courant ($100), Duke ($105)</div>
+    <div class="budget-row"><span class="budget-key">Full-fee programs</span><span class="budget-amount">10 × avg $103</span></div>
+    <div class="budget-row"><span class="budget-key">Estimated total</span><span class="budget-amount" style="color:var(--green)">~$1,125</span></div>
+    <div class="budget-bar-wrap"><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:75%;background:var(--green-dot)"></div></div></div>
+    <div class="budget-status" style="color:var(--green)">✓ Well within budget. $375 buffer.</div>
+  </div>
+  <div class="budget-scenario">
+    <div class="budget-title">Scenario C — No Waivers (worst case)</div>
+    <div class="budget-subtitle">All 25 programs at full fee. Rice counted at $0.</div>
+    <div class="budget-row"><span class="budget-key">Total at list price</span><span class="budget-amount" style="color:var(--red)">$2,405</span></div>
+    <div class="budget-bar-wrap"><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:100%;background:var(--red-dot)"></div></div></div>
+    <div class="budget-status" style="color:var(--red)">✗ $905 over budget — confirm ≥5 waivers before applying to this full portfolio.</div>
+  </div>
+  <div class="section-head">Fee Breakdown by Program</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Program</th><th>Tier</th><th>Fee</th><th>Source</th><th>Waiver Available</th><th>Priority</th>
+  </tr></thead><tbody id="budget-breakdown-body"></tbody></table></div>
+</div>
+
+<!-- ══ TAB 7 · TRACKERS ═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-trackers">
+  <div class="page-header">
+    <h1>Application Trackers</h1>
+    <p>Check off each task as you complete it — progress saves automatically in your browser.</p>
+  </div>
+
+  <!-- LinkedIn Optimization Card -->
+  <div class="section-head">⓪ LinkedIn Optimization</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px;margin-bottom:24px">
+    <div class="li-card" id="li-headline" onclick="toggleLI('headline')">
+      <div class="li-check-ui"></div>
+      <div><div class="li-title">Updated headline</div><div class="li-sub">PhD applicant + research focus</div></div>
+    </div>
+    <div class="li-card" id="li-about" onclick="toggleLI('about')">
+      <div class="li-check-ui"></div>
+      <div><div class="li-title">About section</div><div class="li-sub">Research-first narrative</div></div>
+    </div>
+    <div class="li-card" id="li-skills" onclick="toggleLI('skills')">
+      <div class="li-check-ui"></div>
+      <div><div class="li-title">Skills &amp; endorsements</div><div class="li-sub">ECG/EEG/EMG, ML, BCI, HCI</div></div>
+    </div>
+    <div class="li-card" id="li-faculty" onclick="toggleLI('faculty')">
+      <div class="li-check-ui"></div>
+      <div><div class="li-title">Connected with faculty</div><div class="li-sub">Target professors at your programs</div></div>
+    </div>
+    <div class="li-card" id="li-posts" onclick="toggleLI('posts')">
+      <div class="li-check-ui"></div>
+      <div><div class="li-title">Research posts</div><div class="li-sub">Staggered posts on current work</div></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;padding:10px 14px;border-radius:8px;background:var(--surface);border:1px solid var(--border)">
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px">Resume</div>
+      <div style="font-size:11px;color:var(--muted)">Link your resume for quick reference</div>
+    </div>
+    <a id="resume-link" href="#" target="_blank" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border-radius:6px;border:1px solid var(--accent-glow)">Open Resume</a>
+    <button onclick="setResume()" style="font-size:12px;font-weight:600;padding:6px 14px;background:var(--surface2);color:var(--text2);border-radius:6px;border:1px solid var(--border2);cursor:pointer" id="resume-set-btn">Set URL</button>
+  </div>
+
+  <div class="section-head">① Application Progress Tracker</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Program</th>
+        <th>Tier</th>
+        <th>Deadline</th>
+        <th>My Fit</th>
+        <th>Login ID</th>
+        <th>Written SOP</th>
+        <th>Contacted Faculty</th>
+        <th>Research Interest Doc</th>
+        <th>Fee Waiver Applied</th>
+        <th>Progress</th>
+      </tr></thead>
+      <tbody id="app-tracker-body"></tbody>
+    </table>
+  </div>
+
+  <div class="section-head">② Faculty Outreach Tracker</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Faculty</th><th>Program</th><th>Email</th><th>Date Sent</th><th>Response</th><th>Follow-up</th><th>Outcome</th>
+  </tr></thead><tbody id="outreach-tracker-body"></tbody></table></div>
+
+  <div class="section-head">③ Recommendation Letter Tracker</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Recommender</th><th>Relationship</th><th>Programs (#)</th><th>Asked</th><th>Confirmed</th><th>Submitted</th><th>Notes</th>
+  </tr></thead><tbody>
+    <tr><td style="color:var(--text)">Recommender 1</td><td class="mono">—</td><td class="num">58</td>
+      <td><span class="status-chip chip-not-started">Not Asked</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td style="color:var(--muted)">Ask by Oct 1</td></tr>
+    <tr><td style="color:var(--text)">Recommender 2</td><td class="mono">—</td><td class="num">58</td>
+      <td><span class="status-chip chip-not-started">Not Asked</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td style="color:var(--muted)">Ask by Oct 1</td></tr>
+    <tr><td style="color:var(--text)">Recommender 3</td><td class="mono">—</td><td class="num">58</td>
+      <td><span class="status-chip chip-not-started">Not Asked</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td><span class="status-chip chip-not-started">—</span></td>
+      <td style="color:var(--muted)">Ask by Oct 1</td></tr>
+  </tbody></table></div>
+
+  <div class="section-head">④ Fee Waiver Tracker</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Program</th><th>Fee</th><th>Waiver Type</th><th>Applied</th><th>Status</th><th>Savings</th>
+  </tr></thead><tbody id="waiver-tracker-body"></tbody></table></div>
+</div>
+
+<!-- ══ TAB 8 · ASSESSMENT ═════════════════════════════════════ -->
+<div class="tab-panel" id="tab-assessment">
+  <div class="page-header">
+    <h1>Strategic Assessment — 15 Questions</h1>
+    <p>Click any question to expand the analysis.</p>
+  </div>
+  <div class="qa-list" id="qa-list"></div>
+</div>
+
+<!-- ══ TAB 9 · INFO SESSIONS ══════════════════════════════════ -->
+<div class="tab-panel" id="tab-infosessions">
+  <div class="page-header">
+    <h1>Information Sessions</h1>
+    <p>Track virtual and in-person info sessions hosted by programs. Click <strong>+ Add Session</strong> to log one.</p>
+  </div>
+
+  <!-- Summary tiles -->
+  <div class="tiles" style="margin-bottom:24px">
+    <div class="tile"><div class="tile-num" id="is-total">0</div><div class="tile-label">Sessions logged</div></div>
+    <div class="tile"><div class="tile-num" id="is-registered" style="color:var(--yellow)">0</div><div class="tile-label">Registered</div></div>
+    <div class="tile"><div class="tile-num" id="is-attended" style="color:var(--green)">0</div><div class="tile-label">Attended</div></div>
+    <div class="tile"><div class="tile-num" id="is-upcoming" style="color:var(--accent)">0</div><div class="tile-label">Upcoming</div></div>
+  </div>
+
+  <!-- Add session button + filter row -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <button onclick="openISModal()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Session
+    </button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="is-filter-row">
+      <button class="filter-btn active" onclick="filterIS('all',this)">All</button>
+      <button class="filter-btn" onclick="filterIS('upcoming',this)">Upcoming</button>
+      <button class="filter-btn" onclick="filterIS('attended',this)">Attended</button>
+      <button class="filter-btn" onclick="filterIS('missed',this)">Missed / Skipped</button>
+    </div>
+  </div>
+
+  <!-- Session table -->
+  <div class="table-wrap">
+    <table id="is-table">
+      <thead><tr>
+        <th>Program</th>
+        <th>Date &amp; Time</th>
+        <th>Format</th>
+        <th>Topic / Host</th>
+        <th>Registered</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th style="width:64px"></th>
+      </tr></thead>
+      <tbody id="is-tbody"></tbody>
+    </table>
+    <div id="is-empty" style="padding:32px;text-align:center;color:var(--muted);font-size:13px;display:none">No sessions logged yet — click <strong style="color:var(--text)">+ Add Session</strong> to get started.</div>
+  </div>
+</div>
+
+<!-- Fee Waiver Link Modal -->
+<div id="fw-modal" onclick="if(event.target===this)closeFwModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1001;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(440px,92vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)">Fee Waiver Link</div>
+      <button onclick="closeFwModal()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div id="fw-modal-prog" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+    <div style="display:grid;gap:10px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">URL</label>
+        <input id="fw-modal-url" type="url" placeholder="https://gradapply.university.edu/fee-waiver" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box" onkeydown="if(event.key==='Enter')saveFwModal()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">NOTES (optional)</label>
+        <input id="fw-modal-notes" type="text" placeholder="e.g. Need to submit by Nov 1, requires SOP draft" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button onclick="clearFwModal()" style="padding:7px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--red);font-size:13px;cursor:pointer">Clear</button>
+      <button onclick="closeFwModal()" style="padding:7px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="saveFwModal()" style="padding:7px 18px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Info Session Modal -->
+<div id="is-modal" onclick="if(event.target===this)closeISModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(520px,92vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)" id="is-modal-title">Add Info Session</div>
+      <button onclick="closeISModal()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">PROGRAM *</label>
+        <select id="is-f-program" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px" onchange="isUpdateProgramField()">
+          <option value="">— Select program —</option>
+          <option value="__other__">Other (type below)</option>
+        </select>
+        <input id="is-f-program-other" placeholder="Program name" style="display:none;width:100%;margin-top:6px;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">DATE *</label>
+          <input type="date" id="is-f-date" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">TIME (optional)</label>
+          <input type="time" id="is-f-time" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">FORMAT</label>
+        <select id="is-f-format" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px">
+          <option value="Virtual">Virtual</option>
+          <option value="In-Person">In-Person</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">TOPIC / HOST (optional)</label>
+        <input id="is-f-topic" placeholder="e.g. Graduate Admissions Webinar · Dr. Smith" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">REGISTERED?</label>
+          <select id="is-f-registered" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">STATUS</label>
+          <select id="is-f-status" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px">
+            <option value="upcoming">Upcoming</option>
+            <option value="attended">Attended</option>
+            <option value="missed">Missed</option>
+            <option value="skipped">Skipped</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">NOTES / KEY TAKEAWAYS</label>
+        <textarea id="is-f-notes" rows="3" placeholder="Faculty contacts met, funding info, Q&amp;A insights…" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
+      <button onclick="closeISModal()" style="padding:7px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="saveISEntry()" style="padding:7px 16px;border-radius:6px;border:none;background:var(--accent-glow);color:#fff;font-size:13px;font-weight:600;cursor:pointer" id="is-save-btn">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB 10 · LEGEND ═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-legend">
+  <div class="page-header">
+    <h1>Legend &amp; Navigation Guide</h1>
+    <p>All abbreviations, badges, and controls explained in one place.</p>
+  </div>
+
+  <!-- Navigation -->
+  <div class="section-head"><span>📂</span> Tabs</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tab</th><th>What it contains</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;color:var(--text)">Portfolio</td><td style="color:var(--text2)">All 58 programs ranked by AVS. Main working view — set tiers, track checklist tasks, and monitor My Fit per program.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Candidate Pool</td><td style="color:var(--text2)">Full pool including programs not selected. Useful for reconsidering swaps or comparing notes on dropped programs.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Requirements</td><td style="color:var(--text2)">Deadline, application fee, GRE/TOEFL requirements, SOP length, and LOR count for each program.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Faculty Outreach</td><td style="color:var(--text2)">Priority contacts, email template, and dos/don'ts for cold outreach to target professors.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Fee Waivers</td><td style="color:var(--text2)">Which programs offer waivers, how to apply, estimated savings, and waiver priority rankings.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Budget</td><td style="color:var(--text2)">Three fee scenarios (worst-case, 40% waivers, 60% waivers) against your $1,500 target.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Trackers</td><td style="color:var(--text2)">Rec letter status table, LinkedIn optimization checklist, and resume link.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Assessment</td><td style="color:var(--text2)">15 strategic Q&amp;As about your application — expandable, covering portfolio balance, research framing, and risk.</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Legend</td><td style="color:var(--text2)">This page.</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Tier badges -->
+  <div class="section-head"><span>🏷</span> Tier Badges (your personal preference)</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Badge</th><th>Meaning</th><th>How to set</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tier tier-green"><span class="dot dot-green"></span>🟢 Top Choice</span></td><td style="color:var(--text2)">You would love to attend this program</td><td style="color:var(--muted)">Click the badge once from Unset</td></tr>
+      <tr><td><span class="tier tier-yellow"><span class="dot dot-yellow"></span>🟡 Interest</span></td><td style="color:var(--text2)">You'd like to go — it's a good program</td><td style="color:var(--muted)">Click the badge twice from Unset</td></tr>
+      <tr><td><span class="tier tier-red"><span class="dot dot-red"></span>🔴 Last Resort</span></td><td style="color:var(--text2)">You'd go only if it's the only option</td><td style="color:var(--muted)">Click the badge three times from Unset</td></tr>
+      <tr><td><span class="tier tier-none"><span class="dot dot-none"></span>— Unset</span></td><td style="color:var(--text2)">No preference set yet</td><td style="color:var(--muted)">Default for all new programs; cycles back to Unset on 4th click</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- My Fit -->
+  <div class="section-head"><span>🎯</span> My Fit (admissions probability)</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Label</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="fit-btn fit-reach" style="display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700">Reach</span></td><td style="color:var(--text2)">Admit odds are low (&lt;25%). Strong programs to aspire toward — apply, but don't rely on them.</td></tr>
+      <tr><td><span class="fit-btn fit-match" style="display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700">Match</span></td><td style="color:var(--text2)">Your profile is competitive — a realistic admit if the application is strong.</td></tr>
+      <tr><td><span class="fit-btn fit-safety" style="display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700">Safety</span></td><td style="color:var(--text2)">High confidence of admission. Use these to guarantee at least one offer.</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- AVS -->
+  <div class="section-head"><span>📊</span> AVS — Application Value Score</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px">
+    <div style="font-family:var(--mono);font-size:13px;color:var(--accent);margin-bottom:10px">AVS = ResearchFit×0.40 + ProgramStrength×0.25 + Accessibility×0.20 + BudgetEfficiency×0.15</div>
+    <div style="display:grid;gap:8px">
+      <div style="display:flex;gap:12px;align-items:baseline"><span style="font-weight:600;color:var(--text);min-width:160px">Research Fit (40%)</span><span style="font-size:12.5px;color:var(--text2)">How well the faculty and program align with ECG/EEG/EMG signal processing, VQ-VAE/RVQ representations, BCI, and affective computing</span></div>
+      <div style="display:flex;gap:12px;align-items:baseline"><span style="font-weight:600;color:var(--text);min-width:160px">Program Strength (25%)</span><span style="font-size:12.5px;color:var(--text2)">Overall program reputation, funding, and placement outcomes</span></div>
+      <div style="display:flex;gap:12px;align-items:baseline"><span style="font-weight:600;color:var(--text);min-width:160px">Accessibility (20%)</span><span style="font-size:12.5px;color:var(--text2)">Admissions competitiveness relative to your profile — higher score means more likely to admit</span></div>
+      <div style="display:flex;gap:12px;align-items:baseline"><span style="font-weight:600;color:var(--text);min-width:160px">Budget Efficiency (15%)</span><span style="font-size:12.5px;color:var(--text2)">Fee waiver availability and application fee cost</span></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:16px;font-size:12px">
+      <span style="color:var(--green);font-weight:700">≥ 75 Strong</span>
+      <span style="color:var(--yellow);font-weight:700">70–74 Good</span>
+      <span style="color:var(--muted);font-weight:700">&lt; 70 Moderate</span>
+    </div>
+  </div>
+
+  <!-- Source badges -->
+  <div class="section-head"><span>🔖</span> Data Source Labels</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Badge</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src src-c">C</span></td><td style="color:var(--text2)"><strong style="color:var(--text)">Confirmed</strong> — verified directly from the program's official page</td></tr>
+      <tr><td><span class="src src-p">P</span></td><td style="color:var(--text2)"><strong style="color:var(--text)">Provisional</strong> — sourced from a recent year; verify before submitting</td></tr>
+      <tr><td><span class="src src-e">E</span></td><td style="color:var(--text2)"><strong style="color:var(--text)">Estimated</strong> — approximated based on similar programs; must be confirmed</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Per-program checklist -->
+  <div class="section-head"><span>☑️</span> Per-Program Checklist Tasks</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Task</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;color:var(--text)">Login ID</td><td style="color:var(--text2)">Created an account on the program's application portal</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">SOP</td><td style="color:var(--text2)">Statement of Purpose drafted or adapted for this program</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Faculty</td><td style="color:var(--text2)">Reached out to at least one target faculty member</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Research Doc</td><td style="color:var(--text2)">Research interest document / writing sample prepared</td></tr>
+      <tr><td style="font-weight:600;color:var(--text)">Fee Waiver</td><td style="color:var(--text2)">Applied for or confirmed a fee waiver</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Other abbreviations -->
+  <div class="section-head"><span>📖</span> Other Abbreviations</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Abbreviation</th><th>Full form</th></tr></thead>
+    <tbody>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">NY/NJ</td><td style="color:var(--text2)">New York / New Jersey — local programs (lower cost, commutable)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">SOP</td><td style="color:var(--text2)">Statement of Purpose</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">LOR</td><td style="color:var(--text2)">Letter of Recommendation</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">GRE</td><td style="color:var(--text2)">Graduate Record Examination — noted as Required / Optional / Not required per program</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">TOEFL</td><td style="color:var(--text2)">Test of English as a Foreign Language — minimum score listed in Requirements tab</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">BME</td><td style="color:var(--text2)">Biomedical Engineering</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">CS / CSE</td><td style="color:var(--text2)">Computer Science / Computer Science &amp; Engineering</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">ECE / EECS</td><td style="color:var(--text2)">Electrical &amp; Computer Engineering / Electrical Engineering &amp; Computer Science</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">HCII</td><td style="color:var(--text2)">Human-Computer Interaction Institute (CMU)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">GSBS</td><td style="color:var(--text2)">Graduate School of Biomedical Sciences (Mount Sinai)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">CICS</td><td style="color:var(--text2)">College of Information and Computer Sciences (UMass Amherst)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">ECSE</td><td style="color:var(--text2)">Electrical, Computer, &amp; Systems Engineering (RPI)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">BBSR</td><td style="color:var(--text2)">Biomedical &amp; Biological Sciences Research (Cedars-Sinai)</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">VQ-VAE / RVQ</td><td style="color:var(--text2)">Vector-Quantized Variational Autoencoder / Residual Vector Quantization — your core ML methods</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">BCI</td><td style="color:var(--text2)">Brain-Computer Interface</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">HCI</td><td style="color:var(--text2)">Human-Computer Interaction</td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--text2)">ECG / EEG / EMG</td><td style="color:var(--text2)">Electrocardiogram / Electroencephalogram / Electromyogram — your primary signal modalities</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Storage note -->
+  <div class="section-head"><span>💾</span> How Your Data Is Saved</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-size:12.5px;color:var(--text2);line-height:1.7">
+    All progress (tier labels, checklist ticks, My Fit selections, LinkedIn tasks, resume URL) is stored in <strong style="color:var(--text)">your browser's localStorage</strong> under three keys:
+    <div style="margin-top:10px;display:grid;gap:6px">
+      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_prog_2027</code> — all per-program state (tiers, checklist, fit)</div>
+      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_li_2027</code> — LinkedIn optimization task state</div>
+      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_is_2027</code> — info session log</div>
+      <div><code style="font-family:var(--mono);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:11.5px">phd_resume_url</code> — your resume URL</div>
+    </div>
+    <div style="margin-top:10px;color:var(--muted)">⚠ Data is local to this browser. Clearing site data or opening in a private window will reset progress. Export a backup if you change devices.</div>
+  </div>
+
+</div>
+
+</main>
+</div>
+
+<script>
+/* ────────────────────────────────────────────────────────────
+   CHECKLIST DEFINITION
+──────────────────────────────────────────────────────────── */
+const CHECKLIST = [
+  {key:"loginId",    label:"Created login ID"},
+  {key:"sop",        label:"Written SOP"},
+  {key:"faculty",    label:"Contacted faculty"},
+  {key:"researchDoc",label:"Research interest doc"},
+  {key:"feeWaiver",  label:"Applied for fee waiver"},
+];
+
+const FIT_CYCLE = ["reach","match","safety"];
+const FIT_LABEL = {reach:"Reach", match:"Match", safety:"Safety", null:"Set Fit"};
+
+/* Default admissions-probability fit (Reach/Match/Safety).
+   Based on program selectivity + research fit for this profile.
+   Overridden the moment the user clicks the button. */
+const DEFAULT_FIT = {
+  1:"match",   // Rice CS — strong fit, accessible
+  2:"reach",   // UCSD CSE — top program, competitive intl
+  3:"reach",   // MIT Media Lab — ~5% admit rate
+  4:"reach",   // Columbia BME — very competitive
+  5:"match",   // Cornell Tech IS — strong fit, more accessible than flagship
+  6:"match",   // WashU BME — accessible, recruitment-friendly
+  7:"reach",   // CMU HCII — ~8% admit rate
+  8:"reach",   // Georgia Tech CS — top-5 CS
+  9:"reach",   // UW CSE — top-5 CS
+  10:"reach",  // UPenn CS — very competitive
+  11:"match",  // UT Austin ECE — moderate competition
+  12:"match",  // NYU Courant — home institution advantage
+  13:"reach",  // JHU BME — very competitive
+  14:"safety", // Stevens BME — accessible NY/NJ
+  15:"safety", // Rutgers ECE — accessible NY/NJ
+  16:"reach",  // UIUC CS — top-5 CS
+  17:"reach",  // Duke BME — competitive
+  18:"match",  // Northeastern CS — moderate competition
+  19:"reach",  // UMich EECS — top-5 EECS
+  20:"safety", // UMass CICS — accessible
+  21:"safety", // UNC Chapel Hill CS — accessible
+  22:"safety", // Stony Brook CS — accessible NY/NJ
+  23:"reach",  // Stanford CS — ~3% admit rate
+  24:"reach",  // UC Berkeley EECS — ~5% admit rate
+  25:"match",  // USC CS — competitive but more accessible
+  26:"reach",  // Cold Spring Harbor — tiny program, ~10 admits/yr
+  27:"match",  // Mount Sinai GSBS — moderate biomedical competition
+  28:"match",  // Cedars-Sinai — translational focus, accessible PhD
+  29:"reach",  // Brown BME — competitive
+  30:"match",  // Univ. of Utah BME — moderate
+  31:"reach",  // Northwestern BME — top university, competitive
+  32:"match",  // UMN ECE — moderate
+  33:"match",  // Univ. of Rochester CS — less competitive
+  34:"match",  // Univ. of Pittsburgh BME — moderate
+  35:"match",  // Emory/GT BME — moderate
+  36:"safety", // Case Western BME — accessible
+  37:"match",  // Univ. of Maryland BME — moderate
+  38:"safety", // NJIT ECE — accessible NY/NJ
+  39:"reach",  // UCLA BME — competitive UC system
+  40:"match",  // UC Irvine EECS — moderate, strong biosignal fit
+  41:"match",  // Boston University BME — moderate
+  42:"match",  // Purdue BME — moderate, strong neural fit
+  43:"match",  // Drexel ECE — moderate, accessible
+  44:"safety", // University of Florida BME — low fee, accessible
+  45:"match",  // UC Boulder ECE — moderate
+  46:"safety", // RPI ECSE — NY state, accessible
+  47:"safety", // Syracuse EECS — NY state, accessible
+  48:"match",  // George Washington BME — DC area, moderate
+  49:"reach",  // CMU ECE — very competitive (top CS university)
+  50:"reach",  // Yale BME — very competitive
+  51:"match",  // UW-Madison BME — moderate
+  52:"reach",  // UMich BME — very competitive
+  53:"match",  // USC BME — moderate
+  54:"match",  // Ohio State BME — moderate/accessible
+  55:"match",  // UT Dallas CS — accessible TX option
+  56:"safety", // VCU BME — accessible safety
+  57:"safety", // Marquette BME — accessible safety
+  58:"safety", // Univ. of Delaware BME — accessible safety
+  59:"safety", // SUNY Buffalo BME — accessible
+  60:"match",  // UVA BME — strong program, free app
+  61:"match",  // TAMU BME — solid program
+  62:"safety", // Univ. of Kentucky BME — accessible
+  63:"match",  // Vanderbilt BME — strong, advisor rec
+  64:"safety", // CCNY BME — accessible NY/NJ
+  65:"safety", // UT Arlington BME — accessible
+  66:"safety", // FSU/FAMU BME — accessible
+};
+
+/* ────────────────────────────────────────────────────────────
+   LOCALSTORAGE
+──────────────────────────────────────────────────────────── */
+function loadProg() {
+  try { return JSON.parse(localStorage.getItem("phd_prog_2027") || "{}"); }
+  catch(e) { return {}; }
+}
+function saveProg(data) {
+  try { localStorage.setItem("phd_prog_2027", JSON.stringify(data)); }
+  catch(e) {}
+}
+function getProg(id) {
+  const all = loadProg();
+  const defaults = {loginId:false, sop:false, faculty:false, researchDoc:false, feeWaiver:false, fit: DEFAULT_FIT[id] || null};
+  return Object.assign({}, defaults, all[id] || {});
+}
+function setProg(id, key, val) {
+  const all = loadProg();
+  if (!all[id]) all[id] = {};
+  all[id][key] = val;
+  saveProg(all);
+}
+
+/* ────────────────────────────────────────────────────────────
+   TOGGLE HANDLERS
+──────────────────────────────────────────────────────────── */
+function toggleCheck(id, key) {
+  const p = getProg(id);
+  p[key] = !p[key];
+  setProg(id, key, p[key]);
+  refreshProgUI(id);
+}
+
+function cycleFit(id) {
+  const p = getProg(id);
+  const cur = p.fit || null;
+  const idx = FIT_CYCLE.indexOf(cur);
+  const next = FIT_CYCLE[(idx + 1) % FIT_CYCLE.length];
+  setProg(id, "fit", next);
+  refreshFitUI(id);
+}
+
+/* ────────────────────────────────────────────────────────────
+   UI REFRESH
+──────────────────────────────────────────────────────────── */
+function refreshFitUI(id) {
+  const p = getProg(id);
+  const fit = p.fit || null;
+  document.querySelectorAll(`.fit-btn[data-id="${id}"]`).forEach(btn => {
+    btn.className = `fit-btn fit-${fit || "unset"}`;
+    btn.textContent = FIT_LABEL[fit] || "Set Fit";
+  });
+}
+
+function refreshProgUI(id) {
+  const p = getProg(id);
+  const done = CHECKLIST.filter(c => p[c.key]).length;
+
+  // Dot indicators in portfolio table
+  CHECKLIST.forEach(c => {
+    const dot = document.getElementById(`dot-${id}-${c.key}`);
+    if (dot) dot.className = `check-dot${p[c.key] ? " done" : ""}`;
+  });
+
+  // Progress bar in portfolio
+  const barFill = document.getElementById(`pfill-${id}`);
+  const barCount = document.getElementById(`pcount-${id}`);
+  if (barFill) barFill.style.width = `${(done/5)*100}%`;
+  if (barCount) barCount.textContent = `${done}/5`;
+
+  // Full-row checkboxes in tracker tab
+  CHECKLIST.forEach(c => {
+    const row = document.getElementById(`cr-${id}-${c.key}`);
+    if (row) row.className = `check-row${p[c.key] ? " done" : ""}`;
+  });
+
+  // Tracker progress bar
+  const tf = document.getElementById(`tfill-${id}`);
+  const tc = document.getElementById(`tcount-${id}`);
+  if (tf) tf.style.width = `${(done/5)*100}%`;
+  if (tc) tc.textContent = `${done}/5`;
+
+  updateGlobalProgress();
+}
+
+function updateGlobalProgress() {
+  const all = loadProg();
+  let totalDone = 0;
+  PORTFOLIO.forEach(p => {
+    const d = all[p.id] || {};
+    totalDone += CHECKLIST.filter(c => d[c.key]).length;
+  });
+  const avg = Math.round((totalDone / PORTFOLIO.length * 10)) / 10;
+  const el = document.getElementById("global-prog");
+  if (el) el.textContent = `${totalDone}/${PORTFOLIO.length * 5}`;
+}
+
+function initAllUI() {
+  PORTFOLIO.forEach(p => {
+    refreshFitUI(p.id);
+    refreshProgUI(p.id);
+    refreshTierUI(p.id);
+  });
+  refreshTierCounts();
+  initLI();
+  initResume();
+  seedIS();
+  renderIS();
+}
+
+/* ────────────────────────────────────────────────────────────
+   INFO SESSIONS TRACKER
+──────────────────────────────────────────────────────────── */
+const IS_KEY = "phd_is_2027";
+let isEditId = null;
+let isActiveFilter = "all";
+
+/* Pre-seeded known sessions — loaded once if storage is empty.
+   Dates marked TBC: confirm on program page before registering.
+   All registration URLs verified August 2026. */
+const IS_SEED = [
+  {id:"seed_1",  program:"Columbia BME",           date:"2026-10-01", time:"", format:"Virtual",   topic:"Doctoral Program Info Session (Webinar) — recurring",  registered:"no", status:"upcoming", notes:"Recurring webinar series. Confirm date & register at columbia.edu/content/events/biomedical-engineering-doctoral-information-session-webinar"},
+  {id:"seed_2",  program:"Columbia BME",           date:"2026-11-01", time:"", format:"Virtual",   topic:"Columbia Engineering Graduate Admissions Info Session",  registered:"no", status:"upcoming", notes:"Register at apply.engineering.columbia.edu/portal/info_sessions — multiple dates available"},
+  {id:"seed_3",  program:"NYU Courant CS",         date:"2026-10-15", time:"", format:"Virtual",   topic:"NYU GSAS Virtual Open House — includes Courant CS",     registered:"no", status:"upcoming", notes:"Register at gsas.nyu.edu/admissions/graduate-fairs-and-open-houses/gsas-virtual-open-house.html — confirm exact date"},
+  {id:"seed_4",  program:"NYU Courant CS",         date:"2026-11-01", time:"", format:"Virtual",   topic:"NYU Tandon Graduate Admissions Events (engineering)",    registered:"no", status:"upcoming", notes:"Check engineering.nyu.edu/admissions/graduate/events for current schedule"},
+  {id:"seed_5",  program:"Stevens BME",            date:"2026-10-01", time:"", format:"Virtual",   topic:"Stevens Graduate Open House",                           registered:"no", status:"upcoming", notes:"Register at stevens.edu/events/graduate-open-house — fall 2026 recruiting schedule at stevens.edu/page-right-nav/fall-2026-recruiting-events"},
+  {id:"seed_6",  program:"Rutgers ECE",            date:"2026-10-01", time:"", format:"In-Person", topic:"Rutgers School of Engineering Information Session",      registered:"no", status:"upcoming", notes:"Check soe.rutgers.edu/admission-and-aid/tours-and-information-sessions for fall dates"},
+  {id:"seed_7",  program:"WashU BME",              date:"2026-10-01", time:"", format:"Virtual",   topic:"WashU McKelvey Graduate Recruitment Session",           registered:"no", status:"upcoming", notes:"Confirm date at engineering.washu.edu/academics/graduate-admissions/recruitment-schedule.html"},
+  {id:"seed_8",  program:"Georgia Tech CS",        date:"2026-09-01", time:"", format:"Virtual",   topic:"Georgia Tech GradExpo Info Sessions — CS/BME",          registered:"no", status:"upcoming", notes:"Session list at grad.gatech.edu/gradexpo/info-sessions — check fall 2026 schedule"},
+  {id:"seed_9",  program:"Northeastern CS",        date:"2026-10-01", time:"", format:"Virtual",   topic:"Northeastern Virtual PhD Information Session",           registered:"no", status:"upcoming", notes:"Recurring monthly sessions — register at graduate.northeastern.edu/events/category/admissions/information-session/"},
+  {id:"seed_10", program:"UMich EECS",             date:"2026-10-01", time:"", format:"In-Person", topic:"Michigan ECE Open House 2026",                          registered:"no", status:"upcoming", notes:"Confirmed event at events.umich.edu/event/150671 — check date and register"},
+  {id:"seed_11", program:"Syracuse EECS",          date:"2026-10-01", time:"", format:"Virtual",   topic:"Syracuse ECS Virtual Graduate Info Session",            registered:"no", status:"upcoming", notes:"Register at ecs.syracuse.edu/admissions/graduate/virtual-graduate-events"},
+  {id:"seed_12", program:"Rice CS",                date:"2026-10-01", time:"", format:"Virtual",   topic:"Rice CS PhD Virtual Academic Information Session",       registered:"no", status:"upcoming", notes:"Check riceadmission.rice.edu/portal/virtual-academic for fall schedule"},
+];
+
+function seedIS() {
+  try {
+    const existing = JSON.parse(localStorage.getItem(IS_KEY) || "[]");
+    if (existing.length > 0) return; // don't overwrite user data
+    localStorage.setItem(IS_KEY, JSON.stringify(IS_SEED));
+  } catch(e) {}
+}
+
+function loadIS() {
+  try { return JSON.parse(localStorage.getItem(IS_KEY) || "[]"); } catch(e) { return []; }
+}
+function saveIS(arr) {
+  try { localStorage.setItem(IS_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+
+function isStatusChip(s) {
+  const map = {
+    upcoming: ["var(--accent-bg)","var(--accent)","Upcoming"],
+    attended: ["var(--green-bg)","var(--green)","Attended"],
+    missed:   ["var(--red-bg)","var(--red)","Missed"],
+    skipped:  ["var(--surface2)","var(--muted)","Skipped"],
+  };
+  const [bg,col,lbl] = map[s] || map.upcoming;
+  return `<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:700;background:${bg};color:${col}">${lbl}</span>`;
+}
+
+function isDateSort(a, b) {
+  return (a.date || "9999") < (b.date || "9999") ? -1 : 1;
+}
+
+function isMatchesFilter(s, f) {
+  if (f === "all") return true;
+  return s.status === f || (f === "missed" && (s.status === "missed" || s.status === "skipped"));
+}
+
+function isIsUpcoming(s) {
+  if (s.status !== "upcoming") return false;
+  if (!s.date) return true;
+  return s.date >= new Date().toISOString().slice(0,10);
+}
+
+function renderIS() {
+  const arr = loadIS().sort(isDateSort);
+  const tbody = document.getElementById("is-tbody");
+  const empty = document.getElementById("is-empty");
+  if (!tbody) return;
+
+  const filtered = arr.filter(s => isMatchesFilter(s, isActiveFilter));
+
+  // counts
+  const el = id => document.getElementById(id);
+  if (el("is-total"))      el("is-total").textContent      = arr.length;
+  if (el("is-registered")) el("is-registered").textContent = arr.filter(s=>s.registered==="yes").length;
+  if (el("is-attended"))   el("is-attended").textContent   = arr.filter(s=>s.status==="attended").length;
+  if (el("is-upcoming"))   el("is-upcoming").textContent   = arr.filter(isIsUpcoming).length;
+
+  if (!filtered.length) {
+    tbody.innerHTML = "";
+    if (empty) { empty.style.display = "block"; empty.textContent = arr.length ? "No sessions match this filter." : "No sessions logged yet — click + Add Session to get started."; }
+    return;
+  }
+  if (empty) empty.style.display = "none";
+
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td style="font-weight:600;color:var(--text);white-space:nowrap">${s.program || "—"}</td>
+      <td style="font-family:var(--mono);font-size:11.5px;color:var(--text2);white-space:nowrap">${s.date || "—"}${s.time ? " " + s.time : ""}</td>
+      <td style="font-size:12px;color:var(--muted)">${s.format || "—"}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:180px">${s.topic || "—"}</td>
+      <td style="text-align:center">${s.registered==="yes"?`<span style="color:var(--green);font-weight:700">✓</span>`:`<span style="color:var(--muted)">—</span>`}</td>
+      <td>${isStatusChip(s.status)}</td>
+      <td style="font-size:11.5px;color:var(--muted);max-width:200px">${s.notes || "—"}</td>
+      <td style="white-space:nowrap">
+        <button onclick="editISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Edit">✎</button>
+        <button onclick="deleteISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Delete">✕</button>
+      </td>
+    </tr>`).join("");
+}
+
+function openISModal(editId) {
+  isEditId = editId || null;
+  const modal = document.getElementById("is-modal");
+  const title = document.getElementById("is-modal-title");
+  const btn   = document.getElementById("is-save-btn");
+
+  // Populate program dropdown if not yet done
+  const sel = document.getElementById("is-f-program");
+  if (sel.options.length <= 2) {
+    PROGRAMS_RAW.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.name; opt.textContent = p.name;
+      sel.insertBefore(opt, sel.options[sel.options.length - 1]);
+    });
+  }
+
+  if (editId) {
+    title.textContent = "Edit Session";
+    btn.textContent = "Save Changes";
+    const s = loadIS().find(x => x.id === editId);
+    if (s) {
+      // check if program is in list
+      const inList = Array.from(sel.options).some(o => o.value === s.program && o.value !== "__other__");
+      if (inList) {
+        sel.value = s.program;
+        document.getElementById("is-f-program-other").style.display = "none";
+      } else {
+        sel.value = "__other__";
+        const oth = document.getElementById("is-f-program-other");
+        oth.style.display = "block"; oth.value = s.program || "";
+      }
+      document.getElementById("is-f-date").value       = s.date || "";
+      document.getElementById("is-f-time").value       = s.time || "";
+      document.getElementById("is-f-format").value     = s.format || "Virtual";
+      document.getElementById("is-f-topic").value      = s.topic || "";
+      document.getElementById("is-f-registered").value = s.registered || "no";
+      document.getElementById("is-f-status").value     = s.status || "upcoming";
+      document.getElementById("is-f-notes").value      = s.notes || "";
+    }
+  } else {
+    title.textContent = "Add Info Session";
+    btn.textContent = "Save Session";
+    sel.value = "";
+    document.getElementById("is-f-program-other").style.display = "none";
+    document.getElementById("is-f-date").value = "";
+    document.getElementById("is-f-time").value = "";
+    document.getElementById("is-f-format").value = "Virtual";
+    document.getElementById("is-f-topic").value = "";
+    document.getElementById("is-f-registered").value = "no";
+    document.getElementById("is-f-status").value = "upcoming";
+    document.getElementById("is-f-notes").value = "";
+  }
+  modal.style.display = "flex";
+}
+
+function closeISModal() {
+  document.getElementById("is-modal").style.display = "none";
+  isEditId = null;
+}
+
+function isUpdateProgramField() {
+  const sel = document.getElementById("is-f-program");
+  const oth = document.getElementById("is-f-program-other");
+  oth.style.display = sel.value === "__other__" ? "block" : "none";
+}
+
+function saveISEntry() {
+  const sel = document.getElementById("is-f-program");
+  const prog = sel.value === "__other__"
+    ? (document.getElementById("is-f-program-other").value.trim() || "")
+    : sel.value;
+  if (!prog) { alert("Please select or enter a program name."); return; }
+
+  const entry = {
+    id:         isEditId || ("is_" + Date.now()),
+    program:    prog,
+    date:       document.getElementById("is-f-date").value,
+    time:       document.getElementById("is-f-time").value,
+    format:     document.getElementById("is-f-format").value,
+    topic:      document.getElementById("is-f-topic").value.trim(),
+    registered: document.getElementById("is-f-registered").value,
+    status:     document.getElementById("is-f-status").value,
+    notes:      document.getElementById("is-f-notes").value.trim(),
+  };
+
+  const arr = loadIS();
+  if (isEditId) {
+    const idx = arr.findIndex(x => x.id === isEditId);
+    if (idx >= 0) arr[idx] = entry; else arr.push(entry);
+  } else {
+    arr.push(entry);
+  }
+  saveIS(arr);
+  closeISModal();
+  renderIS();
+}
+
+function editISEntry(id) { openISModal(id); }
+
+function deleteISEntry(id) {
+  if (!confirm("Delete this session?")) return;
+  const arr = loadIS().filter(x => x.id !== id);
+  saveIS(arr);
+  renderIS();
+}
+
+function filterIS(f, btn) {
+  isActiveFilter = f;
+  document.querySelectorAll("#is-filter-row .filter-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  renderIS();
+}
+
+/* ────────────────────────────────────────────────────────────
+   LINKEDIN TRACKER
+──────────────────────────────────────────────────────────── */
+const LI_KEYS = ["headline","about","skills","faculty","posts"];
+function loadLI() {
+  try { return JSON.parse(localStorage.getItem("phd_li_2027") || "{}"); } catch(e) { return {}; }
+}
+function saveLI(data) {
+  try { localStorage.setItem("phd_li_2027", JSON.stringify(data)); } catch(e) {}
+}
+function toggleLI(key) {
+  const d = loadLI();
+  d[key] = !d[key];
+  saveLI(d);
+  const el = document.getElementById(`li-${key}`);
+  if (el) el.className = `li-card${d[key] ? " done" : ""}`;
+}
+function initLI() {
+  const d = loadLI();
+  LI_KEYS.forEach(k => {
+    const el = document.getElementById(`li-${k}`);
+    if (el) el.className = `li-card${d[k] ? " done" : ""}`;
+  });
+}
+
+/* ────────────────────────────────────────────────────────────
+   RESUME LINK
+──────────────────────────────────────────────────────────── */
+function loadResume() {
+  try { return localStorage.getItem("phd_resume_url") || ""; } catch(e) { return ""; }
+}
+function saveResume(url) {
+  try { localStorage.setItem("phd_resume_url", url); } catch(e) {}
+}
+function initResume() {
+  const url = loadResume();
+  const link = document.getElementById("resume-link");
+  const btn  = document.getElementById("resume-set-btn");
+  if (url && link && btn) {
+    link.href = url; link.style.display = "inline-block";
+    btn.textContent = "Change URL";
+  }
+}
+function setResume() {
+  const cur = loadResume();
+  const url = prompt("Paste your resume URL (Google Drive, Dropbox, etc.):", cur || "");
+  if (url === null) return;
+  if (url.trim()) {
+    saveResume(url.trim());
+    const link = document.getElementById("resume-link");
+    const btn  = document.getElementById("resume-set-btn");
+    if (link) { link.href = url.trim(); link.style.display = "inline-block"; }
+    if (btn) btn.textContent = "Change URL";
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   DATA
+──────────────────────────────────────────────────────────── */
+const PROGRAMS_RAW = [
+  {id:1,  name:"Rice CS",              dept:"Computer Science",         tier:"green", nynj:false, avs:80, fee:0,   fw:true,  wt:"No application fee",            ws:"confirmed", stipend:35000, faculty:["Akane Sano"],                          threads:["Wearable sensing","Physiological signals","Affective computing"],     deadline:"Jan 1, 2027",   dlSrc:"provisional", feeSrc:"confirmed",  gre:"Not required",    toefl:"80+ iBT",  sopLen:"2 pages",     location:"Houston, TX",          op:1, notes:"Highest AVS. Free application. Sano = physiological wearables."},
+  {id:2,  name:"UCSD CSE",             dept:"CS & Engineering",         tier:"red",   nynj:false, avs:77, fee:155, fw:true,  wt:"International student waiver",  ws:"confirmed", stipend:40000, faculty:["Gert Cauwenberghs","Tzyy-Ping Jung"],   threads:["Neural signal processing","BCI","Low-power biosensors"],              deadline:"Jan 5, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"85+ iBT",  sopLen:"3–4 pages",   location:"San Diego, CA",        op:3, notes:"Intl waiver confirmed. Cauwenberghs = neural circuits + BCI."},
+  {id:3,  name:"MIT Media Lab",        dept:"Media Arts & Sciences",    tier:"red",   nynj:false, avs:76, fee:75,  fw:false, wt:null,                            ws:"unlikely",  stipend:42000, faculty:["Rosalind Picard","Pattie Maes"],        threads:["Affective computing","Wearable biosensors","HCI"],                    deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"Objectives",  location:"Cambridge, MA",        op:4, notes:"Picard invented affective computing. SOP must be visionary."},
+  {id:4,  name:"Columbia BME",         dept:"Biomedical Engineering",   tier:"red",   nynj:true,  avs:74, fee:100, fw:false, wt:null,                            ws:"unlikely",  stipend:44000, faculty:["Paul Sajda"],                           threads:["EEG","BCI","Neural ML","Cognitive neuroscience"],                    deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"100 iBT",  sopLen:"2–3 pages",   location:"New York, NY",         op:2, notes:"Sajda = EEG-based BCI, neural decoding. NYC."},
+  {id:5,  name:"Cornell Tech IS",      dept:"Information Science",      tier:"red",   nynj:true,  avs:74, fee:105, fw:true,  wt:"Financial hardship (intl ok)",  ws:"confirmed", stipend:60719, faculty:["Tanzeem Choudhury"],                    threads:["Mobile sensing","HCI","Wearable health","Activity recognition"],      deadline:"Jan 3, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"2 pages",     location:"New York, NY",         op:2, notes:"Highest stipend ($60,719). Hardship waiver confirmed intl. Apply by Oct 15 — waiver approved by Nov 1."},
+  {id:6,  name:"WashU BME",            dept:"Biomedical Engineering",   tier:"green", nynj:false, avs:73, fee:75,  fw:true,  wt:"Recruitment event waiver",      ws:"confirmed", stipend:32000, faculty:["Ismael Seañez","ShiNung Ching"],        threads:["Neural interfaces","Signal processing","BCI","Motor control"],       deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"90 iBT",   sopLen:"2 pages",     location:"St. Louis, MO",        op:3, notes:"Waiver via recruitment event. No intl exclusion."},
+  {id:7,  name:"CMU HCII",             dept:"Human-Computer Interaction",tier:"red",  nynj:false, avs:72, fee:100, fw:true,  wt:"Info-session waiver",           ws:"confirmed", stipend:38000, faculty:["Afsaneh Doryab","Jason Hong"],          threads:["Health sensing","Mobile health","HCI","Behavioral computing"],        deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"3 pages",     location:"Pittsburgh, PA",       op:3, notes:"Attend virtual info session. Verify intl waiver eligibility."},
+  {id:8,  name:"Georgia Tech CS",      dept:"Computer Science",         tier:"red",   nynj:false, avs:72, fee:105, fw:false, wt:null,                            ws:"unlikely",  stipend:35000, faculty:["Thomas Ploetz","Chethan Pandarinath"],   threads:["HAR","Wearable sensing","Neural decoding","Time-series ML"],         deadline:"Jan 1, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"90 iBT",   sopLen:"2 pages",     location:"Atlanta, GA",          op:3, notes:"Ploetz = wearable HAR; Pandarinath = neural population decoding."},
+  {id:9,  name:"UW CSE",               dept:"CS & Engineering",         tier:"red",   nynj:false, avs:72, fee:90,  fw:false, wt:null,                            ws:"unlikely",  stipend:36000, faculty:["Shwetak Patel","Rajesh Rao"],           threads:["Ubiquitous computing","Mobile health","BCI","Neural signals"],       deadline:"Dec 15, 2026",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"92 iBT",   sopLen:"3 pages",     location:"Seattle, WA",          op:3, notes:"Patel = ubiquitous health sensing; Rao = BCI/neural."},
+  {id:10, name:"UPenn CS",             dept:"Computer Science",         tier:"yellow",nynj:false, avs:72, fee:95,  fw:false, wt:null,                            ws:"possible",  stipend:38000, faculty:["Konrad Kording","Eva Dyer"],            threads:["Computational neuroscience","Neural signals","ML for biology"],      deadline:"Dec 15, 2026",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"3 pages",     location:"Philadelphia, PA",     op:3, notes:"Kording + Dyer = neural data analysis, population dynamics."},
+  {id:11, name:"UT Austin ECE",        dept:"Electrical & Comp. Eng.",  tier:"yellow",nynj:false, avs:72, fee:90,  fw:false, wt:null,                            ws:"possible",  stipend:34000, faculty:["Edison Thomaz"],                        threads:["Wearable computing","Behavior sensing","mHealth"],                   deadline:"Jan 1, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"88 iBT",   sopLen:"2–3 pages",   location:"Austin, TX",           op:2, notes:"Thomaz = top wearable behavior sensing researcher."},
+  {id:12, name:"NYU Courant CS",       dept:"Computer Science",         tier:"yellow",nynj:true,  avs:71, fee:100, fw:false, wt:null,                            ws:"possible",  stipend:36000, faculty:["Rajesh Ranganath"],                     threads:["ECG deep learning","Probabilistic ML","Clinical ML"],                deadline:"Jan 1, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"2 pages",     location:"New York, NY",         op:1, notes:"Ranganath = direct ECG/health ML. Home institution advantage."},
+  {id:13, name:"JHU BME",              dept:"Biomedical Engineering",   tier:"yellow",nynj:false, avs:71, fee:115, fw:false, wt:null,                            ws:"unlikely",  stipend:38000, faculty:["Nitish Thakor"],                        threads:["Neural engineering","BCI","Neural signal processing"],               deadline:"Jan 1, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"100 iBT",  sopLen:"2 pages",     location:"Baltimore, MD",        op:3, notes:"Thakor = legendary BCI/neural engineering. High fee."},
+  {id:14, name:"Stevens BME",          dept:"Biomedical Engineering",   tier:"green", nynj:true,  avs:71, fee:60,  fw:false, wt:null,                            ws:"possible",  stipend:28000, faculty:["Ramana Vinjamuri"],                     threads:["BCI","Motor control","Neural signal processing"],                   deadline:"Feb 1, 2027",   dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"79 iBT",   sopLen:"2 pages",     location:"Hoboken, NJ",          op:2, notes:"Low fee, NY/NJ location, accessible admissions."},
+  {id:15, name:"Rutgers ECE",          dept:"Electrical & Comp. Eng.",  tier:"green", nynj:true,  avs:71, fee:70,  fw:false, wt:null,                            ws:"possible",  stipend:30000, faculty:["Simiao Niu"],                           threads:["Biosensors","Wearable devices","Signal acquisition"],                deadline:"Jan 15, 2027",  dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"79 iBT",   sopLen:"2 pages",     location:"New Brunswick, NJ",    op:2, notes:"NY/NJ safety. Niu = wearable biosensor hardware."},
+  {id:16, name:"UIUC CS",              dept:"Computer Science",         tier:"yellow",nynj:false, avs:71, fee:90,  fw:false, wt:null,                            ws:"possible",  stipend:33000, faculty:["Jimeng Sun"],                           threads:["Clinical ML","Time-series","EHR/biosignal ML"],                      deadline:"Dec 15, 2026",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"103 iBT",  sopLen:"2 pages",     location:"Urbana-Champaign, IL", op:3, notes:"Sun = clinical time-series ML."},
+  {id:17, name:"Duke BME",             dept:"Biomedical Engineering",   tier:"yellow",nynj:false, avs:70, fee:105, fw:false, wt:null,                            ws:"unlikely",  stipend:35000, faculty:["Jonathan Viventi","R. Kamaleswaran"],   threads:["Neural signals","ECG ML","Clinical biosignal analysis"],             deadline:"Dec 15, 2026",  dlSrc:"provisional", feeSrc:"provisional",gre:"Optional",        toefl:"90 iBT",   sopLen:"2–3 pages",   location:"Durham, NC",           op:3, notes:"Viventi = flexible neural arrays; Kamaleswaran = ECG ML."},
+  {id:18, name:"Northeastern CS",      dept:"Computer Science",         tier:"yellow",nynj:false, avs:70, fee:100, fw:false, wt:null,                            ws:"possible",  stipend:32000, faculty:["Dana Brooks"],                          threads:["ECG signal processing","EEG","Biosignal analysis"],                  deadline:"Jan 15, 2027",  dlSrc:"provisional", feeSrc:"estimated",  gre:"Not required",    toefl:"90 iBT",   sopLen:"2 pages",     location:"Boston, MA",           op:2, notes:"Brooks = direct ECG/EEG signal processing fit."},
+  {id:19, name:"UMich EECS",           dept:"EECS",                     tier:"yellow",nynj:false, avs:70, fee:90,  fw:false, wt:null,                            ws:"possible",  stipend:36000, faculty:["Jenna Wiens"],                          threads:["Clinical ML","Health time-series","Predictive biosignals"],          deadline:"Jan 15, 2027",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"3 pages",     location:"Ann Arbor, MI",        op:3, notes:"Wiens = clinical ML, health time-series."},
+  {id:20, name:"UMass CICS",           dept:"CS (Manning College)",     tier:"green", nynj:false, avs:70, fee:90,  fw:false, wt:null,                            ws:"possible",  stipend:30000, faculty:["Deepak Ganesan","Tauhidur Rahman"],     threads:["Mobile sensing","Wearable health","Physiological computing"],        deadline:"Jan 15, 2027",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"85 iBT",   sopLen:"2 pages",     location:"Amherst, MA",          op:2, notes:"Ganesan + Rahman = wearable/mobile health. Accessible safety. Great pharma and biomedical research (advisor rec)."},
+  {id:21, name:"UNC Chapel Hill CS",   dept:"Computer Science",         tier:"green", nynj:false, avs:69, fee:95,  fw:false, wt:null,                            ws:"possible",  stipend:28000, faculty:["Shahriyar Nirjon"],                     threads:["Wearable sensing","Mobile health","IoT biosignals"],                 deadline:"Dec 15, 2026",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"90 iBT",   sopLen:"2 pages",     location:"Chapel Hill, NC",      op:2, notes:"Nirjon = wearable/mobile health. Accessible safety."},
+  {id:22, name:"Stony Brook CS",       dept:"Computer Science",         tier:"green", nynj:true,  avs:69, fee:100, fw:false, wt:null,                            ws:"possible",  stipend:26000, faculty:["Shubham Jain"],                         threads:["Mobile health","Wearable biosignals","mHealth sensing"],             deadline:"Jan 15, 2027",  dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"80 iBT",   sopLen:"2 pages",     location:"Stony Brook, NY",      op:2, notes:"NY/NJ safety. Jain = mobile health sensing."},
+  {id:23, name:"Stanford CS",          dept:"Computer Science",         tier:"red",   nynj:false, avs:65, fee:125, fw:false, wt:null,                            ws:"unlikely",  stipend:45000, faculty:["James Zou"],                            threads:["ML for health","Genomic signals","Foundation models"],               deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"2–3 pages",   location:"Stanford, CA",         op:4, notes:"Zou = ML+bio broadly. Lower AVS — apply for prestige ceiling."},
+  {id:24, name:"UC Berkeley EECS",     dept:"EECS",                     tier:"red",   nynj:false, avs:68, fee:155, fw:false, wt:null,                            ws:"unlikely",  stipend:41000, faculty:["Gopala Anumanchipalli"],                threads:["Speech BCI","Neural decoding","Neuroprosthetics"],                   deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"3 pages",     location:"Berkeley, CA",         op:4, notes:"Anumanchipalli = speech BCI/neural decoding. High fee, no intl waiver."},
+  {id:25, name:"USC CS",               dept:"Computer Science",         tier:"red",   nynj:false, avs:68, fee:120, fw:false, wt:null,                            ws:"unlikely",  stipend:37000, faculty:["Shrikanth Narayanan"],                  threads:["Multimodal biosignals","Affective computing","Speech/physiology"],   deadline:"Dec 1, 2026",   dlSrc:"provisional", feeSrc:"provisional",gre:"Not required",    toefl:"100 iBT",  sopLen:"2–3 pages",   location:"Los Angeles, CA",      op:4, notes:"Narayanan SAIL = multimodal affective/physiological signals."},
+
+  /* ── 3 specifically requested ─────────────────────────────── */
+  {id:26, name:"Cold Spring Harbor (Watson)",dept:"Biological Sciences",  tier:"none", nynj:true,  avs:65, fee:90,  fw:false, wt:null, ws:"unlikely",  stipend:36000, faculty:["Anthony Zador","Adam Kepecs"],            threads:["Computational neuroscience","Neural coding","Quantitative biology"],       deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"100 iBT", sopLen:"2 pages",   location:"Cold Spring Harbor, NY", op:3, notes:"Elite small program ~12/yr. Strong computational neuroscience. Less wearable HCI. Set your tier."},
+  {id:27, name:"Mount Sinai (Icahn GSBS)",  dept:"Biomedical Sciences",   tier:"none", nynj:true,  avs:67, fee:85,  fw:false, wt:null, ws:"possible",  stipend:38000, faculty:["Friedman Brain Inst. (verify)"],          threads:["Computational neuroscience","Neural engineering","Biomedical data"],     deadline:"Dec 15, 2026", dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"100 iBT", sopLen:"2 pages",   location:"New York, NY",           op:2, notes:"NYC. Verify faculty with ECG/biosignal or wearable HCI focus in GSBS."},
+  {id:28, name:"Cedars-Sinai BBSR",         dept:"Biomedical Sciences",   tier:"none", nynj:false, avs:64, fee:75,  fw:false, wt:null, ws:"possible",  stipend:35000, faculty:["Eduardo Marban"],                         threads:["Cardiac signals","Clinical biosignal ML","Translational research"],      deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"100 iBT", sopLen:"2 pages",   location:"Los Angeles, CA",        op:3, notes:"Smidt Heart Institute = strong ECG/cardiac signal ML. Verify PhD structure (CSMC/UCLA joint)."},
+
+  /* ── 10 additional for broader coverage ───────────────────── */
+  {id:29, name:"Brown BME",                 dept:"Biomedical Engineering",tier:"none", nynj:false, avs:70, fee:115, fw:true,  wt:"Fee waivers easily available", ws:"unlikely",  stipend:37000, faculty:["Leigh Hochberg","David Borton"],           threads:["BCI","Neural decoding","Neuroprosthetics","Neural signal processing"], deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"100 iBT", sopLen:"2 pages",   location:"Providence, RI",         op:3, notes:"Hochberg = world-class BCI (BrainGate). Borton = implantable neural recording. Excellent biosignal fit."},
+  {id:30, name:"Univ. of Utah BME",         dept:"Biomedical Engineering",tier:"none", nynj:false, avs:70, fee:65,  fw:false, wt:null, ws:"possible",  stipend:33000, faculty:["Gregory Clark","Bradley Greger"],          threads:["BCI","Neural interface","Neuroprosthetics","Sensory feedback"],         deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Salt Lake City, UT",     op:2, notes:"BCI heritage (Utah array). Clark = sensory feedback prosthetics. Low fee, affordable CoL."},
+  {id:31, name:"Northwestern BME",          dept:"Biomedical Engineering",tier:"none", nynj:false, avs:70, fee:95,  fw:false, wt:null, ws:"unlikely",  stipend:37000, faculty:["Jonathan Rivnay","Aggelos Katsaggelos"],  threads:["Organic bioelectronics","Signal processing","Wearable biosensors"],    deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"100 iBT", sopLen:"2-3 pages", location:"Evanston, IL",           op:3, notes:"Rivnay = organic/flexible bioelectronics + wearable biosensors. Katsaggelos = signal processing."},
+  {id:32, name:"UMN ECE",                   dept:"Electrical & Comp. Eng.",tier:"none",nynj:false, avs:69, fee:90,  fw:false, wt:null, ws:"possible",  stipend:33000, faculty:["Bin He","Theoden Netoff"],                 threads:["EEG source imaging","BCI","Neural signal processing","Epilepsy"],       deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"79 iBT",  sopLen:"2 pages",   location:"Minneapolis, MN",        op:2, notes:"Bin He = leading EEG/BCI researcher globally. Netoff = neural signal dynamics. No fee waiver but strong program (advisor rec)."},
+  {id:33, name:"Univ. of Rochester CS",     dept:"Computer Science",      tier:"none", nynj:false, avs:68, fee:85,  fw:false, wt:null, ws:"possible",  stipend:30000, faculty:["Ehsan Hoque"],                             threads:["HCI","Health sensing","Affective computing","Behavioral analysis"],     deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"90 iBT",  sopLen:"2 pages",   location:"Rochester, NY",          op:2, notes:"Hoque = HCI + health behavior sensing + affective computing. Direct wearable/HCI thread fit."},
+  {id:34, name:"Univ. of Pittsburgh BME",   dept:"Biomedical Engineering",tier:"none", nynj:false, avs:68, fee:80,  fw:false, wt:null, ws:"possible",  stipend:32000, faculty:["Robert Gaunt","Lee Fisher"],               threads:["Peripheral nerve BCI","Motor control","Neural prosthetics","EMG"],      deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Pittsburgh, PA",         op:2, notes:"Gaunt = peripheral nerve BCI. Fisher = motor control. Strong EMG/neural prosthetics fit."},
+  {id:35, name:"Emory/GT BME",              dept:"Biomedical Engineering",tier:"none", nynj:false, avs:67, fee:100, fw:false, wt:null, ws:"possible",  stipend:33000, faculty:["Woon-Hong Yeo","Steve Potter"],            threads:["Flexible wearable biosensors","Neural engineering","Soft bioelectronics"],deadline:"Dec 15, 2026", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"90 iBT",  sopLen:"2 pages",   location:"Atlanta, GA",            op:2, notes:"Yeo = flexible/stretchable wearable biosensors. Potter = neural engineering. Joint Emory-GT."},
+  {id:36, name:"Case Western BME",          dept:"Biomedical Engineering",tier:"none", nynj:false, avs:67, fee:65,  fw:false, wt:null, ws:"possible",  stipend:31000, faculty:["Dustin Tyler","Dominique Durand"],         threads:["Neural stimulation","Bioelectricity","Neural signal processing","EMG"],  deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Cleveland, OH",          op:2, notes:"Tyler = peripheral nerve BCI. Durand = neural bioelectricity. Low fee."},
+  {id:37, name:"Univ. of Maryland BME",     dept:"Biomedical Engineering",tier:"none", nynj:false, avs:68, fee:75,  fw:false, wt:null, ws:"possible",  stipend:32000, faculty:["Behtash Babadi","Timothy Bhatt"],          threads:["Neural signal processing","Biosignal ML","Neuroengineering"],           deadline:"Dec 15, 2026", dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"100 iBT", sopLen:"2 pages",   location:"College Park, MD",       op:2, notes:"Babadi = neural signal processing / population coding. Strong biosignal ML fit."},
+  {id:38, name:"NJIT ECE",                  dept:"Electrical & Comp. Eng.",tier:"none",nynj:true,  avs:65, fee:75,  fw:false, wt:null, ws:"possible",  stipend:26000, faculty:["Tara Alvarez","Jorge Golowasch"],           threads:["Biosignal processing","Neuroengineering","Oculomotor signals"],         deadline:"Feb 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Newark, NJ",             op:1, notes:"NY/NJ accessible option. Alvarez = oculomotor biosignal processing. Verify PhD openings."},
+
+  /* ── 10 more ───────────────────────────────────────────────── */
+  {id:39, name:"UCLA BME",                  dept:"Biomedical Engineering",tier:"none", nynj:false, avs:68, fee:135, fw:false, wt:null, ws:"unlikely",  stipend:38000, faculty:["Dino Di Carlo","Carlos Monroy"],            threads:["Microfluidic biosensors","Wearable diagnostics","Physiological ML"],    deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"87 iBT",  sopLen:"2-3 pages", location:"Los Angeles, CA",        op:3, notes:"Di Carlo = microfluidic biosensors. Different dept from UCLA CS (rejected). High fee — check waiver."},
+  {id:40, name:"UC Irvine EECS",            dept:"EECS",                  tier:"none", nynj:false, avs:67, fee:140, fw:false, wt:null, ws:"possible",  stipend:36000, faculty:["Zoran Nenadic","Gregory Yauney"],           threads:["BCI","EEG decoding","Neural signal classification","Brain-computer"],  deadline:"Dec 15, 2026", dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"80 iBT",  sopLen:"3 pages",   location:"Irvine, CA",             op:3, notes:"Nenadic = BCI + EEG decoding — very strong fit for neural ML thread."},
+  {id:41, name:"Boston University BME",     dept:"Biomedical Engineering",tier:"none", nynj:false, avs:68, fee:95,  fw:true,  wt:"Fee waiver form available", ws:"possible",  stipend:36000, faculty:["David Boas","Xue Han"],                     threads:["Neural signal imaging","Optogenetics","Biosignal methods"],             deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"84 iBT",  sopLen:"2 pages",   location:"Boston, MA",             op:2, notes:"Different from BU ECE/CS (rejected). Boas = neural signal imaging methods. Han = neural circuit signals."},
+  {id:42, name:"Purdue BME",                dept:"Biomedical Engineering",tier:"none", nynj:false, avs:67, fee:60,  fw:false, wt:null, ws:"possible",  stipend:32000, faculty:["Pedro Irazoqui","Riyi Shi"],                threads:["Neural engineering","Epilepsy biosignals","Implantable BCI","EMG"],     deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"77 iBT",  sopLen:"2 pages",   location:"West Lafayette, IN",     op:2, notes:"Irazoqui = neural engineering + seizure biosignal detection. Low fee. Different from Purdue ECE (rejected)."},
+  {id:43, name:"Drexel ECE",                dept:"Electrical & Comp. Eng.",tier:"none",nynj:false, avs:66, fee:80,  fw:false, wt:null, ws:"possible",  stipend:30000, faculty:["Banu Onaral","Feroze Mohamed"],             threads:["Cognitive signal processing","Neural biomarkers","EEG/biosignal ML"],  deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Philadelphia, PA",       op:2, notes:"Onaral = pioneering neural/cognitive signal processing. Different from Drexel BME (rejected)."},
+  {id:44, name:"University of Florida BME", dept:"Biomedical Engineering",tier:"none", nynj:false, avs:65, fee:30,  fw:true,  wt:"Fill form before Nov 15; direct waiver by Dec 5", ws:"possible",  stipend:28000, faculty:["Jack Judy","Ruogu Fang"],                   threads:["MEMS neural","AI biosignal imaging","Wearable neural sensors"],         deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Gainesville, FL",        op:2, notes:"Very low application fee ($30 est.). Judy = MEMS neural sensors. Fang = AI health biosignals."},
+  {id:45, name:"UC Boulder ECE",            dept:"Electrical & Comp. Eng.",tier:"none",nynj:false, avs:65, fee:60,  fw:false, wt:null, ws:"possible",  stipend:31000, faculty:["Dejan Filipovic","Michael Wakin"],           threads:["Signal processing","Biomedical sensing","Neural systems"],              deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"83 iBT",  sopLen:"2 pages",   location:"Boulder, CO",            op:2, notes:"BioFrontiers Institute on campus. Wakin = compressed sensing / signal processing."},
+  {id:46, name:"RPI ECSE",                  dept:"Elec., Comp. & Systems",tier:"none", nynj:false, avs:64, fee:75,  fw:true,  wt:"Email dept for fee waiver", ws:"possible",  stipend:28000, faculty:["Birsen Yazici","Boleslaw Szymanski"],        threads:["Biomedical signal processing","Inverse problems","Imaging"],            deadline:"Feb 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"88 iBT",  sopLen:"2 pages",   location:"Troy, NY",               op:2, notes:"Yazici = biomedical signal processing + imaging. NY state, accessible safety option."},
+  {id:47, name:"Syracuse University EECS",  dept:"EECS",                  tier:"none", nynj:false, avs:63, fee:75,  fw:false, wt:null, ws:"possible",  stipend:26000, faculty:["Pramod Varshney","Senem Velipasalar"],      threads:["Signal processing","Wearable activity recognition","Distributed sensing"],deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Syracuse, NY",           op:2, notes:"Velipasalar = wearable sensing + activity recognition. Varshney = signal processing. NY state accessible."},
+  {id:48, name:"George Washington BME",     dept:"Biomedical Engineering",tier:"none", nynj:false, avs:64, fee:80,  fw:false, wt:null, ws:"possible",  stipend:30000, faculty:["Murray Loew","Vesna Zderic"],               threads:["Biomedical signal processing","Therapeutic biosignals","Medical imaging"],deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Washington, DC",         op:2, notes:"Loew = biomedical signal processing. DC-area accessible option."},
+
+  /* ── 10 more (batch 3) ─────────────────────────────────────── */
+  {id:49, name:"CMU ECE",                   dept:"Electrical & Comp. Eng.",tier:"none",nynj:false, avs:70, fee:100, fw:false, wt:null, ws:"unlikely",  stipend:38000, faculty:["Byron Yu","Pulkit Grover"],                 threads:["Neural population dynamics","Neural signal processing","Information theory for biosignals"],deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"100 iBT", sopLen:"3 pages",   location:"Pittsburgh, PA",         op:3, notes:"Byron Yu = neural population signal analysis — excellent fit. Different dept from CMU HCII (in list)."},
+  {id:50, name:"Yale BME",                  dept:"Biomedical Engineering",tier:"none", nynj:false, avs:68, fee:105, fw:false, wt:null, ws:"unlikely",  stipend:38000, faculty:["Hemant Tagare","Rong Fan"],                 threads:["Biomedical signal processing","Biosensors","Medical imaging signals"],  deadline:"Dec 15, 2026", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"100 iBT", sopLen:"2 pages",   location:"New Haven, CT",          op:3, notes:"Tagare = biomedical signal processing. Rong Fan = high-throughput biosensors. Prestigious safety."},
+  {id:51, name:"UW-Madison BME",            dept:"Biomedical Engineering",tier:"none", nynj:false, avs:69, fee:75,  fw:false, wt:null, ws:"possible",  stipend:33000, faculty:["Justin Williams","Kip Ludwig"],             threads:["Neural recording","BCI","Neural interface","Implantable biosensors"],   deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"92 iBT",  sopLen:"2 pages",   location:"Madison, WI",            op:2, notes:"Williams = neural recording + BCI. Ludwig = chronic neural electrodes. Strong biosignal hardware fit."},
+  {id:52, name:"UMich BME",                 dept:"Biomedical Engineering",tier:"none", nynj:false, avs:70, fee:90,  fw:false, wt:null, ws:"unlikely",  stipend:37000, faculty:["Cindy Chestek","Cynthia Bir"],              threads:["BCI","Neural decoding","Motor cortex signals","Neuroprosthetics"],      deadline:"Jan 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"84 iBT",  sopLen:"2 pages",   location:"Ann Arbor, MI",          op:3, notes:"Chestek = BCI + neural decoding of motor cortex. Different dept from UMich EECS (in list). Excellent fit."},
+  {id:53, name:"USC BME",                   dept:"Biomedical Engineering",tier:"none", nynj:false, avs:67, fee:120, fw:false, wt:null, ws:"possible",  stipend:36000, faculty:["Gerald Loeb","James Finley"],               threads:["Motor control","EMG","Surface biosignals","Neuromechanics"],            deadline:"Dec 1, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"90 iBT",  sopLen:"2-3 pages", location:"Los Angeles, CA",        op:3, notes:"Loeb = EMG + motor control biosignals. Different dept from USC CS (in list). High fee."},
+  {id:54, name:"Ohio State BME",            dept:"Biomedical Engineering",tier:"none", nynj:false, avs:65, fee:60,  fw:false, wt:null, ws:"possible",  stipend:28000, faculty:["Liang Guo","David Beversdorf"],             threads:["Flexible neural electrodes","EEG","Neural recording","Biosignal acquisition"],deadline:"Jan 1, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Columbus, OH",           op:2, notes:"Guo = flexible neural electrodes + recording. Different dept from Ohio State ECE (rejected). Low fee."},
+  {id:55, name:"UT Dallas CS",              dept:"Computer Science",      tier:"none", nynj:false, avs:64, fee:50,  fw:false, wt:null, ws:"possible",  stipend:28000, faculty:["Balakrishnan Prabhakaran","Kang Zhang"],    threads:["Multimedia health signals","Clinical ML","Biomedical informatics"],     deadline:"Jan 15, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Not required",  toefl:"80 iBT",  sopLen:"2 pages",   location:"Richardson, TX",         op:2, notes:"Very low application fee ($50 est.). Prabhakaran = multimedia + health sensing. TX accessible."},
+  {id:56, name:"VCU BME",                   dept:"Biomedical Engineering",tier:"none", nynj:false, avs:63, fee:65,  fw:false, wt:null, ws:"possible",  stipend:25000, faculty:["Woon-Hong Yeo (verify)","Gary Bowlin"],     threads:["Biomedical signals","Clinical biosignal translation","Neural rehabilitation"],deadline:"Feb 1, 2027", dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"80 iBT",  sopLen:"2 pages",   location:"Richmond, VA",           op:2, notes:"Clinical translational focus. Verify current faculty with biosignal/neural fit. Accessible safety."},
+  {id:57, name:"Marquette BME",             dept:"Biomedical Engineering",tier:"none", nynj:false, avs:63, fee:60,  fw:false, wt:null, ws:"possible",  stipend:26000, faculty:["Brian Schmit","Eleonora Pirro"],             threads:["Surface EMG","Rehab neural engineering","Motor biosignals"],            deadline:"Feb 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Milwaukee, WI",          op:2, notes:"Schmit = surface EMG + neural rehab. Very accessible. Low fee. Strong EMG thread fit."},
+  {id:58, name:"Univ. of Delaware BME",     dept:"Biomedical Engineering",tier:"none", nynj:false, avs:63, fee:75,  fw:false, wt:null, ws:"possible",  stipend:26000, faculty:["Jill Higginson","Elad Sacks (verify)"],    threads:["Biomechanics signals","Gait analysis","Biosignal acquisition"],         deadline:"Feb 1, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",     toefl:"79 iBT",  sopLen:"2 pages",   location:"Newark, DE",             op:2, notes:"Higginson = gait/movement biosignals. Accessible safety. Verify neural/ML faculty before applying."},
+
+  /* ── advisor recommendations (batch 4) ─────────────────────── */
+  {id:59, name:"SUNY Buffalo BME",          dept:"Biomedical Engineering", tier:"none", nynj:false, avs:64, fee:0,   fw:true,  wt:"Free application week",              ws:"possible", stipend:28000, faculty:["Edward Brown (verify)","Mark Albert (verify)"],    threads:["Biomedical engineering","Neural signals","Biosensors"],                deadline:"Jan 15, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"Buffalo, NY",          op:2, notes:"Apply during free application week. Advisor rec. Verify faculty with biosignal/wearable fit."},
+  {id:60, name:"University of Virginia BME",dept:"Biomedical Engineering", tier:"none", nynj:false, avs:68, fee:0,   fw:true,  wt:"Free application",                   ws:"possible", stipend:32000, faculty:["William Guilford (verify)","Scott Acton (verify)"], threads:["Biomedical engineering","Pharma research","Signal processing"],         deadline:"Dec 15, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"90 iBT",  sopLen:"2 pages",   location:"Charlottesville, VA",  op:2, notes:"Free application. Great pharma research. Also check Chem Eng dept. Advisor rec."},
+  {id:61, name:"TAMU BME",                  dept:"Biomedical Engineering", tier:"none", nynj:false, avs:67, fee:90,  fw:false, wt:null,                                 ws:"possible", stipend:32000, faculty:["Gerard Cote (verify)","Reza Moheimani (verify)"],   threads:["Biomedical engineering","Biosensors","Health engineering"],             deadline:"Jan 1, 2027",   dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"80 iBT",  sopLen:"2 pages",   location:"College Station, TX",  op:2, notes:"Advisor rec. Large well-funded program. Verify faculty with wearable/neural biosignal focus."},
+  {id:62, name:"Univ. of Kentucky BME",     dept:"Biomedical Engineering", tier:"none", nynj:false, avs:62, fee:75,  fw:true,  wt:"Email dept before Nov 15 for waiver",ws:"possible", stipend:26000, faculty:["Abhijit Patwardhan (verify)","Bruce Walcott (verify)"],threads:["Biomedical engineering","Neural signals","Biosignals"],               deadline:"Nov 15, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"Lexington, KY",        op:2, notes:"Fee waiver via email — contact dept before Nov 15 deadline. Advisor confirms waiver availability."},
+  {id:63, name:"Vanderbilt BME",            dept:"Biomedical Engineering", tier:"none", nynj:false, avs:68, fee:95,  fw:false, wt:null,                                 ws:"possible", stipend:35000, faculty:["E. Dankwa-Mullan","Michael Miga (verify)"],          threads:["Clinical biosignals","BMI","Neural engineering","Biomedical ML"],       deadline:"Dec 15, 2026",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"90 iBT",  sopLen:"2 pages",   location:"Nashville, TN",        op:2, notes:"Advisor strongly recommends. Verify faculty with ECG/wearable focus. Moved from considered list."},
+  {id:64, name:"CCNY BME",                  dept:"Biomedical Engineering", tier:"none", nynj:true,  avs:63, fee:75,  fw:true,  wt:"Email dept after applying",          ws:"possible", stipend:26000, faculty:["Luis Cardoso (verify)","Sihong Wang (verify)"],      threads:["Biomedical engineering","Biosignals","Neural engineering"],             deadline:"Jan 15, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"New York, NY",         op:1, notes:"NY/NJ. Fee waiver just requires email after applying — advisor confirms. Accessible option."},
+  {id:65, name:"UT Arlington BME",          dept:"Biomedical Engineering", tier:"none", nynj:false, avs:62, fee:0,   fw:true,  wt:"Free application",                   ws:"possible", stipend:27000, faculty:["Hanli Liu (verify)","Khosrow Behbehani (verify)"],   threads:["Optical biosignals","Biomedical engineering","Neural systems"],         deadline:"Jan 15, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"Arlington, TX",        op:2, notes:"Free application. Accessible safety. Liu = optical biosignals. Advisor rec."},
+  {id:66, name:"FSU/FAMU BME",              dept:"Biomedical Engineering", tier:"none", nynj:false, avs:62, fee:0,   fw:true,  wt:"Free application",                   ws:"possible", stipend:25000, faculty:["Emmanuel Collins (verify)","Zucai Suo (verify)"],    threads:["Biomedical engineering","Neural systems","Health engineering"],         deadline:"Jan 15, 2027",  dlSrc:"estimated", feeSrc:"estimated", gre:"Optional",    toefl:"79 iBT",  sopLen:"2 pages",   location:"Tallahassee, FL",      op:2, notes:"Free application. Joint FSU-FAMU engineering program. Accessible safety. Verify faculty fit."},
+];
+
+const PORTFOLIO = PROGRAMS_RAW.sort((a,b) => b.avs - a.avs);
+
+const POOL_REJECTED = [
+  {name:"NYU Tandon ECE",          location:"Brooklyn, NY",   faculty:"Various",                  reason:"Superseded by NYU Courant (stronger CS + better ECG ML faculty fit)"},
+  {name:"Princeton CS",            location:"Princeton, NJ",  faculty:"No direct match",           reason:"No active faculty with clear ECG/EEG/wearable focus identified"},
+  {name:"CMU Robotics",            location:"Pittsburgh, PA", faculty:"Various robotics",          reason:"Less direct fit than HCII for HCI/wearable thread"},
+  {name:"UCLA CS",                 location:"Los Angeles, CA",faculty:"Various",                  reason:"Similar to Berkeley/UCSD; $135 fee, less specific faculty fit"},
+  {name:"UC Davis CS",             location:"Davis, CA",      faculty:"Limited match",             reason:"Lower program strength; no strong ECG/wearable faculty identified"},
+  {name:"Ohio State ECE",          location:"Columbus, OH",   faculty:"Limited match",             reason:"Decent signal processing but limited ML/HCI integration"},
+  {name:"Vanderbilt BME",          location:"Nashville, TN",  faculty:"E. Dankwa-Mullan (BMI)",   reason:"Moved to active list per advisor recommendation — verify faculty fit"},
+  {name:"Arizona State CS",        location:"Tempe, AZ",      faculty:"Limited match",             reason:"No identified faculty with strong biosignal + ML + wearable profile"},
+  {name:"Boston University ECE/CS",location:"Boston, MA",     faculty:"Limited match",             reason:"Similar niche to Northeastern; lower signal processing fit"},
+  {name:"Drexel BME",              location:"Philadelphia, PA",faculty:"Limited match",            reason:"Lower program strength; budget pressure from high fee"},
+  {name:"Emory CS/BMI",            location:"Atlanta, GA",    faculty:"Various clinical ML",       reason:"Clinical ML focus but limited ECG signal processing / wearable HCI"},
+  {name:"Virginia Tech ECE",       location:"Blacksburg, VA", faculty:"Some biosignal work",       reason:"Decent signals but limited ML/HCI cross-disciplinary integration"},
+  {name:"Penn State ECE",          location:"State College, PA",faculty:"Limited match",           reason:"Signal processing strength but lower ML + HCI fit"},
+  {name:"Minnesota CS",            location:"Minneapolis, MN",faculty:"Some health ML",            reason:"Decent health ML but less specific to ECG/EEG/wearable thread"},
+  {name:"Purdue ECE",              location:"West Lafayette, IN",faculty:"Signal processing",      reason:"Strong signal processing but limited wearable HCI / affective computing"},
+  {name:"Maryland CS",             location:"College Park, MD",faculty:"Various",                  reason:"Decent program but no clear differentiator from higher-ranked alternatives"},
+];
+
+const QA = [
+  {q:"Which single faculty member is the strongest advocate for my admission?",verdict:"verdict-yes",vtext:"Rice/Sajda",a:"Akane Sano (Rice CS) maps directly onto physiological wearable signals, her lab is small enough for real mentorship, and the $0 fee removes all cost barriers — contact her first. Second strongest for EEG/BCI depth: Paul Sajda (Columbia BME). For the HCI/mobile thread: Tanzeem Choudhury (Cornell Tech) and Edison Thomaz (UT Austin) are both approachable and highly aligned."},
+  {q:"What's the minimum research overlap threshold to justify a Red-tier application?",verdict:"verdict-conditional",vtext:"2 of 3 threads",a:"At least two of your three core threads (ECG/EEG/EMG signal processing; VQ-VAE/RVQ discrete representations; HCI/wearable/BCI) must map to a specific faculty member's active publications from the last 3 years. 'Adjacent' ML-for-health work alone does not clear the bar. Exception: MIT Media Lab, where Picard's affective computing work is such a perfect match that the long-shot odds are justified."},
+  {q:"BME vs CS vs EECS — which home department best positions my thesis?",verdict:"verdict-conditional",vtext:"CS/EECS if ML-first",a:"CS or EECS if your primary thesis contribution is in ML methods and representations (VQ-VAE/RVQ for biosignals) — CS advisors have stronger networks at NeurIPS/ICLR venues. BME if your thesis is hardware-adjacent neural interface design or clinical translation. For this profile, CS/EECS positioning is marginally stronger."},
+  {q:"Is VQ-VAE/RVQ knowledge a differentiator or a gap in BCI/biosignal research?",verdict:"verdict-yes",vtext:"Differentiator",a:"Differentiator. Discrete representation learning for biosignals is underexplored — virtually all BCI and ECG foundation model work uses continuous latent spaces. This positions you at the intersection of foundation model methodology and domain application. Lead with this in SOPs: 'I apply discrete codebook representations (VQ-VAE/RVQ) to physiological signals to enable cross-patient transfer and compression-efficient wearable inference.'"},
+  {q:"How should I prioritize my SOP: signal processing depth vs HCI applications vs ML methods?",verdict:"verdict-conditional",vtext:"Problem→Method→Impact",a:"Open with a concrete problem from your own research. Then show your ML method — VQ-VAE/RVQ — as the specific tool you brought to it. Close with the HCI/wearable application context. Avoid opening with methodology; it reads as a methods paper. The arc: problem → your insight → technique → broader impact. Customize the HCI vs clinical vs neural engineering framing per program."},
+  {q:"Risk profile of 10 Red-tier programs — how many acceptances should I expect?",verdict:"verdict-conditional",vtext:"1–3 likely",a:"With specific faculty matches, expect 1–3 acceptances from 10 Red-tier programs (10–30% hit rate is realistic). The 8 Yellow + 7 Green programs are not backup — they are where you may genuinely choose to go. A preprint on arXiv before Dec 1 materially improves odds across all tiers."},
+  {q:"If I can only secure 5 fee waivers, which 5 programs should I prioritize?",verdict:"verdict-yes",vtext:"Rice+UCSD+CMU+Cornell+WashU",a:"(1) Rice — $0 regardless. (2) UCSD CSE — $155 confirmed international waiver, biggest absolute savings. (3) Cornell Tech — $105 hardship waiver, international eligible. (4) CMU HCII — $100 info-session waiver, confirm international eligibility. (5) WashU BME — $75 recruitment event, no international exclusion. Total savings on these 5: $435."},
+  {q:"Cornell Tech or Columbia as primary NY/NJ Red-tier choice?",verdict:"verdict-conditional",vtext:"Depends on thesis",a:"Cornell Tech for HCI/wearable/mobile health thesis — Choudhury is the stronger fit and the $60,719 stipend is exceptional for NYC. Columbia BME for EEG/BCI/neural engineering — Sajda is a near-perfect faculty match. If your thesis bridges both, apply to both and let advisor conversations guide the decision."},
+  {q:"Is MIT Media Lab worth the application given extremely low admit rates?",verdict:"verdict-yes",vtext:"Yes—different SOP",a:"Yes. Picard's Affective Computing Group and the $75 fee make this a high-value long-shot. The Media Lab responds to intellectual vision over GPA/GRE. Your MIT SOP must be completely distinct from your CS program versions — write about the future of wearable emotional intelligence, not about technical signal processing methodology."},
+  {q:"How does a strong GPA from NYU affect competitiveness at Stanford and MIT?",verdict:"verdict-conditional",vtext:"GPA is not the constraint",a:"GPA is a threshold, not a differentiator at Stanford/MIT. A strong GPA clears the bar and then recedes. What matters: a first-author paper or preprint at a recognized venue, letters from faculty known to the program, and a specific named advisor who expressed interest. A preprint on arXiv by November 2026 changes the Stanford/MIT calculus more than any GPA optimization."},
+  {q:"Which conferences would most strengthen the application before Dec 1, 2026?",verdict:"verdict-conditional",vtext:"NeurIPS workshop or EMBC",a:"NeurIPS workshops on biosignals/time-series (deadline ~Sept, notification ~Nov) — a workshop paper at NeurIPS carries significant signal to CS programs. EMBC 2026 for biosignal domain credibility. CHI 2027 Late-Breaking Work (deadline ~Oct 2026) for HCI credibility. A first-author NeurIPS 2026 workshop paper is the single highest-leverage output before December applications."},
+  {q:"Should I contact faculty before submitting, and in what order?",verdict:"verdict-yes",vtext:"Yes — Green/Yellow first",a:"Yes, for 8–12 programs with a specific paper to cite. Order: (1) September — Green/Yellow tier faculty, most likely to respond. (2) October — Red-tier faculty after deep preparation. (3) Do not contact faculty where fit is peripheral. One follow-up after 10 days is fine. A faculty member saying 'your application looks interesting' materially improves your odds."},
+  {q:"How should I factor stipend variation ($26K–$61K) into program decisions?",verdict:"verdict-conditional",vtext:"Use cost-adjusted stipend",a:"Adjust for cost of living. Cornell Tech's $60,719 in NYC ≈ $42K in Houston in purchasing power. Rice's $35K in Houston goes further than Columbia's $44K in Manhattan. The real ranking: Cornell Tech (NYC), MIT (Cambridge), Columbia (NYC), then UCSD, then Rice (low CoL, no debt stress). Don't dismiss lower nominal stipends in affordable cities."},
+  {q:"Is a BME background an advantage or disadvantage for CS PhD applications?",verdict:"verdict-yes",vtext:"Advantage — frame it right",a:"Advantage. CS PhD programs in health/HCI/ML actively seek domain expertise pure CS applicants lack. Frame it: 'I understand physiological signals at a biological level and bring ML to solve problems pure CS researchers miss.' To address the weakness: demonstrate CS-level programming rigor — include GitHub links, name ML frameworks and venues where your target advisors publish."},
+  {q:"What's the optimal application timeline working backwards from Dec 1 deadlines?",verdict:"verdict-yes",vtext:"Start now",a:"Aug–Sept: NeurIPS workshop submission; begin SOP draft; register for CMU info session. Sept 1: finalize program list. Sept 15: outreach to Green/Yellow faculty. Oct 1: request letters of recommendation (give ≥10 weeks). Oct 15: first full SOP draft. Nov 1: SOPs customized per program (8 distinct versions). Nov 15: final review; all portals created. Dec 1: submit Dec 1 deadline apps. Jan 1–15: submit remaining programs."},
+];
+
+/* ────────────────────────────────────────────────────────────
+   HELPERS
+──────────────────────────────────────────────────────────── */
+const TIER_MAP = {
+  green:  ["dot-green",  "tier-green",  "🟢 Top Choice"],
+  yellow: ["dot-yellow", "tier-yellow", "🟡 Interest"],
+  red:    ["dot-red",    "tier-red",    "🔴 Last Resort"],
+  none:   ["dot-none",   "tier-none",   "— Unset"],
+};
+const TIER_CYCLE = ["green","yellow","red","none"];
+
+function getEffectiveTier(id) {
+  try {
+    const all = JSON.parse(localStorage.getItem("phd_prog_2027") || "{}");
+    if (all[id] && all[id].tier !== undefined) return all[id].tier;
+  } catch(e) {}
+  const prog = PROGRAMS_RAW.find(p => p.id === id);
+  return prog ? (prog.tier || "none") : "none";
+}
+
+function tierBadge(t, id) {
+  const key = (t && TIER_MAP[t]) ? t : "none";
+  const [dc, tc, lbl] = TIER_MAP[key];
+  const click = id != null ? ` onclick="cycleTier(${id},event)" title="Click to set your preference" style="cursor:pointer"` : "";
+  const elId  = id != null ? ` id="tier-badge-${id}"` : "";
+  return `<span${elId} class="tier ${tc}"${click}><span class="dot ${dc}"></span>${lbl}</span>`;
+}
+
+function refreshTierCounts() {
+  const counts = {green:0, yellow:0, red:0, none:0};
+  PROGRAMS_RAW.forEach(p => { counts[getEffectiveTier(p.id)]++; });
+  ["green","yellow","red","none"].forEach(t => {
+    const tc = document.getElementById(`tc-${t}`);
+    const sc = document.getElementById(`sc-${t}`);
+    if (tc) tc.textContent = counts[t];
+    if (sc) sc.textContent = counts[t];
+  });
+}
+
+function cycleTier(id, event) {
+  if (event) event.stopPropagation();
+  const cur = getEffectiveTier(id);
+  const idx = TIER_CYCLE.indexOf(cur);
+  const next = TIER_CYCLE[(idx + 1) % TIER_CYCLE.length];
+  setProg(id, "tier", next);
+  refreshTierUI(id);
+  refreshTierCounts();
+}
+
+function refreshTierUI(id) {
+  const t = getEffectiveTier(id);
+  const el = document.getElementById(`tier-badge-${id}`);
+  if (!el) return;
+  const [dc, tc, lbl] = TIER_MAP[t] || TIER_MAP.none;
+  el.className = `tier ${tc}`;
+  el.innerHTML = `<span class="dot ${dc}"></span>${lbl}`;
+}
+function srcBadge(s) {
+  const cls={confirmed:"src-c",provisional:"src-p",estimated:"src-e"};
+  const lbl={confirmed:"C",provisional:"P",estimated:"E"};
+  return `<span class="src ${cls[s]||'src-e'}">${lbl[s]||'E'}</span>`;
+}
+function avsBar(score) {
+  const color=score>=75?"var(--green-dot)":score>=70?"var(--yellow-dot)":"var(--muted)";
+  return `<div class="avs-wrap"><span class="avs-score">${score}</span><div class="avs-bar-bg"><div class="avs-bar" style="width:${score}%;background:${color}"></div></div></div>`;
+}
+function fmtFee(fee){return fee===0?'<span style="color:var(--green);font-weight:700;font-family:var(--mono)">FREE</span>':`<span class="mono">$${fee}</span>`;}
+function fmtStipend(s){return `<span class="mono">$${(s/1000).toFixed(0)}K</span>`;}
+function wsc(s){return s==="confirmed"?"waiver-confirmed":s==="possible"?"waiver-possible":"waiver-unlikely";}
+
+/* Render fit button (used in both portfolio and tracker) */
+function fitBtnHTML(id) {
+  return `<button class="fit-btn fit-unset" data-id="${id}" onclick="cycleFit(${id})" title="Click to cycle: Reach → Match → Safety">Set Fit</button>`;
+}
+
+/* Compact 5-dot progress for portfolio table */
+function compactProgHTML(id) {
+  const dots = CHECKLIST.map(c =>
+    `<span class="check-dot" id="dot-${id}-${c.key}" title="${c.label}" onclick="toggleCheck(${id},'${c.key}')"></span>`
+  ).join("");
+  return `<div style="display:flex;flex-direction:column;gap:5px">
+    <div class="check-dots">${dots}</div>
+    <div class="prog-bar">
+      <span class="prog-count" id="pcount-${id}">0/5</span>
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="pfill-${id}" style="width:0%"></div></div>
+    </div>
+  </div>`;
+}
+
+/* Full checklist rows for tracker tab */
+function fullChecklistHTML(id) {
+  return CHECKLIST.map(c =>
+    `<div class="check-row" id="cr-${id}-${c.key}" onclick="toggleCheck(${id},'${c.key}')">
+      <div class="check-box-ui"></div>
+      <span class="check-row-label">${c.label}</span>
+    </div>`
+  ).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER PORTFOLIO
+──────────────────────────────────────────────────────────── */
+/* ── Portfolio filter state ── */
+const PF = { tier:"all", fit:"all", gre:"all", nynj:false };
+const PS = { col:"avs", dir:-1 }; // col = sort key, dir = 1 asc / -1 desc
+
+function pfFilter(dim, val, btn) {
+  PF[dim] = val;
+  const grp = {"tier":"pf-tier-filters","fit":"pf-fit-filters","gre":"pf-gre-filters"}[dim];
+  document.querySelectorAll(`#${grp} .filter-btn`).forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  renderPortfolio();
+}
+function pfToggleNYNJ(btn) {
+  PF.nynj = !PF.nynj;
+  btn.classList.toggle("active", PF.nynj);
+  renderPortfolio();
+}
+function pfSort(col) {
+  if (PS.col === col) PS.dir *= -1; else { PS.col = col; PS.dir = col === "avs" ? -1 : 1; }
+  renderPortfolio();
+}
+
+/* Sort value extractors per column key */
+function pfSortVal(p, col) {
+  const TIER_ORDER  = {green:0, yellow:1, red:2, none:3};
+  const FIT_ORDER   = {reach:0, match:1, safety:2};
+  const GRE_ORDER   = {"Required":0,"Optional":1,"Not required":2,"Not considered":3};
+  switch(col) {
+    case "name":     return p.name.toLowerCase();
+    case "tier":     return TIER_ORDER[getEffectiveTier(p.id)] ?? 3;
+    case "faculty":  return p.faculty[0].toLowerCase();
+    case "avs":      return p.avs;
+    case "fee":      return p.fee;
+    case "stipend":  return p.stipend;
+    case "gre":      return GRE_ORDER[(p.gre||"Not required")] ?? 2;
+    case "fit":      return FIT_ORDER[getProg(p.id).fit || "reach"] ?? 0;
+    case "progress": return CHECKLIST.filter(c => getProg(p.id)[c.key]).length;
+    default:         return p.avs;
+  }
+}
+
+function saveFwLink(id, val) {
+  const all = loadProg();
+  if (!all[id]) all[id] = {};
+  all[id].fwLink = val.trim();
+  saveProg(all);
+}
+
+function fwLinkHTML(id) {
+  const prog = getProg(id);
+  const link  = (prog.fwLink  || "").trim();
+  const notes = (prog.fwNotes || "").trim();
+  if (link) {
+    const tip = notes ? `${link}\n\n${notes}` : link;
+    return `<span style="display:flex;align-items:center;gap:4px">
+      <a href="${link}" target="_blank" rel="noopener" title="${tip}"
+         style="font-size:11px;color:var(--accent);text-decoration:none;max-width:80px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle">🔗 Link</a>
+      <button onclick="editFwLink(${id})" title="Edit"
+        style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;padding:0 2px">✏️</button>
+    </span>`;
+  }
+  return `<button onclick="editFwLink(${id})"
+    style="background:none;border:1px dashed var(--border);border-radius:5px;cursor:pointer;color:var(--muted);font-size:11px;padding:2px 8px;white-space:nowrap;transition:border-color .15s"
+    onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ Add</button>`;
+}
+
+let fwModalId = null;
+
+function editFwLink(id) {
+  fwModalId = id;
+  const prog = getProg(id);
+  const raw = PROGRAMS_RAW.find(p => p.id === id);
+  document.getElementById("fw-modal-prog").textContent = raw ? raw.name : "";
+  document.getElementById("fw-modal-url").value = prog.fwLink || "";
+  document.getElementById("fw-modal-notes").value = prog.fwNotes || "";
+  const m = document.getElementById("fw-modal");
+  m.style.display = "flex";
+  setTimeout(() => document.getElementById("fw-modal-url").focus(), 60);
+}
+
+function closeFwModal() {
+  document.getElementById("fw-modal").style.display = "none";
+  fwModalId = null;
+}
+
+function clearFwModal() {
+  document.getElementById("fw-modal-url").value = "";
+  document.getElementById("fw-modal-notes").value = "";
+}
+
+function saveFwModal() {
+  if (fwModalId === null) return;
+  const url   = document.getElementById("fw-modal-url").value.trim();
+  const notes = document.getElementById("fw-modal-notes").value.trim();
+  const all = loadProg();
+  if (!all[fwModalId]) all[fwModalId] = {};
+  all[fwModalId].fwLink  = url;
+  all[fwModalId].fwNotes = notes;
+  saveProg(all);
+  // Update cells in place
+  document.querySelectorAll(`.fw-cell[data-id="${fwModalId}"]`).forEach(el => {
+    el.innerHTML = fwLinkHTML(fwModalId);
+  });
+  closeFwModal();
+}
+
+function greBadge(gre) {
+  const map = {
+    "Required":      ["var(--red-bg)",     "var(--red)",    "Required"],
+    "Optional":      ["var(--yellow-bg)",  "var(--yellow)", "Optional"],
+    "Not required":  ["var(--green-bg)",   "var(--green)",  "Not Required"],
+    "Not considered":["var(--surface2)",   "var(--muted)",  "Not Considered"],
+  };
+  const key = Object.keys(map).find(k => k.toLowerCase() === (gre||"").toLowerCase()) || "Not required";
+  const [bg, col, lbl] = map[key];
+  return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;background:${bg};color:${col};white-space:nowrap">${lbl}</span>`;
+}
+
+function renderPortfolio() {
+  const filtered = PORTFOLIO.filter(p => {
+    if (PF.nynj && !p.nynj) return false;
+    if (PF.tier !== "all" && getEffectiveTier(p.id) !== PF.tier) return false;
+    if (PF.fit  !== "all") {
+      const f = getProg(p.id).fit;
+      if ((f || "reach") !== PF.fit) return false;
+    }
+    if (PF.gre  !== "all") {
+      const g = (p.gre || "").toLowerCase();
+      if (g !== PF.gre.toLowerCase()) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    const va = pfSortVal(a, PS.col), vb = pfSortVal(b, PS.col);
+    if (va < vb) return -1 * PS.dir;
+    if (va > vb) return  1 * PS.dir;
+    return 0;
+  });
+
+  const cnt = document.getElementById("pf-count");
+  if (cnt) cnt.textContent = filtered.length < PORTFOLIO.length ? `${filtered.length} of ${PORTFOLIO.length} shown` : "";
+
+  // Update sort indicators on headers
+  const SH = {name:"th-name",tier:"th-tier",faculty:"th-faculty",avs:"th-avs",fee:"th-fee",stipend:"th-stipend",gre:"th-gre",fit:"th-fit",progress:"th-progress"};
+  Object.entries(SH).forEach(([col, id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const arrow = PS.col === col ? (PS.dir === -1 ? " ↓" : " ↑") : " ⇅";
+    el.querySelector(".sort-arrow").textContent = arrow;
+    el.style.color = PS.col === col ? "var(--text)" : "";
+  });
+
+  document.getElementById("portfolio-body").innerHTML = filtered.map((p, i) => {
+    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
+    return `<tr>
+      <td class="num" style="color:var(--muted)">${i+1}</td>
+      <td><span style="font-weight:600;color:var(--text)">${nynj}${p.name}</span><br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
+      <td>${tierBadge(getEffectiveTier(p.id), p.id)}</td>
+      <td style="font-size:12px">${p.faculty.join(", ")}</td>
+      <td>${avsBar(p.avs)}</td>
+      <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
+      <td>${fmtStipend(p.stipend)}</td>
+      <td>${greBadge(p.gre)}</td>
+      <td>${fitBtnHTML(p.id)}</td>
+      <td class="fw-cell" data-id="${p.id}">${fwLinkHTML(p.id)}</td>
+      <td>${compactProgHTML(p.id)}</td>
+    </tr>`;
+  }).join("");
+
+  // Refresh interactive UI elements after innerHTML replacement
+  filtered.forEach(p => {
+    refreshFitUI(p.id);
+    refreshProgUI(p.id);
+    refreshTierUI(p.id);
+  });
+
+  // Top 4 cards
+  document.getElementById("top-picks-cards").innerHTML = PORTFOLIO.slice(0,4).map(p => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div><div class="card-name">${p.name}</div><div class="card-dept">${p.dept}</div></div>
+        ${tierBadge(getEffectiveTier(p.id), p.id)}
+      </div>
+      <div class="card-row"><span class="card-label">AVS</span><span class="card-val" style="color:var(--accent)">${p.avs}/100</span></div>
+      <div class="card-row"><span class="card-label">Fee</span><span class="card-val">${p.fee===0?"FREE":"$"+p.fee}</span></div>
+      <div class="card-row"><span class="card-label">Stipend</span><span class="card-val">~$${(p.stipend/1000).toFixed(0)}K/yr</span></div>
+      <div class="card-faculty">${p.faculty.join(", ")}</div>
+      <div class="card-tags">${p.threads.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    </div>`).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER CANDIDATE POOL
+──────────────────────────────────────────────────────────── */
+function renderPool() {
+  window._poolRows = [
+    ...PORTFOLIO.map(p => ({id:p.id,name:p.name,dept:p.dept,loc:p.location,status:"selected",tier:p.tier,faculty:p.faculty.join(", "),nynj:p.nynj,reason:"—"})),
+    ...POOL_REJECTED.map(r => ({name:r.name,dept:"—",loc:r.location,status:"not-selected",tier:null,faculty:r.faculty,nynj:r.location.includes("NY")||r.location.includes("NJ"),reason:r.reason}))
+  ];
+  renderPoolTable(window._poolRows);
+}
+function renderPoolTable(rows) {
+  document.getElementById("pool-body").innerHTML = rows.map(r => {
+    const badge = r.status==="selected" ? tierBadge(getEffectiveTier(r.id), r.id) : `<span class="status-chip" style="background:var(--red-bg);color:var(--red)">Not Selected</span>`;
+    const nynj = r.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
+    return `<tr><td><span style="font-weight:600;color:var(--text)">${nynj}${r.name}</span></td><td style="font-size:11.5px;color:var(--muted)">${r.dept}</td><td style="font-size:11.5px;color:var(--muted)">${r.loc}</td><td>${badge}</td><td style="font-size:12px">${r.faculty}</td><td style="font-size:11.5px;color:var(--muted);max-width:260px">${r.reason}</td></tr>`;
+  }).join("");
+}
+function filterPool(f,btn) {
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  const rows=window._poolRows;
+  let filtered=f==="all"?rows:f==="selected"?rows.filter(r=>r.status==="selected"):f==="not-selected"?rows.filter(r=>r.status==="not-selected"):rows.filter(r=>r.nynj);
+  renderPoolTable(filtered);
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER REQUIREMENTS
+──────────────────────────────────────────────────────────── */
+function renderRequirements() {
+  document.getElementById("req-body").innerHTML = PORTFOLIO.map(p => {
+    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
+    return `<tr><td><span style="font-weight:600;color:var(--text)">${nynj}${p.name}</span></td><td><span class="mono">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td><td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td><td style="font-size:12px">${p.gre}</td><td style="font-size:12px">${p.toefl}</td><td style="font-size:12px">${p.sopLen}</td><td class="num">3</td><td style="font-size:11.5px;color:var(--muted)">Not required</td></tr>`;
+  }).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER FACULTY OUTREACH
+──────────────────────────────────────────────────────────── */
+function renderOutreach() {
+  const data=[
+    {pri:1,faculty:"Akane Sano",          prog:"Rice CS",           tier:"green", email:"a.sano@rice.edu (est.)",             hook:"Physiological signal wearables + affective computing",         when:"Sept 1–15"},
+    {pri:1,faculty:"Edison Thomaz",        prog:"UT Austin ECE",     tier:"yellow",email:"ethomaz@utexas.edu (est.)",          hook:"Wearable behavior sensing + daily life physiological signals",  when:"Sept 1–15"},
+    {pri:1,faculty:"Rajesh Ranganath",     prog:"NYU Courant CS",    tier:"yellow",email:"rajeshr@cims.nyu.edu (est.)",        hook:"ECG deep learning + probabilistic models for health",           when:"Sept 1–15 (home institution)"},
+    {pri:2,faculty:"Paul Sajda",           prog:"Columbia BME",      tier:"red",   email:"ps629@columbia.edu (est.)",          hook:"EEG-based BCI + neural decoding",                              when:"Oct 1–15"},
+    {pri:2,faculty:"Tanzeem Choudhury",    prog:"Cornell Tech IS",   tier:"red",   email:"t.choudhury@cornell.edu (est.)",     hook:"Mobile sensing + wearable health",                             when:"Oct 1–15"},
+    {pri:2,faculty:"Ramana Vinjamuri",     prog:"Stevens BME",       tier:"green", email:"rv@stevens.edu (est.)",              hook:"BCI + motor control neural signals",                           when:"Sept 15 – Oct 1"},
+    {pri:2,faculty:"Deepak Ganesan",       prog:"UMass CICS",        tier:"green", email:"ganesan@cs.umass.edu (est.)",        hook:"Wearable health sensing + mobile physiological signals",        when:"Sept 15 – Oct 1"},
+    {pri:2,faculty:"Dana Brooks",          prog:"Northeastern CS",   tier:"yellow",email:"dana@ece.neu.edu (est.)",            hook:"ECG/EEG signal processing — cite biosignal work",              when:"Sept 15 – Oct 1"},
+    {pri:3,faculty:"Gert Cauwenberghs",    prog:"UCSD CSE",          tier:"red",   email:"gert@ucsd.edu (est.)",               hook:"Neural circuit + BCI + low-power biosensor interface",         when:"Oct 15 – Nov 1"},
+    {pri:3,faculty:"Ismael Seañez",        prog:"WashU BME",         tier:"green", email:"iseanezmendivil@wustl.edu (est.)",   hook:"Neural interface + spinal BCI signal processing",             when:"Sept 15 – Oct 1"},
+    {pri:3,faculty:"Rosalind Picard",      prog:"MIT Media Lab",     tier:"red",   email:"picard@media.mit.edu (est.)",        hook:"Affective computing + wearable physiological sensing",         when:"Oct 15 (vision-focused)"},
+    {pri:4,faculty:"Thomas Ploetz",        prog:"Georgia Tech CS",   tier:"red",   email:"tploetz@gatech.edu (est.)",          hook:"HAR + wearable sensing — cite IMU/label noise work",          when:"Oct 15 – Nov 1"},
+  ];
+  document.getElementById("outreach-body").innerHTML = data.map(r=>`<tr>
+    <td class="num" style="color:${r.pri===1?"var(--red)":r.pri===2?"var(--yellow)":"var(--muted)"}">${r.pri}</td>
+    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
+    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
+    <td style="font-size:11.5px">${r.hook}</td><td style="font-size:11.5px">${r.when}</td>
+  </tr>`).join("");
+
+  document.getElementById("outreach-tracker-body").innerHTML = data.map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td>
+    <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.email}</td>
+    <td class="mono" style="color:var(--muted)">—</td>
+    <td><span class="status-chip chip-not-started">Not Sent</span></td>
+    <td class="mono" style="color:var(--muted)">—</td>
+    <td><span class="status-chip chip-not-started">Pending</span></td>
+  </tr>`).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER FEE WAIVERS
+──────────────────────────────────────────────────────────── */
+function getWaiverHow(id){const m={1:"Automatically free — no action needed",2:"Apply via UCSD Graduate Division international waiver portal",5:"Submit financial hardship waiver form with application",6:"Attend WashU BME recruitment event for waiver code",7:"Attend CMU HCII virtual info session for waiver code"};return m[id]||"Check program website";}
+function getWaiverDl(id){const m={1:"N/A",2:"With application (Jan 5)",5:"With application (Jan 3)",6:"Oct–Nov (before event)",7:"Oct–Nov (before session)"};return m[id]||"Check program website";}
+function renderWaivers() {
+  const rows = PORTFOLIO.map(p=>({name:p.name,tier:p.tier,fee:p.fee,feeSrc:p.feeSrc,avail:p.fw,type:p.wt||"None confirmed",status:p.ws,how:getWaiverHow(p.id),dl:getWaiverDl(p.id)}));
+  document.getElementById("waiver-body").innerHTML = rows.sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${r.name}</td>
+    <td>${fmtFee(r.fee)} ${srcBadge(r.feeSrc)}</td>
+    <td style="font-size:11.5px">${r.type}</td>
+    <td class="${wsc(r.status)}" style="font-size:12px">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</td>
+    <td style="font-size:11.5px;color:var(--muted)">${r.how}</td>
+    <td style="font-size:11.5px;color:var(--muted)">${r.dl}</td>
+    <td>${r.avail?`<span class="savings-badge">-$${r.fee}</span>`:`<span style="color:var(--muted)">—</span>`}</td>
+  </tr>`).join("");
+  document.getElementById("waiver-tracker-body").innerHTML = rows.filter(r=>r.avail).sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${r.name}</td><td>${fmtFee(r.fee)}</td>
+    <td style="font-size:11.5px">${r.type}</td>
+    <td><span class="status-chip chip-not-started">Not Applied</span></td>
+    <td><span class="status-chip chip-not-started">Pending</span></td>
+    <td><span class="savings-badge">$${r.fee} potential</span></td>
+  </tr>`).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER BUDGET BREAKDOWN
+──────────────────────────────────────────────────────────── */
+function renderBudget() {
+  document.getElementById("budget-breakdown-body").innerHTML = [...PORTFOLIO].sort((a,b)=>b.fee-a.fee).map(p=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${p.name}</td><td>${tierBadge(p.tier)}</td>
+    <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
+    <td style="font-size:11.5px">${p.feeSrc}</td>
+    <td style="font-size:12px">${p.fw?`<span class="${wsc(p.ws)}">${p.wt}</span>`:'<span style="color:var(--muted)">None confirmed</span>'}</td>
+    <td style="font-size:12px">${p.fw?(p.ws==="confirmed"?'<span style="color:var(--red);font-weight:700">HIGH</span>':'<span style="color:var(--yellow)">Medium</span>'):'<span style="color:var(--muted)">Low</span>'}</td>
+  </tr>`).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER APPLICATION TRACKER (with full checkboxes)
+──────────────────────────────────────────────────────────── */
+function renderAppTracker() {
+  const sorted = [...PORTFOLIO].sort((a,b) => new Date(a.deadline.replace(/,/,"")) - new Date(b.deadline.replace(/,/,"")));
+  document.getElementById("app-tracker-body").innerHTML = sorted.map(p => {
+    const nynj = p.nynj ? `<span class="nynj-tag">NY/NJ</span> ` : "";
+    return `<tr>
+      <td class="tracker-prog-cell">
+        <div style="font-weight:600;color:var(--text);margin-bottom:2px">${nynj}${p.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${p.location}</div>
+      </td>
+      <td>${tierBadge(p.tier)}</td>
+      <td><span class="mono" style="font-size:11px">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td>
+      <td>${fitBtnHTML(p.id)}</td>
+      <td><div class="check-row" id="cr-${p.id}-loginId" onclick="toggleCheck(${p.id},'loginId')"><div class="check-box-ui"></div></div></td>
+      <td><div class="check-row" id="cr-${p.id}-sop" onclick="toggleCheck(${p.id},'sop')"><div class="check-box-ui"></div></div></td>
+      <td><div class="check-row" id="cr-${p.id}-faculty" onclick="toggleCheck(${p.id},'faculty')"><div class="check-box-ui"></div></div></td>
+      <td><div class="check-row" id="cr-${p.id}-researchDoc" onclick="toggleCheck(${p.id},'researchDoc')"><div class="check-box-ui"></div></div></td>
+      <td><div class="check-row" id="cr-${p.id}-feeWaiver" onclick="toggleCheck(${p.id},'feeWaiver')"><div class="check-box-ui"></div></div></td>
+      <td>
+        <div class="prog-bar" style="min-width:80px">
+          <span class="prog-count" id="tcount-${p.id}">0/5</span>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="tfill-${p.id}" style="width:0%"></div></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER Q&A
+──────────────────────────────────────────────────────────── */
+function renderQA() {
+  document.getElementById("qa-list").innerHTML = QA.map((item,i)=>`
+    <div class="qa-item" id="qa-${i}">
+      <div class="qa-q" onclick="toggleQA(${i})">
+        <span class="qa-num">${String(i+1).padStart(2,"0")}</span>
+        <span class="qa-text">${item.q}</span>
+        <span class="qa-verdict ${item.verdict}">${item.vtext}</span>
+        <span class="qa-arrow">▶</span>
+      </div>
+      <div class="qa-a">${item.a}</div>
+    </div>`).join("");
+}
+function toggleQA(i){document.getElementById("qa-"+i).classList.toggle("open");}
+
+/* ────────────────────────────────────────────────────────────
+   TAB NAVIGATION
+──────────────────────────────────────────────────────────── */
+function showTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  if(btn) btn.classList.add("active");
+}
+
+/* ────────────────────────────────────────────────────────────
+   INIT
+──────────────────────────────────────────────────────────── */
+renderPortfolio();
+renderPool();
+renderRequirements();
+renderOutreach();
+renderWaivers();
+renderBudget();
+renderAppTracker();
+renderQA();
+initAllUI();   // Apply saved localStorage state to all UI elements
+</script>
+</body>
+</html>
