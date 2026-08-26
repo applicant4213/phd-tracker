@@ -1100,6 +1100,12 @@ function _arrToObj(arr) {
   arr.forEach((v, i) => { o[v.id || i] = v; });
   return o;
 }
+function toArr(v) {
+  if (!v) return [];
+  if (Array.isArray(v)) return v;
+  if (typeof v === "object") return Object.values(v);
+  return [];
+}
 
 /* ────────────────────────────────────────────────────────────
    CHECKLIST DEFINITION
@@ -1667,14 +1673,20 @@ function nextCustomId() {
 }
 
 let PORTFOLIO = [];
+function normalizeProgram(p) {
+  return Object.assign({}, p, {
+    faculty: toArr(p.faculty),
+    threads: toArr(p.threads)
+  });
+}
 function rebuildPortfolio() {
   const deleted   = loadDeleted();
   const custom    = loadCustomProgs();
   const overrides = loadOverrides();
   PORTFOLIO = [
     ...PROGRAMS_RAW.filter(p => !deleted.has(p.id))
-                   .map(p => overrides[p.id] ? Object.assign({}, p, overrides[p.id]) : p),
-    ...custom
+                   .map(p => normalizeProgram(overrides[p.id] ? Object.assign({}, p, overrides[p.id]) : p)),
+    ...custom.map(normalizeProgram)
   ].sort((a, b) => b.avs - a.avs);
 }
 
@@ -2002,7 +2014,7 @@ function renderPortfolio() {
       <td><span style="font-weight:600;color:var(--text)">${p.name}</span>${noteIcon}<br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
       <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td>
       <td>${tierBadge(getEffectiveTier(p.id), p.id)}</td>
-      <td style="font-size:12px">${p.faculty.join(", ")}</td>
+      <td style="font-size:12px">${toArr(p.faculty).join(", ")}</td>
       <td>${avsBar(p.avs)}</td>
       <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
       <td>${fmtStipend(p.stipend)}</td>
@@ -2031,8 +2043,8 @@ function renderPortfolio() {
       <div class="card-row"><span class="card-label">AVS</span><span class="card-val" style="color:var(--accent)">${p.avs}/100</span></div>
       <div class="card-row"><span class="card-label">Fee</span><span class="card-val">${p.fee===0?"FREE":"$"+p.fee}</span></div>
       <div class="card-row"><span class="card-label">Stipend</span><span class="card-val">~$${(p.stipend/1000).toFixed(0)}K/yr</span></div>
-      <div class="card-faculty">${p.faculty.join(", ")}</div>
-      <div class="card-tags">${p.threads.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      <div class="card-faculty">${toArr(p.faculty).join(", ")}</div>
+      <div class="card-tags">${toArr(p.threads).map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     </div>`).join("");
 }
 
@@ -2041,7 +2053,7 @@ function renderPortfolio() {
 ──────────────────────────────────────────────────────────── */
 function renderPool() {
   window._poolRows = [
-    ...filteredPortfolio().map(p => ({id:p.id,name:p.name,dept:p.dept,loc:p.location,status:"selected",tier:p.tier,faculty:p.faculty.join(", "),nynj:p.nynj,reason:"—"})),
+    ...filteredPortfolio().map(p => ({id:p.id,name:p.name,dept:p.dept,loc:p.location,status:"selected",tier:p.tier,faculty:toArr(p.faculty).join(", "),nynj:p.nynj,reason:"—"})),
     ...POOL_REJECTED.map(r => ({name:r.name,dept:"—",loc:r.location,status:"not-selected",tier:null,faculty:r.faculty,nynj:r.location.includes("NY")||r.location.includes("NJ"),reason:r.reason}))
   ];
   renderPoolTable(window._poolRows);
