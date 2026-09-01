@@ -1047,110 +1047,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
 <script>
 /* ────────────────────────────────────────────────────────────
-   AUTH — ALLOWED EMAIL ALLOWLIST
-   Add/remove emails here to control who can access the tracker.
-──────────────────────────────────────────────────────────── */
-const ALLOWED_EMAILS = [
-  "vgg2023@nyu.edu",
-  // Add more emails here, e.g.:
-  // "collaborator@example.com",
-];
-
-function signInWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).catch(err => {
-    const errEl = document.getElementById("auth-error");
-    errEl.textContent = "Sign-in failed: " + err.message;
-    errEl.style.display = "block";
-  });
-}
-
-function signOutUser() {
-  firebase.auth().signOut();
-}
-
-firebase.auth().onAuthStateChanged(user => {
-  if (!user) {
-    // Not signed in — show login screen, hide app
-    document.getElementById("auth-overlay").style.display = "flex";
-    document.getElementById("fb-loading").style.display = "none";
-    document.getElementById("auth-user-info").style.display = "none";
-    document.querySelector(".app").style.display = "none";
-    return;
-  }
-
-  const email = user.email || "";
-  if (!ALLOWED_EMAILS.includes(email.toLowerCase())) {
-    // Signed in but not on allowlist
-    firebase.auth().signOut();
-    const errEl = document.getElementById("auth-error");
-    errEl.textContent = `Access denied for ${email}. Contact Vaishnavi to be added.`;
-    errEl.style.display = "block";
-    document.getElementById("auth-overlay").style.display = "flex";
-    document.querySelector(".app").style.display = "none";
-    return;
-  }
-
-  // Authorized — hide login, show app
-  document.getElementById("auth-overlay").style.display = "none";
-  document.getElementById("fb-loading").style.display = "flex";
-  document.querySelector(".app").style.display = "flex";
-
-  // Show user info in sidebar
-  const infoEl = document.getElementById("auth-user-info");
-  const emailEl = document.getElementById("auth-user-email");
-  if (infoEl) infoEl.style.display = "block";
-  if (emailEl) emailEl.textContent = "Signed in as " + email;
-});
-
-/* ────────────────────────────────────────────────────────────
-   EXCEL EXPORT via SheetJS
-──────────────────────────────────────────────────────────── */
-function exportToExcel() {
-  if (typeof XLSX === "undefined") {
-    alert("SheetJS not loaded yet — try again in a moment.");
-    return;
-  }
-
-  const wb = XLSX.utils.book_new();
-
-  /* ── Sheet 1: Portfolio ── */
-  const portRows = [["#","Program","Dept","City","Tier","My Fit","AVS","Fee ($)","Stipend ($/yr)","GRE","Deadline","Login ID","SOP","Faculty","Research Doc","Fee Waiver","Progress","Notes"]];
-  PORTFOLIO.forEach((p, i) => {
-    const prog = getProg(p.id);
-    const done = CHECKLIST.filter(c => prog[c.key]).length;
-    portRows.push([
-      i+1, p.name, p.dept, p.location||"", getEffectiveTier(p.id),
-      prog.fit || "unset", p.avs, p.fee, p.stipend, p.gre, p.deadline,
-      prog.loginId?"✓":"", prog.sop?"✓":"", prog.faculty?"✓":"",
-      prog.researchDoc?"✓":"", prog.feeWaiver?"✓":"",
-      `${done}/5`, p.notes||""
-    ]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(portRows), "Portfolio");
-
-  /* ── Sheet 2: Requirements ── */
-  const reqRows = [["Program","City","Deadline","Fee ($)","GRE","TOEFL","SOP Length","LORs"]];
-  PORTFOLIO.forEach(p => reqRows.push([p.name, p.location||"", p.deadline, p.fee, p.gre, p.toefl||"", p.sopLen||"", 3]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(reqRows), "Requirements");
-
-  /* ── Sheet 3: Fee Waivers ── */
-  const wRows = [["Program","City","Fee ($)","Waiver Available","Waiver Type","Status"]];
-  PORTFOLIO.forEach(p => wRows.push([p.name, p.location||"", p.fee, p.fw?"Yes":"No", p.wt||"None", p.ws||""]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wRows), "Fee Waivers");
-
-  /* ── Sheet 4: Info Sessions ── */
-  const isRows = [["Program","Date","Time","Format","Topic / Host","Registered","Status","Notes"]];
-  (_cache.is || []).forEach(s => isRows.push([s.prog||"", s.date||"", s.time||"", s.format||"", s.topic||"", s.registered||"", s.status||"", s.notes||""]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(isRows), "Info Sessions");
-
-  /* ── Download ── */
-  const date = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `phd-tracker-${date}.xlsx`);
-}
-
-/* ────────────────────────────────────────────────────────────
-   FIREBASE INIT
+   FIREBASE INIT  (must run first — auth depends on this)
 ──────────────────────────────────────────────────────────── */
 const firebaseConfig = {
   apiKey: "AIzaSyAg5pBlcLAv5466oTtMMB_owUE1W0IHixg",
@@ -1164,6 +1061,98 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const _db = firebase.database();
 function _fbRef(path) { return _db.ref("phd/" + path); }
+
+/* ────────────────────────────────────────────────────────────
+   AUTH — ALLOWED EMAIL ALLOWLIST
+   Add/remove emails here to control who can access the tracker.
+──────────────────────────────────────────────────────────── */
+const ALLOWED_EMAILS = [
+  "vgg2023@nyu.edu",
+  // Add more emails here, e.g.:
+  // "collaborator@example.com",
+];
+
+function signInWithGoogle() {
+  const errEl = document.getElementById("auth-error");
+  errEl.style.display = "none";
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(err => {
+    errEl.textContent = "Sign-in failed: " + err.message;
+    errEl.style.display = "block";
+  });
+}
+
+function signOutUser() {
+  firebase.auth().signOut();
+}
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+    document.getElementById("auth-overlay").style.display = "flex";
+    document.getElementById("fb-loading").style.display = "none";
+    document.getElementById("auth-user-info").style.display = "none";
+    document.querySelector(".app").style.display = "none";
+    return;
+  }
+
+  const email = (user.email || "").toLowerCase();
+  if (!ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
+    firebase.auth().signOut();
+    const errEl = document.getElementById("auth-error");
+    errEl.textContent = `Access denied for ${user.email}. Contact Vaishnavi to be added.`;
+    errEl.style.display = "block";
+    document.getElementById("auth-overlay").style.display = "flex";
+    document.querySelector(".app").style.display = "none";
+    return;
+  }
+
+  // Authorized — hide login, show loading then app
+  document.getElementById("auth-overlay").style.display = "none";
+  document.getElementById("fb-loading").style.display = "flex";
+  document.querySelector(".app").style.display = "flex";
+
+  const infoEl = document.getElementById("auth-user-info");
+  const emailEl = document.getElementById("auth-user-email");
+  if (infoEl) infoEl.style.display = "block";
+  if (emailEl) emailEl.textContent = "Signed in as " + user.email;
+});
+
+/* ────────────────────────────────────────────────────────────
+   EXCEL EXPORT via SheetJS
+──────────────────────────────────────────────────────────── */
+function exportToExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("SheetJS not loaded yet — try again in a moment.");
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+
+  /* Sheet 1: Portfolio */
+  const portRows = [["#","Program","Dept","City","Tier","My Fit","AVS","Fee ($)","Stipend ($/yr)","GRE","Deadline","Login ID","SOP","Faculty","Research Doc","Fee Waiver","Progress","Notes"]];
+  PORTFOLIO.forEach((p, i) => {
+    const prog = getProg(p.id);
+    const done = CHECKLIST.filter(c => prog[c.key]).length;
+    portRows.push([i+1,p.name,p.dept,p.location||"",getEffectiveTier(p.id),prog.fit||"unset",p.avs,p.fee,p.stipend,p.gre,p.deadline,prog.loginId?"✓":"",prog.sop?"✓":"",prog.faculty?"✓":"",prog.researchDoc?"✓":"",prog.feeWaiver?"✓":"",`${done}/5`,p.notes||""]);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(portRows), "Portfolio");
+
+  /* Sheet 2: Requirements */
+  const reqRows = [["Program","City","Deadline","Fee ($)","GRE","TOEFL","SOP Length","LORs"]];
+  PORTFOLIO.forEach(p => reqRows.push([p.name,p.location||"",p.deadline,p.fee,p.gre,p.toefl||"",p.sopLen||"",3]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(reqRows), "Requirements");
+
+  /* Sheet 3: Fee Waivers */
+  const wRows = [["Program","City","Fee ($)","Waiver Available","Waiver Type","Status"]];
+  PORTFOLIO.forEach(p => wRows.push([p.name,p.location||"",p.fee,p.fw?"Yes":"No",p.wt||"None",p.ws||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wRows), "Fee Waivers");
+
+  /* Sheet 4: Info Sessions */
+  const isRows = [["Program","Date","Time","Format","Topic / Host","Registered","Status","Notes"]];
+  (_cache.is||[]).forEach(s => isRows.push([s.prog||"",s.date||"",s.time||"",s.format||"",s.topic||"",s.registered||"",s.status||"",s.notes||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(isRows), "Info Sessions");
+
+  XLSX.writeFile(wb, `phd-tracker-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
 
 /* In-memory cache — mirrors Firebase, makes all reads synchronous */
 let _cache = {
