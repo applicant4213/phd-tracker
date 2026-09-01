@@ -1063,15 +1063,9 @@ const _db = firebase.database();
 function _fbRef(path) { return _db.ref("phd/" + path); }
 
 /* ────────────────────────────────────────────────────────────
-   AUTH — ALLOWED EMAIL ALLOWLIST
-   Add/remove emails here to control who can access the tracker.
+   AUTH — allowlist stored in Firebase at phd/admin/allowlist
+   No emails in this source file. Add/remove via Firebase Console.
 ──────────────────────────────────────────────────────────── */
-const ALLOWED_EMAILS = [
-  "vgg2023@nyu.edu",
-  // Add more emails here, e.g.:
-  // "collaborator@example.com",
-];
-
 function signInWithGoogle() {
   const errEl = document.getElementById("auth-error");
   errEl.style.display = "none";
@@ -1086,6 +1080,15 @@ function signOutUser() {
   firebase.auth().signOut();
 }
 
+function _showAuthDenied(email, msg) {
+  firebase.auth().signOut();
+  const errEl = document.getElementById("auth-error");
+  errEl.textContent = msg || `Access denied for ${email}. Contact Vaishnavi to be added.`;
+  errEl.style.display = "block";
+  document.getElementById("auth-overlay").style.display = "flex";
+  document.querySelector(".app").style.display = "none";
+}
+
 firebase.auth().onAuthStateChanged(user => {
   if (!user) {
     document.getElementById("auth-overlay").style.display = "flex";
@@ -1096,28 +1099,35 @@ firebase.auth().onAuthStateChanged(user => {
   }
 
   const email = (user.email || "").toLowerCase();
-  if (!ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
-    firebase.auth().signOut();
-    const errEl = document.getElementById("auth-error");
-    errEl.textContent = `Access denied for ${user.email}. Contact Vaishnavi to be added.`;
-    errEl.style.display = "block";
-    document.getElementById("auth-overlay").style.display = "flex";
-    document.querySelector(".app").style.display = "none";
-    return;
-  }
 
-  // Authorized — hide login, show app
-  document.getElementById("auth-overlay").style.display = "none";
-  document.querySelector(".app").style.display = "flex";
-  // If RTDB already loaded data before sign-in, hide spinner immediately.
-  // Otherwise show it and let the RTDB listener hide it when data arrives.
-  const alreadyLoaded = typeof _fbReady !== "undefined" && _fbReady;
-  document.getElementById("fb-loading").style.display = alreadyLoaded ? "none" : "flex";
+  // Fetch allowlist from Firebase — not stored in source code
+  firebase.database().ref("phd/admin/allowlist").once("value")
+    .then(snap => {
+      const data = snap.val();
+      // allowlist stored as { "0": "user@example.com", "1": "other@example.com", ... }
+      const allowed = data
+        ? Object.values(data).some(e => e.toLowerCase() === email)
+        : false;
 
-  const infoEl = document.getElementById("auth-user-info");
-  const emailEl = document.getElementById("auth-user-email");
-  if (infoEl) infoEl.style.display = "block";
-  if (emailEl) emailEl.textContent = "Signed in as " + user.email;
+      if (!allowed) {
+        _showAuthDenied(user.email);
+        return;
+      }
+
+      // Authorized — show app
+      document.getElementById("auth-overlay").style.display = "none";
+      document.querySelector(".app").style.display = "flex";
+      const alreadyLoaded = typeof _fbReady !== "undefined" && _fbReady;
+      document.getElementById("fb-loading").style.display = alreadyLoaded ? "none" : "flex";
+
+      const infoEl = document.getElementById("auth-user-info");
+      const emailEl = document.getElementById("auth-user-email");
+      if (infoEl) infoEl.style.display = "block";
+      if (emailEl) emailEl.textContent = "Signed in as " + user.email;
+    })
+    .catch(() => {
+      _showAuthDenied(user.email, "Could not verify access. Check your connection and try again.");
+    });
 });
 
 /* ────────────────────────────────────────────────────────────
