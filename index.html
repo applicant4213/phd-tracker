@@ -422,6 +422,11 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div class="tile"><div class="tile-num" id="tc-nynj">9</div><div class="tile-label">NY/NJ programs</div></div>
     <div class="tile" id="progress-tile"><div class="tile-num" id="global-prog">0/5</div><div class="tile-label">Tasks done</div></div>
   </div>
+  <div class="tiles" style="margin-top:8px">
+    <div class="tile"><div class="tile-num" id="tc-safety" style="color:var(--green)">0</div><div class="tile-label">🟢 Safety</div></div>
+    <div class="tile"><div class="tile-num" id="tc-match" style="color:var(--yellow)">0</div><div class="tile-label">🟡 Match</div></div>
+    <div class="tile"><div class="tile-num" id="tc-reach" style="color:var(--red)">0</div><div class="tile-label">🔴 Reach</div></div>
+  </div>
 
   <div class="table-wrap">
     <table id="portfolio-table">
@@ -1894,6 +1899,9 @@ function refreshTierCounts() {
     if (tc) tc.textContent = counts[t];
     if (sc) sc.textContent = counts[t];
   });
+  const fitCounts = {safety:0, match:0, reach:0};
+  PORTFOLIO.forEach(p => { const f = getProg(p.id).fit; if (f) fitCounts[f] = (fitCounts[f]||0)+1; });
+  ["safety","match","reach"].forEach(t => { const el = document.getElementById(`tc-${t}`); if (el) el.textContent = fitCounts[t]; });
 }
 
 function cycleTier(id, event) {
