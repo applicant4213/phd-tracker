@@ -1067,7 +1067,7 @@ function _fbRef(path) { return _db.ref("phd/" + path); }
    Add/remove emails here to control who can access the tracker.
 ──────────────────────────────────────────────────────────── */
 const ALLOWED_EMAILS = [
-  "vgg2023@nyu.edu","vaishnavi.guptm@gmail.com","vguptm@gmail.com",
+  "vgg2023@nyu.edu",
   // Add more emails here, e.g.:
   // "collaborator@example.com",
 ];
@@ -1106,10 +1106,13 @@ firebase.auth().onAuthStateChanged(user => {
     return;
   }
 
-  // Authorized — hide login, show loading then app
+  // Authorized — hide login, show app
   document.getElementById("auth-overlay").style.display = "none";
-  document.getElementById("fb-loading").style.display = "flex";
   document.querySelector(".app").style.display = "flex";
+  // If RTDB already loaded data before sign-in, hide spinner immediately.
+  // Otherwise show it and let the RTDB listener hide it when data arrives.
+  const alreadyLoaded = typeof _fbReady !== "undefined" && _fbReady;
+  document.getElementById("fb-loading").style.display = alreadyLoaded ? "none" : "flex";
 
   const infoEl = document.getElementById("auth-user-info");
   const emailEl = document.getElementById("auth-user-email");
