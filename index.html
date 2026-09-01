@@ -273,17 +273,33 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
+<!-- Auth login overlay -->
+<div id="auth-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;gap:20px">
+  <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--accent-glow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <div style="text-align:center">
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">PhD Strategy — Fall 2027</div>
+    <div style="font-size:13px;color:var(--muted)">Sign in to access your tracker</div>
+  </div>
+  <button id="auth-google-btn" onclick="signInWithGoogle()" style="display:flex;align-items:center;gap:10px;padding:11px 24px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .15s">
+    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Sign in with Google
+  </button>
+  <div id="auth-error" style="display:none;font-size:12px;color:var(--red);max-width:320px;text-align:center;padding:10px 16px;background:var(--red-bg);border-radius:6px;border:1px solid var(--red-dot)"></div>
+</div>
+
 <!-- Firebase loading overlay -->
-<div id="fb-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px">
+<div id="fb-loading" style="position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px">
   <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-  <div style="font-size:13px;color:var(--muted);font-family:var(--sans)">Connecting to Firebase…</div>
+  <div style="font-size:13px;color:var(--muted);font-family:var(--sans)">Loading your tracker…</div>
 </div>
 <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 
-<div class="app">
+<div class="app" style="display:none">
 
 <!-- ── Sidebar ──────────────────────────────────────────────── -->
 <nav class="sidebar">
@@ -339,8 +355,12 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
   <div class="sidebar-footer">
     <span class="src src-c">C</span> confirmed &nbsp;<span class="src src-p">P</span> provisional &nbsp;<span class="src src-e">E</span> estimated<br>
-    <span style="color:var(--accent-glow)">●</span> Progress saves in your browser<br>
+    <span style="color:var(--accent-glow)">●</span> Synced to Firebase<br>
     <span style="color:var(--muted)">Click tier badge to set preference</span>
+    <div id="auth-user-info" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <div id="auth-user-email" style="font-size:10px;color:var(--muted);word-break:break-all;margin-bottom:6px"></div>
+      <button onclick="signOutUser()" style="width:100%;padding:5px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans)">Sign out</button>
+    </div>
   </div>
 </nav>
 
@@ -376,6 +396,10 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
   <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
   <div style="flex:1"></div>
+  <button onclick="exportToExcel()" title="Export all data to Excel" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export
+  </button>
   <button onclick="openAddProgModal()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Program
@@ -1010,7 +1034,8 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div style="margin-top:10px;display:grid;gap:6px">
       <div>✅ Changes appear in real-time for everyone viewing this page</div>
       <div>✅ Data persists across devices, browsers, and sessions</div>
-      <div>✅ No login required for collaborators — just share the URL</div>
+      <div>✅ Google Sign-In required — access limited to approved accounts</div>
+      <div>✅ Use the <strong>Export</strong> button to download all data as Excel</div>
     </div>
     <div style="margin-top:10px;color:var(--muted)">ℹ️ Hosted at <code style="font-family:var(--mono);font-size:11px">phd-applicant-tracker-default-rtdb.firebaseio.com</code></div>
   </div>
@@ -1021,6 +1046,109 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 </div>
 
 <script>
+/* ────────────────────────────────────────────────────────────
+   AUTH — ALLOWED EMAIL ALLOWLIST
+   Add/remove emails here to control who can access the tracker.
+──────────────────────────────────────────────────────────── */
+const ALLOWED_EMAILS = [
+  "vgg2023@nyu.edu",
+  // Add more emails here, e.g.:
+  // "collaborator@example.com",
+];
+
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(err => {
+    const errEl = document.getElementById("auth-error");
+    errEl.textContent = "Sign-in failed: " + err.message;
+    errEl.style.display = "block";
+  });
+}
+
+function signOutUser() {
+  firebase.auth().signOut();
+}
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+    // Not signed in — show login screen, hide app
+    document.getElementById("auth-overlay").style.display = "flex";
+    document.getElementById("fb-loading").style.display = "none";
+    document.getElementById("auth-user-info").style.display = "none";
+    document.querySelector(".app").style.display = "none";
+    return;
+  }
+
+  const email = user.email || "";
+  if (!ALLOWED_EMAILS.includes(email.toLowerCase())) {
+    // Signed in but not on allowlist
+    firebase.auth().signOut();
+    const errEl = document.getElementById("auth-error");
+    errEl.textContent = `Access denied for ${email}. Contact Vaishnavi to be added.`;
+    errEl.style.display = "block";
+    document.getElementById("auth-overlay").style.display = "flex";
+    document.querySelector(".app").style.display = "none";
+    return;
+  }
+
+  // Authorized — hide login, show app
+  document.getElementById("auth-overlay").style.display = "none";
+  document.getElementById("fb-loading").style.display = "flex";
+  document.querySelector(".app").style.display = "flex";
+
+  // Show user info in sidebar
+  const infoEl = document.getElementById("auth-user-info");
+  const emailEl = document.getElementById("auth-user-email");
+  if (infoEl) infoEl.style.display = "block";
+  if (emailEl) emailEl.textContent = "Signed in as " + email;
+});
+
+/* ────────────────────────────────────────────────────────────
+   EXCEL EXPORT via SheetJS
+──────────────────────────────────────────────────────────── */
+function exportToExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("SheetJS not loaded yet — try again in a moment.");
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  /* ── Sheet 1: Portfolio ── */
+  const portRows = [["#","Program","Dept","City","Tier","My Fit","AVS","Fee ($)","Stipend ($/yr)","GRE","Deadline","Login ID","SOP","Faculty","Research Doc","Fee Waiver","Progress","Notes"]];
+  PORTFOLIO.forEach((p, i) => {
+    const prog = getProg(p.id);
+    const done = CHECKLIST.filter(c => prog[c.key]).length;
+    portRows.push([
+      i+1, p.name, p.dept, p.location||"", getEffectiveTier(p.id),
+      prog.fit || "unset", p.avs, p.fee, p.stipend, p.gre, p.deadline,
+      prog.loginId?"✓":"", prog.sop?"✓":"", prog.faculty?"✓":"",
+      prog.researchDoc?"✓":"", prog.feeWaiver?"✓":"",
+      `${done}/5`, p.notes||""
+    ]);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(portRows), "Portfolio");
+
+  /* ── Sheet 2: Requirements ── */
+  const reqRows = [["Program","City","Deadline","Fee ($)","GRE","TOEFL","SOP Length","LORs"]];
+  PORTFOLIO.forEach(p => reqRows.push([p.name, p.location||"", p.deadline, p.fee, p.gre, p.toefl||"", p.sopLen||"", 3]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(reqRows), "Requirements");
+
+  /* ── Sheet 3: Fee Waivers ── */
+  const wRows = [["Program","City","Fee ($)","Waiver Available","Waiver Type","Status"]];
+  PORTFOLIO.forEach(p => wRows.push([p.name, p.location||"", p.fee, p.fw?"Yes":"No", p.wt||"None", p.ws||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wRows), "Fee Waivers");
+
+  /* ── Sheet 4: Info Sessions ── */
+  const isRows = [["Program","Date","Time","Format","Topic / Host","Registered","Status","Notes"]];
+  (_cache.is || []).forEach(s => isRows.push([s.prog||"", s.date||"", s.time||"", s.format||"", s.topic||"", s.registered||"", s.status||"", s.notes||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(isRows), "Info Sessions");
+
+  /* ── Download ── */
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `phd-tracker-${date}.xlsx`);
+}
+
 /* ────────────────────────────────────────────────────────────
    FIREBASE INIT
 ──────────────────────────────────────────────────────────── */
