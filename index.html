@@ -325,9 +325,6 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <button class="nav-btn active" onclick="showTab('portfolio',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       <span>Portfolio</span></button>
-    <button class="nav-btn" onclick="showTab('pool',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <span>Candidate Pool</span></button>
     <button class="nav-btn" onclick="showTab('requirements',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       <span>Requirements</span></button>
@@ -451,25 +448,8 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     </table>
   </div>
 
-  <div class="section-head">Top 4 by Application Value Score</div>
-  <div class="cards" id="top-picks-cards"></div>
-</div>
-
-<!-- ══ TAB 2 · CANDIDATE POOL ════════════════════════════════ -->
-<div class="tab-panel" id="tab-pool">
-  <div class="page-header">
-    <h1>Candidate Pool — 41 Programs Evaluated</h1>
-    <p>All programs considered. 25 selected; 16 not selected with reasoning.</p>
-  </div>
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterPool('all',this)">All (41)</button>
-    <button class="filter-btn" onclick="filterPool('selected',this)">Selected (25)</button>
-    <button class="filter-btn" onclick="filterPool('not-selected',this)">Not Selected (16)</button>
-    <button class="filter-btn" onclick="filterPool('nynj',this)">NY/NJ</button>
-  </div>
-  <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>Dept</th><th>Location</th><th>Status</th><th>Key Faculty Match</th><th>Reason (if not selected)</th>
-  </tr></thead><tbody id="pool-body"></tbody></table></div>
+  <div class="section-head" style="margin-top:28px">All Programs — Flashcard View</div>
+  <div class="cards" id="top-picks-cards" style="flex-wrap:wrap;max-height:none"></div>
 </div>
 
 <!-- ══ TAB 3 · REQUIREMENTS ══════════════════════════════════ -->
@@ -479,7 +459,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <p>Verify all dates at program websites — most reflect previous cycle. <span class="src src-p">P</span> = provisional.</p>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th>Program</th><th>City</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th>
+    <th>Program</th><th>City</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th><th>SOP Draft</th>
   </tr></thead><tbody id="req-body"></tbody></table></div>
 </div>
 
@@ -851,6 +831,25 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
 </div>
 
+<!-- ── SOP Draft Modal ───────────────────────────────────────── -->
+<div id="sop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">SOP Draft</div>
+        <div id="sop-modal-prog" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button onclick="closeSopModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:4px 8px">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted)">Write your SOP notes in Markdown. Formatting is preserved.</div>
+    <textarea id="sop-modal-text" style="flex:1;min-height:380px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.65;padding:14px 16px;resize:vertical;outline:none" placeholder="# Statement of Purpose — [Program Name]&#10;&#10;## Why this program&#10;&#10;## Why this advisor&#10;&#10;## My research background&#10;&#10;## Research goals"></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeSopModal()" style="padding:8px 20px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="saveSopModal()" style="padding:8px 20px;border-radius:7px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Save Draft</button>
+    </div>
+  </div>
+</div>
+
 <!-- Info Session Modal -->
 <div id="is-modal" onclick="if(event.target===this)closeISModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(520px,92vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
@@ -1215,7 +1214,6 @@ _fbRef("").on("value", snap => {
     _fbReady = true;
     rebuildPortfolio();
     renderPortfolio();
-    renderPool();
     renderRequirements();
     renderOutreach();
     renderWaivers();
@@ -1991,7 +1989,6 @@ function filteredPortfolio() {
 /* Re-renders every data tab so filters apply everywhere */
 function renderAllTabs() {
   renderPortfolio();
-  renderPool();
   renderRequirements();
   renderWaivers();
   renderBudget();
@@ -2142,7 +2139,7 @@ function renderPortfolio() {
     const notesRow = notes
       ? `<tr id="notes-row-${p.id}" style="display:none">
            <td colspan="${COL_COUNT}" style="padding:0 12px 10px 40px;background:var(--surface2);border-bottom:1px solid var(--border)">
-             <div style="font-size:12px;color:var(--text2);font-style:italic;line-height:1.6;max-width:780px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 6px 6px 0">${notes}</div>
+             <div style="font-size:12px;color:var(--text2);font-style:italic;line-height:1.6;max-width:780px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 6px 6px 0;white-space:pre-wrap">${notes}</div>
              <div style="font-size:10.5px;color:var(--muted);margin-top:5px">Click the row again to edit</div>
            </td>
          </tr>`
@@ -2152,7 +2149,7 @@ function renderPortfolio() {
       <td><span style="font-weight:600;color:var(--text)">${p.name}</span>${noteIcon}<br><span style="font-size:11px;color:var(--muted)">${p.dept}</span></td>
       <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td>
       <td>${tierBadge(getEffectiveTier(p.id), p.id)}</td>
-      <td style="font-size:12px">${toArr(p.faculty).join(", ")}</td>
+      <td style="font-size:12px">${toArr(p.faculty).map(f=>`<a href="javascript:void(0)" onclick="openFacultyTab(${p.id},'${f.replace(/'/g,"\\'")}')" style="color:var(--accent);text-decoration:none;white-space:nowrap" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${f}</a>`).join('<span style="color:var(--muted)">, </span>')}</td>
       <td>${avsBar(p.avs)}</td>
       <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
       <td>${fmtStipend(p.stipend)}</td>
@@ -2171,8 +2168,8 @@ function renderPortfolio() {
     refreshTierUI(p.id);
   });
 
-  // Top 4 cards
-  document.getElementById("top-picks-cards").innerHTML = PORTFOLIO.slice(0,4).map(p => `
+  // All program cards
+  document.getElementById("top-picks-cards").innerHTML = filteredPortfolio().map(p => `
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div><div class="card-name">${p.name}</div><div class="card-dept">${p.dept}</div></div>
@@ -2184,6 +2181,128 @@ function renderPortfolio() {
       <div class="card-faculty">${toArr(p.faculty).join(", ")}</div>
       <div class="card-tags">${toArr(p.threads).map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     </div>`).join("");
+}
+
+function openFacultyTab(progId, facultyName) {
+  const prog = PORTFOLIO.find(p => p.id === progId);
+  const progName = prog ? prog.name : 'Unknown Program';
+  const fbConfig = JSON.stringify({
+    apiKey: "AIzaSyAg5pBlcLAv5466oTtMMB_owUE1W0IHixg",
+    authDomain: "phd-applicant-tracker.firebaseapp.com",
+    databaseURL: "https://phd-applicant-tracker-default-rtdb.firebaseio.com",
+    projectId: "phd-applicant-tracker",
+    storageBucket: "phd-applicant-tracker.appspot.com",
+    messagingSenderId: "191362235585",
+    appId: "1:191362235585:web:75f4a55a9c8b5f8b4f7e2a"
+  });
+  const safeKey = `fac_${progId}_${facultyName.replace(/[^a-z0-9]/gi,'_').toLowerCase()}`;
+  const checks = [
+    {key:'emailDrafted',    label:'Email drafted'},
+    {key:'emailSent',       label:'Initial email sent'},
+    {key:'responseRcvd',    label:'Response received'},
+    {key:'followUpSent',    label:'Follow-up sent (≥10 days later)'},
+    {key:'interestExpressed',label:'Faculty expressed interest'},
+    {key:'appMentioned',    label:'Mentioned application to them'},
+    {key:'applied',         label:'Application submitted'},
+  ];
+  const checksJson = JSON.stringify(checks);
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<title>${facultyName} — Outreach</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"><\/script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;padding:32px;min-height:100vh}
+  h1{font-size:22px;font-weight:700;margin-bottom:4px;color:#fff}
+  .prog{font-size:13px;color:#7c8fa6;margin-bottom:28px}
+  .check-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#1a1f2e;border:1px solid #2d3748;border-radius:10px;margin-bottom:10px;cursor:pointer;transition:background .15s}
+  .check-item:hover{background:#222840}
+  .check-item.done{background:#0d2a1a;border-color:#2d6a4f}
+  .box{width:22px;height:22px;border-radius:5px;border:2px solid #4a5568;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+  .check-item.done .box{background:#22c55e;border-color:#22c55e}
+  .check-item.done .box::after{content:'✓';color:#fff;font-size:14px;font-weight:700}
+  .label{font-size:14px;color:#e2e8f0}
+  .check-item.done .label{color:#86efac}
+  .progress{background:#1a1f2e;border:1px solid #2d3748;border-radius:10px;padding:16px 18px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+  .prog-bar-bg{flex:1;height:8px;background:#2d3748;border-radius:4px;overflow:hidden}
+  .prog-bar-fill{height:100%;background:#22c55e;border-radius:4px;transition:width .3s}
+  .prog-label{font-size:13px;font-weight:600;color:#22c55e;white-space:nowrap;min-width:40px;text-align:right}
+  .notes-box{margin-top:20px}
+  .notes-box textarea{width:100%;background:#1a1f2e;border:1px solid #2d3748;border-radius:8px;color:#e2e8f0;font-family:inherit;font-size:13px;padding:12px 14px;min-height:100px;resize:vertical;outline:none}
+  .notes-box textarea:focus{border-color:#4a9eff}
+  .save-btn{margin-top:10px;padding:8px 20px;background:#4a9eff;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer}
+  .save-btn:hover{background:#2d8af0}
+  .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#7c8fa6;margin-bottom:10px}
+  .status{font-size:12px;color:#7c8fa6;margin-top:20px}
+</style>
+</head>
+<body>
+<h1>${facultyName}</h1>
+<div class="prog">${progName}</div>
+<div class="section-label">Outreach Progress</div>
+<div class="progress">
+  <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-label" id="prog-label">0/7</div>
+</div>
+<div id="checks-container"></div>
+<div class="notes-box">
+  <div class="section-label" style="margin-top:8px">Notes</div>
+  <textarea id="notes-field" placeholder="Add notes about this outreach..."></textarea>
+  <button class="save-btn" onclick="saveNotes()">Save Notes</button>
+</div>
+<div class="status" id="status-msg">Connecting to database…</div>
+<script>
+const CHECKS = ${checksJson};
+const FB_KEY = '${safeKey}';
+firebase.initializeApp(${fbConfig});
+const db = firebase.database();
+const ref = db.ref('facultyOutreach/' + FB_KEY);
+let state = {};
+function updateProgress() {
+  const done = CHECKS.filter(c => state[c.key]).length;
+  document.getElementById('prog-fill').style.width = (done/CHECKS.length*100)+'%';
+  document.getElementById('prog-label').textContent = done+'/'+CHECKS.length;
+}
+function render() {
+  document.getElementById('checks-container').innerHTML = CHECKS.map(c => {
+    const done = !!state[c.key];
+    return '<div class="check-item'+(done?' done':'')+'" id="ci-'+c.key+'" onclick="toggle(\''+c.key+'\')">'
+      +'<div class="box"></div><div class="label">'+c.label+'</div></div>';
+  }).join('');
+  updateProgress();
+}
+function toggle(key) {
+  state[key] = !state[key];
+  ref.update({[key]: state[key]});
+  const el = document.getElementById('ci-'+key);
+  if (el) { el.classList.toggle('done', state[key]); }
+  updateProgress();
+}
+function saveNotes() {
+  const notes = document.getElementById('notes-field').value;
+  ref.update({_notes: notes});
+  document.getElementById('status-msg').textContent = 'Notes saved ✓';
+  setTimeout(() => document.getElementById('status-msg').textContent = 'Synced to Firebase', 1500);
+}
+ref.once('value', snap => {
+  state = snap.val() || {};
+  if (state._notes) document.getElementById('notes-field').value = state._notes;
+  render();
+  document.getElementById('status-msg').textContent = 'Synced to Firebase';
+}, err => {
+  document.getElementById('status-msg').textContent = 'DB error: ' + err.message;
+  render();
+});
+<\/script>
+</body>
+</html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (!win) alert('Pop-up blocked. Please allow pop-ups for this site.');
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -2213,10 +2332,49 @@ function filterPool(f,btn) {
 /* ────────────────────────────────────────────────────────────
    RENDER REQUIREMENTS
 ──────────────────────────────────────────────────────────── */
+function parseDeadline(dl) {
+  if (!dl || dl === "TBD") return new Date("2099-01-01");
+  try { return new Date(dl.replace(/,/, "")); } catch(e) { return new Date("2099-01-01"); }
+}
 function renderRequirements() {
-  document.getElementById("req-body").innerHTML = filteredPortfolio().map(p => {
-    return `<tr><td><span style="font-weight:600;color:var(--text)">${p.name}</span></td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td><td><span class="mono">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td><td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td><td style="font-size:12px">${p.gre}</td><td style="font-size:12px">${p.toefl}</td><td style="font-size:12px">${p.sopLen}</td><td class="num">3</td><td style="font-size:11.5px;color:var(--muted)">Not required</td></tr>`;
+  const sorted = [...filteredPortfolio()].sort((a,b) => parseDeadline(a.deadline) - parseDeadline(b.deadline));
+  document.getElementById("req-body").innerHTML = sorted.map(p => {
+    const sopData = getSopDraft(p.id);
+    const hasSop = sopData && sopData.trim().length > 0;
+    const sopBtn = `<button onclick="openSopModal(${p.id})" style="padding:3px 10px;border-radius:5px;border:1px solid ${hasSop?'var(--accent)':'var(--border2)'};background:${hasSop?'var(--accent-bg)':'var(--surface2)'};color:${hasSop?'var(--accent)':'var(--muted)'};font-size:11px;cursor:pointer;white-space:nowrap">${hasSop?'✎ Edit':'+ Draft'}</button>`;
+    return `<tr><td><span style="font-weight:600;color:var(--text)">${p.name}</span></td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location || "—"}</td><td><span class="mono">${p.deadline}</span> ${srcBadge(p.dlSrc)}</td><td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td><td style="font-size:12px">${p.gre}</td><td style="font-size:12px">${p.toefl}</td><td style="font-size:12px">${p.sopLen}</td><td class="num">3</td><td style="font-size:11.5px;color:var(--muted)">Not required</td><td>${sopBtn}</td></tr>`;
   }).join("");
+}
+
+function getSopDraft(progId) {
+  const all = _cache.prog || {};
+  return (all[progId] && all[progId].sopDraft) ? all[progId].sopDraft : "";
+}
+function saveSopDraft(progId, text) {
+  const all = loadProg();
+  if (!all[progId]) all[progId] = {};
+  all[progId].sopDraft = text;
+  saveProg(all);
+}
+
+let sopModalId = null;
+function openSopModal(progId) {
+  sopModalId = progId;
+  const prog = PORTFOLIO.find(p => p.id === progId);
+  document.getElementById("sop-modal-prog").textContent = prog ? prog.name : "";
+  document.getElementById("sop-modal-text").value = getSopDraft(progId);
+  document.getElementById("sop-modal").style.display = "flex";
+  setTimeout(() => document.getElementById("sop-modal-text").focus(), 60);
+}
+function closeSopModal() {
+  document.getElementById("sop-modal").style.display = "none";
+  sopModalId = null;
+}
+function saveSopModal() {
+  if (sopModalId === null) return;
+  saveSopDraft(sopModalId, document.getElementById("sop-modal-text").value);
+  closeSopModal();
+  renderRequirements();
 }
 
 /* ────────────────────────────────────────────────────────────
