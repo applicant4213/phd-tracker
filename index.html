@@ -195,6 +195,11 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .row-btn { display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:13px;line-height:1;transition:background .15s,color .15s,border-color .15s; }
 .row-btn:hover { background:var(--accent-bg);color:var(--accent);border-color:var(--accent-glow); }
 .row-btn.danger:hover { background:var(--red-bg);color:var(--red);border-color:var(--red); }
+.row-btn.tog-on { background:var(--accent-bg);color:var(--accent);border-color:var(--accent-glow);font-weight:700; }
+.row-btn.tog-no { color:var(--red);border-color:var(--red-dot);background:var(--red-bg); }
+.row-btn.tog-ref { background:#EEF2FF;color:#4F46E5;border-color:#818CF8; }
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .row-btn.tog-ref{background:#1E1B4B;color:#818CF8;border-color:#4F46E5;}}
+:root[data-theme="dark"] .row-btn.tog-ref{background:#1E1B4B;color:#818CF8;border-color:#4F46E5;}
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .filter-btn { font-size: 11px; font-family: var(--sans); font-weight: 500; padding: 5px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: 5px; transition: all .15s; }
 .filter-btn:hover { border-color: var(--border2); color: var(--text2); }
@@ -497,7 +502,11 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <th id="orp-th-fac" onclick="orpSort('faculty')" style="cursor:pointer;user-select:none">Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th id="orp-th-prog" onclick="orpSort('prog')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th id="orp-th-tier" onclick="orpSort('tier')" style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th>Email (est.)</th><th>Research Hook</th><th>When to Contact</th>
+    <th>Email (est.)</th>
+    <th style="text-align:center">Sent</th>
+    <th style="text-align:center">Response</th>
+    <th style="text-align:center">Positive</th>
+    <th style="text-align:center">Referred</th>
   </tr></thead><tbody id="outreach-body"></tbody></table></div>
   <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
     <span>Outreach Tracker</span>
@@ -512,7 +521,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div class="tile"><div class="tile-num" id="ot-stat-notsent" style="color:var(--muted)">0</div><div class="tile-label">Not Sent</div></div>
     <div class="tile"><div class="tile-num" id="ot-stat-noreply" style="color:var(--yellow)">0</div><div class="tile-label">No Reply</div></div>
     <div class="tile"><div class="tile-num" id="ot-stat-positive" style="color:var(--green)">0</div><div class="tile-label">Positive</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-meeting" style="color:var(--accent)">0</div><div class="tile-label">Meeting 📅</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-meeting" style="color:#818CF8">0</div><div class="tile-label">Referred</div></div>
     <div class="tile"><div class="tile-num" id="ot-stat-negative" style="color:var(--red)">0</div><div class="tile-label">Negative</div></div>
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="ot-filter-row">
@@ -520,7 +529,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <button class="filter-btn" onclick="filterOT('not-sent',this)">Not Sent</button>
     <button class="filter-btn" onclick="filterOT('no-reply',this)">No Reply</button>
     <button class="filter-btn" onclick="filterOT('positive',this)">Positive</button>
-    <button class="filter-btn" onclick="filterOT('meeting',this)">Meeting</button>
+    <button class="filter-btn" onclick="filterOT('referred',this)">Referred</button>
     <button class="filter-btn" onclick="filterOT('negative',this)">Negative</button>
   </div>
   <div class="table-wrap"><table><thead><tr>
@@ -529,9 +538,11 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <th id="ot-th-dept" onclick="otSort('dept')" style="cursor:pointer;user-select:none">Dept<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th id="ot-th-email" onclick="otSort('email')" style="cursor:pointer;user-select:none">Email<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th id="ot-th-date" onclick="otSort('dateSent')" style="cursor:pointer;user-select:none;color:var(--text)">Date Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-    <th id="ot-th-response" onclick="otSort('response')" style="cursor:pointer;user-select:none">Response<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-followup" onclick="otSort('followUp')" style="cursor:pointer;user-select:none">Follow-up<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-outcome" onclick="otSort('outcome')" style="cursor:pointer;user-select:none">Outcome<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-sent" onclick="otSort('sent')" style="cursor:pointer;user-select:none;text-align:center">Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-responded" onclick="otSort('responded')" style="cursor:pointer;user-select:none;text-align:center">Response<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-positive" onclick="otSort('positive')" style="cursor:pointer;user-select:none;text-align:center">Positive<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-referred" onclick="otSort('referred')" style="cursor:pointer;user-select:none;text-align:center">Referred<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-outcome" onclick="otSort('outcome')" style="cursor:pointer;user-select:none">Notes<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th></th>
   </tr></thead><tbody id="outreach-tracker-body"></tbody></table>
   <div id="ot-empty" style="display:none;padding:24px;text-align:center;color:var(--muted);font-size:13px">No outreach entries yet — click <strong>+ Add Entry</strong> to log your first email.</div>
@@ -940,22 +951,18 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
         <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Date Sent</label>
         <input id="ot-f-date" type="date" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Response</label>
-        <select id="ot-f-response" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-          <option value="No reply">No reply</option>
-          <option value="Positive">Positive</option>
-          <option value="Negative">Negative</option>
-          <option value="Meeting scheduled">Meeting scheduled</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Follow-up Date</label>
-        <input id="ot-f-followup" type="date" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
+      <div style="grid-column:1/-1">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">Status</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-sent" style="accent-color:var(--accent);width:15px;height:15px"> Email Sent</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-responded" style="accent-color:var(--accent);width:15px;height:15px"> Got Response</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-positive" style="accent-color:var(--accent);width:15px;height:15px"> Positive</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:#818CF8"><input type="checkbox" id="ot-f-referred" style="accent-color:#818CF8;width:15px;height:15px"> Referred to Someone</label>
+        </div>
       </div>
       <div style="grid-column:1/-1">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Outcome / Notes</label>
-        <input id="ot-f-outcome" placeholder="e.g. Pending, Accepted for interview, Declined..." style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notes</label>
+        <input id="ot-f-outcome" placeholder="e.g. Forwarded to PhD student, Zoom call scheduled..." style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
       </div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
@@ -2588,12 +2595,26 @@ function renderOutreach() {
   };
   data.sort((a,b) => _cmp((ORP_VAL[ORP_S.col]||ORP_VAL.pri)(a),(ORP_VAL[ORP_S.col]||ORP_VAL.pri)(b),ORP_S.dir));
   _updateArrows(ORP_S, {pri:"orp-th-pri",faculty:"orp-th-fac",prog:"orp-th-prog",tier:"orp-th-tier"});
-  document.getElementById("outreach-body").innerHTML = data.map(r=>`<tr>
+  const otData = loadOutreach();
+  function _otEntry(faculty, prog) {
+    return otData.find(e => e.faculty.toLowerCase()===faculty.toLowerCase() && e.program.toLowerCase()===prog.toLowerCase()) || {};
+  }
+  function _otTogBtn(faculty, prog, field, val, refStyle) {
+    const cls = refStyle ? (val?" tog-ref":"") : (val?" tog-on":" tog-no");
+    const sym = refStyle ? (val?"✓":"—") : (val?"✓":"✗");
+    return `<button onclick="toggleOTByKey('${faculty.replace(/'/g,"\\'")}','${prog.replace(/'/g,"\\'")}','${field}')" class="row-btn${cls}" style="font-size:14px;font-weight:700" title="${field}">${sym}</button>`;
+  }
+  document.getElementById("outreach-body").innerHTML = data.map(r=>{
+    const oe = _otEntry(r.faculty, r.prog);
+    return `<tr>
     <td class="num" style="color:${r.pri===1?"var(--red)":r.pri===2?"var(--yellow)":"var(--muted)"}">${r.pri}</td>
     <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
     <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
-    <td style="font-size:11.5px">${r.hook}</td><td style="font-size:11.5px">${r.when}</td>
-  </tr>`).join("");
+    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"sent",!!oe.sent,false)}</td>
+    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"responded",!!oe.responded,false)}</td>
+    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"positive",!!oe.positive,false)}</td>
+    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"referred",!!oe.referred,true)}</td>
+  </tr>`;}).join("");
 
   renderOutreachTracker();
 }
@@ -2635,16 +2656,14 @@ function renderOutreachTracker() {
 
   const all = loadOutreach();
 
-  // Update stats tiles
+  // Stats — using boolean fields
   const s = {total:all.length, notsent:0, noreply:0, positive:0, meeting:0, negative:0};
   all.forEach(e => {
-    const r = (e.response || "No reply");
-    const o = (e.outcome  || "").toLowerCase();
-    if (!e.dateSent && o.includes("not sent")) s.notsent++;
-    else if (r === "Positive") s.positive++;
-    else if (r === "Meeting scheduled") s.meeting++;
-    else if (r === "Negative") s.negative++;
-    else s.noreply++;
+    if (!e.sent)                              s.notsent++;
+    else if (e.sent && !e.responded)          s.noreply++;
+    else if (e.positive)                      s.positive++;
+    else if (e.referred)                      s.meeting++;
+    else                                      s.negative++;
   });
   const tid = id => document.getElementById(id);
   if (tid("ot-stat-total"))    tid("ot-stat-total").textContent    = s.total;
@@ -2654,35 +2673,36 @@ function renderOutreachTracker() {
   if (tid("ot-stat-meeting"))  tid("ot-stat-meeting").textContent  = s.meeting;
   if (tid("ot-stat-negative")) tid("ot-stat-negative").textContent = s.negative;
 
-  // Filter by response
+  // Filter
   const FILTER_MATCH = {
     "all":      () => true,
-    "not-sent": e => !e.dateSent && (e.outcome||"").toLowerCase().includes("not sent"),
-    "no-reply": e => (e.response||"No reply")==="No reply" && !(!e.dateSent&&(e.outcome||"").toLowerCase().includes("not sent")),
-    "positive": e => e.response==="Positive",
-    "meeting":  e => e.response==="Meeting scheduled",
-    "negative": e => e.response==="Negative",
+    "not-sent": e => !e.sent,
+    "no-reply": e => e.sent && !e.responded,
+    "positive": e => !!e.positive,
+    "referred": e => !!e.referred,
+    "negative": e => e.responded && !e.positive && !e.referred,
   };
   const matchFn = FILTER_MATCH[otActiveFilter] || FILTER_MATCH.all;
   let arr = all.filter(matchFn);
 
   // Sort
-  const RESP_O = {"Not sent":0,"No reply":1,"Positive":2,"Meeting scheduled":3,"Negative":4};
   const OT_VAL = {
     faculty:   e => (e.faculty||"").toLowerCase(),
     program:   e => (e.program||"").toLowerCase(),
     dept:      e => (e.dept||"").toLowerCase(),
     email:     e => (e.email||"").toLowerCase(),
     dateSent:  e => e.dateSent || "",
-    response:  e => RESP_O[e.response] ?? 1,
-    followUp:  e => e.followUp || "",
+    sent:      e => e.sent ? 0 : 1,
+    responded: e => e.responded ? 0 : 1,
+    positive:  e => e.positive ? 0 : 1,
+    referred:  e => e.referred ? 0 : 1,
     outcome:   e => (e.outcome||"").toLowerCase(),
   };
   arr = arr.slice().sort((a,b) => {
     const fn = OT_VAL[OT_S.col] || OT_VAL.dateSent;
     return _cmp(fn(a), fn(b), OT_S.dir);
   });
-  _updateArrows(OT_S, {faculty:"ot-th-faculty",program:"ot-th-program",dept:"ot-th-dept",email:"ot-th-email",dateSent:"ot-th-date",response:"ot-th-response",followUp:"ot-th-followup",outcome:"ot-th-outcome"});
+  _updateArrows(OT_S, {faculty:"ot-th-faculty",program:"ot-th-program",dept:"ot-th-dept",email:"ot-th-email",dateSent:"ot-th-date",sent:"ot-th-sent",responded:"ot-th-responded",positive:"ot-th-positive",referred:"ot-th-referred",outcome:"ot-th-outcome"});
 
   if (countEl) countEl.textContent = arr.length !== all.length
     ? `${arr.length} of ${all.length} shown`
@@ -2702,8 +2722,10 @@ function renderOutreachTracker() {
       <td style="font-size:11px;color:var(--muted)">${e.dept || "—"}</td>
       <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${e.email || "—"}</td>
       <td style="font-family:var(--mono);font-size:11.5px;white-space:nowrap;color:var(--text2)">${e.dateSent || "—"}</td>
-      <td>${otResponseChip(e.response || "No reply")}</td>
-      <td style="font-family:var(--mono);font-size:11.5px;color:var(--muted)">${e.followUp || "—"}</td>
+      <td style="text-align:center"><button onclick="toggleOT('${e.id}','sent')" class="row-btn${e.sent?' tog-on':' tog-no'}" title="Toggle sent" style="font-size:15px;font-weight:700">${e.sent?'✓':'✗'}</button></td>
+      <td style="text-align:center"><button onclick="toggleOT('${e.id}','responded')" class="row-btn${e.responded?' tog-on':' tog-no'}" title="Toggle response received" style="font-size:15px;font-weight:700">${e.responded?'✓':'✗'}</button></td>
+      <td style="text-align:center"><button onclick="toggleOT('${e.id}','positive')" class="row-btn${e.positive?' tog-on':' tog-no'}" title="Toggle positive response" style="font-size:15px;font-weight:700">${e.positive?'✓':'✗'}</button></td>
+      <td style="text-align:center"><button onclick="toggleOT('${e.id}','referred')" class="row-btn${e.referred?' tog-ref':''}" title="Toggle referred to someone" style="font-size:15px;font-weight:700">${e.referred?'✓':'—'}</button></td>
       <td style="font-size:12px;color:var(--text2)">${e.outcome || "—"}</td>
       <td style="white-space:nowrap">
         <button onclick="editOutreachEntry('${e.id}')" class="row-btn" title="Edit">✎</button>
@@ -2728,9 +2750,11 @@ function openOutreachModal(editId) {
       document.getElementById("ot-f-dept").value     = e.dept     || "";
       document.getElementById("ot-f-email").value    = e.email    || "";
       document.getElementById("ot-f-date").value     = e.dateSent || "";
-      document.getElementById("ot-f-response").value = e.response || "No reply";
-      document.getElementById("ot-f-followup").value = e.followUp || "";
-      document.getElementById("ot-f-outcome").value  = e.outcome  || "";
+      document.getElementById("ot-f-sent").checked      = !!e.sent;
+      document.getElementById("ot-f-responded").checked = !!e.responded;
+      document.getElementById("ot-f-positive").checked  = !!e.positive;
+      document.getElementById("ot-f-referred").checked  = !!e.referred;
+      document.getElementById("ot-f-outcome").value     = e.outcome || "";
     }
   } else {
     title.textContent = "Add Outreach Entry";
@@ -2740,9 +2764,11 @@ function openOutreachModal(editId) {
     document.getElementById("ot-f-dept").value     = "";
     document.getElementById("ot-f-email").value    = "";
     document.getElementById("ot-f-date").value     = new Date().toISOString().slice(0,10);
-    document.getElementById("ot-f-response").value = "No reply";
-    document.getElementById("ot-f-followup").value = "";
-    document.getElementById("ot-f-outcome").value  = "Pending";
+    document.getElementById("ot-f-sent").checked      = false;
+    document.getElementById("ot-f-responded").checked = false;
+    document.getElementById("ot-f-positive").checked  = false;
+    document.getElementById("ot-f-referred").checked  = false;
+    document.getElementById("ot-f-outcome").value     = "";
   }
   modal.style.display = "flex";
   setTimeout(() => { const f = document.getElementById("ot-f-faculty"); if (f) f.focus(); }, 60);
@@ -2764,9 +2790,11 @@ function saveOutreachEntry() {
     dept:     document.getElementById("ot-f-dept").value.trim(),
     email:    document.getElementById("ot-f-email").value.trim(),
     dateSent: document.getElementById("ot-f-date").value,
-    response: document.getElementById("ot-f-response").value,
-    followUp: document.getElementById("ot-f-followup").value,
-    outcome:  document.getElementById("ot-f-outcome").value.trim(),
+    sent:      document.getElementById("ot-f-sent").checked,
+    responded: document.getElementById("ot-f-responded").checked,
+    positive:  document.getElementById("ot-f-positive").checked,
+    referred:  document.getElementById("ot-f-referred").checked,
+    outcome:   document.getElementById("ot-f-outcome").value.trim(),
   };
 
   const arr = loadOutreach();
@@ -2779,6 +2807,42 @@ function saveOutreachEntry() {
   saveOutreach(arr);
   closeOutreachModal();
   renderOutreachTracker();
+}
+
+function toggleOT(id, field) {
+  const arr = loadOutreach();
+  const idx = arr.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  arr[idx][field] = !arr[idx][field];
+  // Auto-stamp date when marking as sent
+  if (field === "sent" && arr[idx].sent && !arr[idx].dateSent)
+    arr[idx].dateSent = new Date().toISOString().slice(0,10);
+  saveOutreach(arr);
+  renderOutreachTracker();
+  renderOutreach(); // keep priority list in sync
+}
+
+function toggleOTByKey(faculty, prog, field) {
+  const arr = loadOutreach();
+  let idx = arr.findIndex(e =>
+    e.faculty.toLowerCase() === faculty.toLowerCase() &&
+    e.program.toLowerCase() === prog.toLowerCase()
+  );
+  if (idx < 0) {
+    // Create entry on the fly
+    arr.push({
+      id: "ot_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
+      faculty, program: prog, dept: "", email: "", dateSent: "",
+      sent: false, responded: false, positive: false, referred: false, outcome: ""
+    });
+    idx = arr.length - 1;
+  }
+  arr[idx][field] = !arr[idx][field];
+  if (field === "sent" && arr[idx].sent && !arr[idx].dateSent)
+    arr[idx].dateSent = new Date().toISOString().slice(0,10);
+  saveOutreach(arr);
+  renderOutreachTracker();
+  renderOutreach();
 }
 
 function editOutreachEntry(id) { openOutreachModal(id); }
@@ -2805,10 +2869,12 @@ function seedOutreachFromPortfolio() {
           program:  p.name,
           dept:     p.dept || "",
           email:    "",
-          dateSent: "",
-          response: "No reply",
-          followUp: "",
-          outcome:  "Not sent",
+          dateSent:  "",
+          sent:      false,
+          responded: false,
+          positive:  false,
+          referred:  false,
+          outcome:   "",
         });
       }
     });
