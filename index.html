@@ -192,6 +192,9 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
 /* ── Waiver / filter ─────────────────────────────────────────── */
 .savings-badge { font-family: var(--mono); font-size: 11px; color: var(--green); font-weight: 700; }
+.row-btn { display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:13px;line-height:1;transition:background .15s,color .15s,border-color .15s; }
+.row-btn:hover { background:var(--accent-bg);color:var(--accent);border-color:var(--accent-glow); }
+.row-btn.danger:hover { background:var(--red-bg);color:var(--red);border-color:var(--red); }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .filter-btn { font-size: 11px; font-family: var(--sans); font-weight: 500; padding: 5px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: 5px; transition: all .15s; }
 .filter-btn:hover { border-color: var(--border2); color: var(--text2); }
@@ -482,7 +485,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   <div class="template-box">
     <strong>Subject:</strong> Prospective PhD applicant — <span class="field">[Your specific topic]</span> × <span class="field">[their recent paper/project]</span><br><br>
     Dear Prof. <span class="field">[Last Name]</span>,<br><br>
-    I am a Master's student at NYU working on <span class="field">[1–2 sentences on your ECG/EEG/VQ-VAE work]</span>. I recently read your paper "<span class="field">[exact title, year]</span>" and found that <span class="field">[specific connection to your work]</span>.<br><br>
+    I recently completed my M.S. in Robotics at NYU Tandon and am currently working independently on <span class="field">[1–2 sentences on your ECG/EEG/VQ-VAE work]</span>. I recently read your paper "<span class="field">[exact title, year]</span>" and found that <span class="field">[specific connection to your work]</span>.<br><br>
     I am applying to your PhD program for Fall 2027 and would be interested in joining your group to explore <span class="field">[specific direction — e.g., discrete codebook representations of ECG signals for cross-patient transfer learning]</span>. I believe my background in <span class="field">[signal processing / VQ-VAE / wearable sensing]</span> could contribute to <span class="field">[their specific project or direction]</span>.<br><br>
     Would you be open to a brief 15-minute Zoom call to discuss whether there is mutual interest and if you plan to take new PhD students for Fall 2027? I have attached my CV.<br><br>
     Thank you for your time.<br>
@@ -496,6 +499,44 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <th id="orp-th-tier" onclick="orpSort('tier')" style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
     <th>Email (est.)</th><th>Research Hook</th><th>When to Contact</th>
   </tr></thead><tbody id="outreach-body"></tbody></table></div>
+  <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
+    <span>Outreach Tracker</span>
+    <span style="display:flex;align-items:center;gap:8px">
+      <span id="ot-count" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
+      <button onclick="seedOutreachFromPortfolio()" title="Pre-fill one row per faculty member from your portfolio" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">⬇ Import from Portfolio</button>
+      <button onclick="openOutreachModal()" style="padding:5px 14px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer">+ Add Entry</button>
+    </span>
+  </div>
+  <div class="tiles" style="margin-top:12px;margin-bottom:14px" id="ot-tiles">
+    <div class="tile"><div class="tile-num" id="ot-stat-total">0</div><div class="tile-label">Total</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-notsent" style="color:var(--muted)">0</div><div class="tile-label">Not Sent</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-noreply" style="color:var(--yellow)">0</div><div class="tile-label">No Reply</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-positive" style="color:var(--green)">0</div><div class="tile-label">Positive</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-meeting" style="color:var(--accent)">0</div><div class="tile-label">Meeting 📅</div></div>
+    <div class="tile"><div class="tile-num" id="ot-stat-negative" style="color:var(--red)">0</div><div class="tile-label">Negative</div></div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="ot-filter-row">
+    <button class="filter-btn active" onclick="filterOT('all',this)">All</button>
+    <button class="filter-btn" onclick="filterOT('not-sent',this)">Not Sent</button>
+    <button class="filter-btn" onclick="filterOT('no-reply',this)">No Reply</button>
+    <button class="filter-btn" onclick="filterOT('positive',this)">Positive</button>
+    <button class="filter-btn" onclick="filterOT('meeting',this)">Meeting</button>
+    <button class="filter-btn" onclick="filterOT('negative',this)">Negative</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr>
+    <th id="ot-th-faculty" onclick="otSort('faculty')" style="cursor:pointer;user-select:none">Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-program" onclick="otSort('program')" style="cursor:pointer;user-select:none">University<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-dept" onclick="otSort('dept')" style="cursor:pointer;user-select:none">Dept<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-email" onclick="otSort('email')" style="cursor:pointer;user-select:none">Email<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-date" onclick="otSort('dateSent')" style="cursor:pointer;user-select:none;color:var(--text)">Date Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
+    <th id="ot-th-response" onclick="otSort('response')" style="cursor:pointer;user-select:none">Response<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-followup" onclick="otSort('followUp')" style="cursor:pointer;user-select:none">Follow-up<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th id="ot-th-outcome" onclick="otSort('outcome')" style="cursor:pointer;user-select:none">Outcome<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th></th>
+  </tr></thead><tbody id="outreach-tracker-body"></tbody></table>
+  <div id="ot-empty" style="display:none;padding:24px;text-align:center;color:var(--muted);font-size:13px">No outreach entries yet — click <strong>+ Add Entry</strong> to log your first email.</div>
+  </div>
+
   <div class="section-head">Outreach Rules</div>
   <div class="card" style="max-width:640px">
     <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do reach out</strong> when you can name a specific paper of theirs and explain a concrete research connection. Target 8–12 emails total.</p>
@@ -633,47 +674,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     </table>
   </div>
 
-  <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">
-    <span>② Faculty Outreach Tracker</span>
-    <span style="display:flex;align-items:center;gap:8px">
-      <span id="ot-count" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
-      <button onclick="seedOutreachFromPortfolio()" title="Pre-fill one row per faculty member from your portfolio" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">⬇ Import from Portfolio</button>
-      <button onclick="openOutreachModal()" style="padding:5px 14px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer">+ Add Entry</button>
-    </span>
-  </div>
-  <!-- Outreach stats strip -->
-  <div class="tiles" style="margin-top:12px;margin-bottom:14px" id="ot-tiles">
-    <div class="tile"><div class="tile-num" id="ot-stat-total">0</div><div class="tile-label">Total</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-notsent" style="color:var(--muted)">0</div><div class="tile-label">Not Sent</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-noreply" style="color:var(--yellow)">0</div><div class="tile-label">No Reply</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-positive" style="color:var(--green)">0</div><div class="tile-label">Positive</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-meeting" style="color:var(--accent)">0</div><div class="tile-label">Meeting 📅</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-negative" style="color:var(--red)">0</div><div class="tile-label">Negative</div></div>
-  </div>
-  <!-- Response filter chips -->
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="ot-filter-row">
-    <button class="filter-btn active" onclick="filterOT('all',this)">All</button>
-    <button class="filter-btn" onclick="filterOT('not-sent',this)">Not Sent</button>
-    <button class="filter-btn" onclick="filterOT('no-reply',this)">No Reply</button>
-    <button class="filter-btn" onclick="filterOT('positive',this)">Positive</button>
-    <button class="filter-btn" onclick="filterOT('meeting',this)">Meeting</button>
-    <button class="filter-btn" onclick="filterOT('negative',this)">Negative</button>
-  </div>
-  <div class="table-wrap"><table><thead><tr>
-    <th id="ot-th-faculty" onclick="otSort('faculty')" style="cursor:pointer;user-select:none">Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-program" onclick="otSort('program')" style="cursor:pointer;user-select:none">University<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-dept" onclick="otSort('dept')" style="cursor:pointer;user-select:none">Dept<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-email" onclick="otSort('email')" style="cursor:pointer;user-select:none">Email<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-date" onclick="otSort('dateSent')" style="cursor:pointer;user-select:none;color:var(--text)">Date Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-    <th id="ot-th-response" onclick="otSort('response')" style="cursor:pointer;user-select:none">Response<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-followup" onclick="otSort('followUp')" style="cursor:pointer;user-select:none">Follow-up<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-outcome" onclick="otSort('outcome')" style="cursor:pointer;user-select:none">Outcome<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th></th>
-  </tr></thead><tbody id="outreach-tracker-body"></tbody></table>
-  <div id="ot-empty" style="display:none;padding:24px;text-align:center;color:var(--muted);font-size:13px">No outreach entries yet — click <strong>+ Add Entry</strong> to log your first email.</div>
-  </div>
-
-  <div class="section-head">③ Recommendation Letter Tracker</div>
+  <div class="section-head">② Recommendation Letter Tracker</div>
   <div class="table-wrap"><table><thead><tr>
     <th>Recommender</th><th>Relationship</th><th>Programs (#)</th><th>Asked</th><th>Confirmed</th><th>Submitted</th><th>Notes</th>
   </tr></thead><tbody>
@@ -1661,8 +1662,8 @@ function renderIS() {
       <td>${isStatusChip(s.status)}</td>
       <td style="font-size:11.5px;color:var(--muted);max-width:200px">${s.notes || "—"}</td>
       <td style="white-space:nowrap">
-        <button onclick="editISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Edit">✎</button>
-        <button onclick="deleteISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Delete">✕</button>
+        <button onclick="editISEntry('${s.id}')" class="row-btn" title="Edit">✎</button>
+        <button onclick="deleteISEntry('${s.id}')" class="row-btn danger" title="Delete">✕</button>
       </td>
     </tr>`).join("");
 }
@@ -2230,8 +2231,7 @@ function fwLinkHTML(id) {
     return `<span style="display:flex;align-items:center;gap:4px">
       <a href="${link}" target="_blank" rel="noopener" title="${tip}"
          style="font-size:11px;color:var(--accent);text-decoration:none;max-width:80px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle">🔗 Link</a>
-      <button onclick="editFwLink(${id})" title="Edit"
-        style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;padding:0 2px">✏️</button>
+      <button onclick="editFwLink(${id})" title="Edit" class="row-btn" style="width:22px;height:22px;font-size:11px">✎</button>
     </span>`;
   }
   return `<button onclick="editFwLink(${id})"
@@ -2706,8 +2706,8 @@ function renderOutreachTracker() {
       <td style="font-family:var(--mono);font-size:11.5px;color:var(--muted)">${e.followUp || "—"}</td>
       <td style="font-size:12px;color:var(--text2)">${e.outcome || "—"}</td>
       <td style="white-space:nowrap">
-        <button onclick="editOutreachEntry('${e.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Edit">✎</button>
-        <button onclick="deleteOutreachEntry('${e.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Delete">✕</button>
+        <button onclick="editOutreachEntry('${e.id}')" class="row-btn" title="Edit">✎</button>
+        <button onclick="deleteOutreachEntry('${e.id}')" class="row-btn danger" title="Delete">✕</button>
       </td>
     </tr>`).join("");
 }
