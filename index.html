@@ -489,7 +489,13 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     Thank you for your time.<br>
     <span class="field">[Your name]</span>
   </div>
-  <div class="section-head">Faculty Contacts</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <div class="section-head" style="margin-bottom:0">Faculty Contacts</div>
+    <button onclick="importFacultyFromPortfolio()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      Import from Portfolio
+    </button>
+  </div>
   <div class="table-wrap" style="overflow-x:auto;overflow-y:auto;max-height:520px">
   <table id="outreach-contact-table">
     <thead style="position:sticky;top:0;z-index:10"><tr>
@@ -2524,6 +2530,25 @@ function facDeleteRow(progId, name) {
   const key = _facKey(progId, name);
   window._fac_set(key, 'hidden', true);
   renderOutreach();
+}
+
+function importFacultyFromPortfolio() {
+  // Un-hide any previously removed faculty so all portfolio faculty are visible
+  let restored = 0;
+  PORTFOLIO.forEach(p => {
+    toArr(p.faculty).forEach(name => {
+      const name_trim = name.trim();
+      if (!name_trim) return;
+      const key = _facKey(p.id, name_trim);
+      const state = window._fac_get(key) || {};
+      if (state.hidden) {
+        window._fac_set(key, 'hidden', false);
+        restored++;
+      }
+    });
+  });
+  renderOutreach();
+  if (restored > 0) alert(`Restored ${restored} hidden faculty from your portfolio.`);
 }
 
 // Escape name for use inside a double-quoted onclick attribute
