@@ -489,6 +489,10 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     Thank you for your time.<br>
     <span class="field">[Your name]</span>
   </div>
+  <div class="section-head">Faculty Contacts</div>
+  <div class="table-wrap"><table><thead><tr>
+    <th>Faculty</th><th>Program</th><th>Tier</th><th>Email (est.)</th><th>Research Hook</th><th>When to Contact</th>
+  </tr></thead><tbody id="outreach-body"></tbody></table></div>
   <div class="section-head">Outreach Rules</div>
   <div class="card" style="max-width:640px">
     <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do reach out</strong> when you can name a specific paper of theirs and explain a concrete research connection. Target 8–12 emails total.</p>
@@ -2474,6 +2478,12 @@ const OUTREACH_DATA=[
 
 function renderOutreach() {
   const data = OUTREACH_DATA;
+
+  document.getElementById("outreach-body").innerHTML = data.map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
+    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
+    <td style="font-size:11.5px">${r.hook}</td><td style="font-size:11.5px">${r.when}</td>
+  </tr>`).join("");
 
   document.getElementById("outreach-tracker-body").innerHTML = data.map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td>
