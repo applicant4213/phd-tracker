@@ -1219,13 +1219,14 @@ function _scheduleRender() {
 let _fbReady = false;
 _fbRef("").on("value", snap => {
   const data = snap.val() || {};
-  _cache.prog     = data.prog     || {};
-  _cache.custom   = data.custom   ? Object.values(data.custom)   : [];
-  _cache.deleted  = data.deleted  || {};
-  _cache.overrides= data.overrides|| {};
-  _cache.nextId   = data.nextId   || 1001;
-  _cache.li       = data.li       || {};
-  _cache.resume   = data.resume   || "";
+  _cache.prog           = data.prog           || {};
+  _cache.custom         = data.custom         ? Object.values(data.custom) : [];
+  _cache.deleted        = data.deleted        || {};
+  _cache.overrides      = data.overrides      || {};
+  _cache.nextId         = data.nextId         || 1001;
+  _cache.li             = data.li             || {};
+  _cache.resume         = data.resume         || "";
+  _cache.facultyOutreach= data.facultyOutreach|| {};
 
   // IS: seed on first load if empty
   if (!data.is) {
