@@ -490,9 +490,24 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <span class="field">[Your name]</span>
   </div>
   <div class="section-head">Faculty Contacts</div>
-  <div class="table-wrap"><table><thead><tr>
-    <th>Faculty</th><th>Program</th><th>Tier</th><th>Email (est.)</th><th>Research Hook</th><th>When to Contact</th>
-  </tr></thead><tbody id="outreach-body"></tbody></table></div>
+  <div class="table-wrap" style="overflow-x:auto">
+  <table id="outreach-contact-table">
+    <thead><tr>
+      <th onclick="sortOutreach('faculty')"  style="cursor:pointer;white-space:nowrap">Faculty <span style="font-size:9px;color:var(--muted)" id="oc-sort-faculty">↕</span></th>
+      <th onclick="sortOutreach('prog')"     style="cursor:pointer;white-space:nowrap">University <span style="font-size:9px;color:var(--muted)" id="oc-sort-prog">↕</span></th>
+      <th>Dept</th>
+      <th>Email</th>
+      <th onclick="sortOutreach('dateSent')" style="cursor:pointer;white-space:nowrap">Date Sent <span style="font-size:9px;color:var(--muted)" id="oc-sort-dateSent">↕</span></th>
+      <th style="white-space:nowrap">Sent</th>
+      <th style="white-space:nowrap">Response</th>
+      <th style="white-space:nowrap">Positive</th>
+      <th>Referred</th>
+      <th>Notes</th>
+      <th style="width:50px"></th>
+    </tr></thead>
+    <tbody id="outreach-body"></tbody>
+  </table>
+  </div>
   <div class="section-head">Outreach Rules</div>
   <div class="card" style="max-width:640px">
     <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do reach out</strong> when you can name a specific paper of theirs and explain a concrete research connection. Target 8–12 emails total.</p>
@@ -2476,6 +2491,48 @@ const OUTREACH_DATA=[
     {pri:4,faculty:"Thomas Ploetz",        prog:"Georgia Tech CS",   tier:"red",   email:"tploetz@gatech.edu (est.)",          hook:"HAR + wearable sensing — cite IMU/label noise work",          when:"Oct 15 – Nov 1"},
 ];
 
+function _facKey(progId, name) {
+  return 'fac_' + progId + '_' + name.replace(/[^a-z0-9]/gi,'_').toLowerCase();
+}
+
+// Tri-state toggle: null/undefined → true → false → null
+function facCycleField(progId, name, field) {
+  const key = _facKey(progId, name);
+  const state = window._fac_get(key) || {};
+  const cur = state[field];
+  const next = (cur === true) ? false : (cur === false) ? null : true;
+  // Auto-set dateSent when marking Sent = true for the first time
+  if (field === 'sent' && next === true && !state.dateSent) {
+    window._fac_set(key, 'dateSent', new Date().toISOString().split('T')[0]);
+  }
+  window._fac_set(key, field, next);
+  renderOutreach();
+}
+
+function facSetField(progId, name, field, val) {
+  window._fac_set(_facKey(progId, name), field, val);
+}
+
+function facDeleteRow(progId, name) {
+  const key = _facKey(progId, name);
+  window._fac_set(key, 'hidden', true);
+  renderOutreach();
+}
+
+// tri-state button renderer
+function _facBtn(progId, name, field, val) {
+  const pj = JSON.stringify(progId), nj = JSON.stringify(name), fj = JSON.stringify(field);
+  if (val === true)  return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,.12)">✓</div>`;
+  if (val === false) return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--red);color:var(--red);background:rgba(239,68,68,.12)">✗</div>`;
+  return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;border:2px solid var(--border2);color:var(--muted)">—</div>`;
+}
+
+let _ocSort = {key:'faculty', dir:1};
+function sortOutreach(key) {
+  if (_ocSort.key === key) _ocSort.dir *= -1; else { _ocSort.key = key; _ocSort.dir = 1; }
+  renderOutreach();
+}
+
 function renderOutreach() {
   // Build rows from portfolio faculty arrays; augment with OUTREACH_DATA details when name matches
   const rows = [];
@@ -2483,32 +2540,75 @@ function renderOutreach() {
     toArr(p.faculty).forEach(name => {
       const name_trim = name.trim();
       if (!name_trim) return;
+      const key = _facKey(p.id, name_trim);
+      const state = window._fac_get(key) || {};
+      if (state.hidden) return;
       const extra = OUTREACH_DATA.find(r => r.faculty.toLowerCase() === name_trim.toLowerCase()) || {};
       rows.push({
+        progId: p.id,
         faculty: name_trim,
         prog: p.name,
-        tier: p.tier,
-        email: extra.email || "—",
-        hook: extra.hook || "—",
-        when: extra.when || "—",
+        dept: p.dept || "—",
+        email: extra.email || state.email || "—",
+        dateSent: state.dateSent || "—",
+        sent: state.sent ?? null,
+        response: state.response ?? null,
+        positive: state.positive ?? null,
+        referred: state.referred || "—",
+        notes: state.notes || "—",
       });
     });
   });
 
-  document.getElementById("outreach-body").innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
-    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
-    <td style="font-size:11.5px">${r.hook}</td><td style="font-size:11.5px">${r.when}</td>
-  </tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet.</td></tr>`;
+  // Sort
+  rows.sort((a, b) => {
+    let av = a[_ocSort.key] || "", bv = b[_ocSort.key] || "";
+    if (av === "—") av = ""; if (bv === "—") bv = "";
+    return String(av).localeCompare(String(bv)) * _ocSort.dir;
+  });
 
-  document.getElementById("outreach-tracker-body").innerHTML = rows.length ? rows.map(r=>`<tr>
+  // Update sort arrows
+  ['faculty','prog','dateSent'].forEach(k => {
+    const el = document.getElementById('oc-sort-'+k);
+    if (el) el.textContent = _ocSort.key === k ? (_ocSort.dir === 1 ? '↓' : '↑') : '↕';
+  });
+
+  document.getElementById("outreach-body").innerHTML = rows.length ? rows.map(r => {
+    const pj = JSON.stringify(r.progId), nj = JSON.stringify(r.faculty);
+    return `<tr>
+    <td style="font-weight:600;color:var(--text);white-space:nowrap">${r.faculty}</td>
+    <td style="font-size:12px;color:var(--accent)">${r.prog}</td>
+    <td style="font-size:11.5px;color:var(--muted)">${r.dept}</td>
+    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
+    <td style="font-size:11px;font-family:var(--mono);color:var(--muted);white-space:nowrap">${r.dateSent}</td>
+    <td style="text-align:center">${_facBtn(r.progId,r.faculty,'sent',r.sent)}</td>
+    <td style="text-align:center">${_facBtn(r.progId,r.faculty,'response',r.response)}</td>
+    <td style="text-align:center">${_facBtn(r.progId,r.faculty,'positive',r.positive)}</td>
+    <td><span contenteditable="true" style="font-size:11.5px;color:var(--muted);outline:none;display:block;min-width:60px" onblur="facSetField(${pj},${nj},'referred',this.textContent.trim())">${r.referred}</span></td>
+    <td><span contenteditable="true" style="font-size:11.5px;color:var(--muted);outline:none;display:block;min-width:80px" onblur="facSetField(${pj},${nj},'notes',this.textContent.trim())">${r.notes}</span></td>
+    <td style="white-space:nowrap;text-align:right">
+      <span onclick="facDeleteRow(${pj},${nj})" title="Remove from list" style="cursor:pointer;color:var(--muted);font-size:14px;padding:2px 5px;border-radius:4px;border:1px solid var(--border2)">✕</span>
+    </td>
+  </tr>`;
+  }).join("") : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet. Add faculty names to programs in the Portfolio tab.</td></tr>`;
+
+  // Also update Trackers tab Faculty Outreach Tracker
+  document.getElementById("outreach-tracker-body").innerHTML = rows.length ? rows.map(r => {
+    const sentChip = r.sent === true  ? `<span class="status-chip" style="background:rgba(34,197,94,.12);color:var(--green);border-color:var(--green)">Sent ✓</span>`
+                   : r.sent === false ? `<span class="status-chip chip-warning">Skipped</span>`
+                   : `<span class="status-chip chip-not-started">Not Sent</span>`;
+    const outChip = r.positive === true  ? `<span class="status-chip" style="background:rgba(34,197,94,.12);color:var(--green);border-color:var(--green)">Positive</span>`
+                  : r.positive === false ? `<span class="status-chip chip-warning">No</span>`
+                  : `<span class="status-chip chip-not-started">Pending</span>`;
+    return `<tr>
     <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td>
     <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.email}</td>
-    <td class="mono" style="color:var(--muted)">—</td>
-    <td><span class="status-chip chip-not-started">Not Sent</span></td>
-    <td class="mono" style="color:var(--muted)">—</td>
-    <td><span class="status-chip chip-not-started">Pending</span></td>
-  </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet.</td></tr>`;
+    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.dateSent}</td>
+    <td>${sentChip}</td>
+    <td style="font-size:11.5px;color:var(--muted)">${r.referred}</td>
+    <td>${outChip}</td>
+  </tr>`;
+  }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet.</td></tr>`;
 }
 
 /* ────────────────────────────────────────────────────────────
