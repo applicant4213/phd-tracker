@@ -192,14 +192,6 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
 /* ── Waiver / filter ─────────────────────────────────────────── */
 .savings-badge { font-family: var(--mono); font-size: 11px; color: var(--green); font-weight: 700; }
-.row-btn { display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:13px;line-height:1;transition:background .15s,color .15s,border-color .15s; }
-.row-btn:hover { background:var(--accent-bg);color:var(--accent);border-color:var(--accent-glow); }
-.row-btn.danger:hover { background:var(--red-bg);color:var(--red);border-color:var(--red); }
-.row-btn.tog-on { background:var(--accent-bg);color:var(--accent);border-color:var(--accent-glow);font-weight:700; }
-.row-btn.tog-no { color:var(--red);border-color:var(--red-dot);background:var(--red-bg); }
-.row-btn.tog-ref { background:#EEF2FF;color:#4F46E5;border-color:#818CF8; }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .row-btn.tog-ref{background:#1E1B4B;color:#818CF8;border-color:#4F46E5;}}
-:root[data-theme="dark"] .row-btn.tog-ref{background:#1E1B4B;color:#818CF8;border-color:#4F46E5;}
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .filter-btn { font-size: 11px; font-family: var(--sans); font-weight: 500; padding: 5px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: 5px; transition: all .15s; }
 .filter-btn:hover { border-color: var(--border2); color: var(--text2); }
@@ -399,9 +391,6 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
   <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
   <button class="filter-btn" id="pf-nynj-btn" onclick="pfToggleNYNJ(this)">NY/NJ only</button>
-  <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
-  <input id="pf-search" type="search" placeholder="Search programs, faculty, location…" oninput="pfSearch(this.value)"
-    style="padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12px;width:220px;outline:none">
   <span id="pf-count" style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:4px"></span>
   <div style="flex:1"></div>
   <button onclick="exportToExcel()" title="Export all data to Excel" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
@@ -460,7 +449,17 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
 
   <div class="section-head" style="margin-top:28px">All Programs — Flashcard View</div>
+  <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px">Click any card to view full program details.</p>
   <div class="cards" id="top-picks-cards" style="flex-wrap:wrap;max-height:none"></div>
+
+  <!-- Flashcard detail panel -->
+  <div id="card-detail-panel" style="display:none;margin-top:24px;border:1px solid var(--border2);border-radius:10px;background:var(--surface);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <div style="font-weight:700;font-size:15px;color:var(--text)" id="cdp-title">Program Details</div>
+      <button onclick="closeCardDetail()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div id="cdp-body" style="padding:18px 20px"></div>
+  </div>
 </div>
 
 <!-- ══ TAB 3 · REQUIREMENTS ══════════════════════════════════ -->
@@ -470,13 +469,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <p>Verify all dates at program websites — most reflect previous cycle. <span class="src src-p">P</span> = provisional.</p>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th id="req-th-name" onclick="reqSort('name')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="req-th-loc" onclick="reqSort('location')" style="cursor:pointer;user-select:none">City<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="req-th-dl" onclick="reqSort('deadline')" style="cursor:pointer;user-select:none;color:var(--text)">Deadline<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↑</span></th>
-    <th id="req-th-fee" onclick="reqSort('fee')" style="cursor:pointer;user-select:none">Fee<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="req-th-gre" onclick="reqSort('gre')" style="cursor:pointer;user-select:none">GRE<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="req-th-toefl" onclick="reqSort('toefl')" style="cursor:pointer;user-select:none">TOEFL Min.<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th>SOP Length</th><th>LORs</th><th>Writing Sample</th><th>SOP Draft</th>
+    <th>Program</th><th>City</th><th>Deadline</th><th>Fee</th><th>GRE</th><th>TOEFL Min.</th><th>SOP Length</th><th>LORs</th><th>Writing Sample</th><th>SOP Draft</th>
   </tr></thead><tbody id="req-body"></tbody></table></div>
 </div>
 
@@ -490,64 +483,12 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   <div class="template-box">
     <strong>Subject:</strong> Prospective PhD applicant — <span class="field">[Your specific topic]</span> × <span class="field">[their recent paper/project]</span><br><br>
     Dear Prof. <span class="field">[Last Name]</span>,<br><br>
-    I recently completed my M.S. in Robotics at NYU Tandon and am currently working independently on <span class="field">[1–2 sentences on your ECG/EEG/VQ-VAE work]</span>. I recently read your paper "<span class="field">[exact title, year]</span>" and found that <span class="field">[specific connection to your work]</span>.<br><br>
+    I am a Master's student at NYU working on <span class="field">[1–2 sentences on your ECG/EEG/VQ-VAE work]</span>. I recently read your paper "<span class="field">[exact title, year]</span>" and found that <span class="field">[specific connection to your work]</span>.<br><br>
     I am applying to your PhD program for Fall 2027 and would be interested in joining your group to explore <span class="field">[specific direction — e.g., discrete codebook representations of ECG signals for cross-patient transfer learning]</span>. I believe my background in <span class="field">[signal processing / VQ-VAE / wearable sensing]</span> could contribute to <span class="field">[their specific project or direction]</span>.<br><br>
     Would you be open to a brief 15-minute Zoom call to discuss whether there is mutual interest and if you plan to take new PhD students for Fall 2027? I have attached my CV.<br><br>
     Thank you for your time.<br>
     <span class="field">[Your name]</span>
   </div>
-  <div class="section-head">Outreach Priority List</div>
-  <div class="table-wrap"><table><thead><tr>
-    <th id="orp-th-pri" onclick="orpSort('pri')" style="cursor:pointer;user-select:none;color:var(--text)">Priority<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↑</span></th>
-    <th id="orp-th-fac" onclick="orpSort('faculty')" style="cursor:pointer;user-select:none">Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="orp-th-prog" onclick="orpSort('prog')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="orp-th-tier" onclick="orpSort('tier')" style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th>Email (est.)</th>
-    <th style="text-align:center">Sent</th>
-    <th style="text-align:center">Response</th>
-    <th style="text-align:center">Positive</th>
-    <th style="text-align:center">Referred</th>
-  </tr></thead><tbody id="outreach-body"></tbody></table></div>
-  <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
-    <span>Outreach Tracker</span>
-    <span style="display:flex;align-items:center;gap:8px">
-      <span id="ot-count" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
-      <button onclick="seedOutreachFromPortfolio()" title="Pre-fill one row per faculty member from your portfolio" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">⬇ Import from Portfolio</button>
-      <button onclick="openOutreachModal()" style="padding:5px 14px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer">+ Add Entry</button>
-    </span>
-  </div>
-  <div class="tiles" style="margin-top:12px;margin-bottom:14px" id="ot-tiles">
-    <div class="tile"><div class="tile-num" id="ot-stat-total">0</div><div class="tile-label">Total</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-notsent" style="color:var(--muted)">0</div><div class="tile-label">Not Sent</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-noreply" style="color:var(--yellow)">0</div><div class="tile-label">No Reply</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-positive" style="color:var(--green)">0</div><div class="tile-label">Positive</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-meeting" style="color:#818CF8">0</div><div class="tile-label">Referred</div></div>
-    <div class="tile"><div class="tile-num" id="ot-stat-negative" style="color:var(--red)">0</div><div class="tile-label">Negative</div></div>
-  </div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="ot-filter-row">
-    <button class="filter-btn active" onclick="filterOT('all',this)">All</button>
-    <button class="filter-btn" onclick="filterOT('not-sent',this)">Not Sent</button>
-    <button class="filter-btn" onclick="filterOT('no-reply',this)">No Reply</button>
-    <button class="filter-btn" onclick="filterOT('positive',this)">Positive</button>
-    <button class="filter-btn" onclick="filterOT('referred',this)">Referred</button>
-    <button class="filter-btn" onclick="filterOT('negative',this)">Negative</button>
-  </div>
-  <div class="table-wrap"><table><thead><tr>
-    <th id="ot-th-faculty" onclick="otSort('faculty')" style="cursor:pointer;user-select:none">Faculty<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-program" onclick="otSort('program')" style="cursor:pointer;user-select:none">University<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-dept" onclick="otSort('dept')" style="cursor:pointer;user-select:none">Dept<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-email" onclick="otSort('email')" style="cursor:pointer;user-select:none">Email<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-date" onclick="otSort('dateSent')" style="cursor:pointer;user-select:none;color:var(--text)">Date Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-    <th id="ot-th-sent" onclick="otSort('sent')" style="cursor:pointer;user-select:none;text-align:center">Sent<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-responded" onclick="otSort('responded')" style="cursor:pointer;user-select:none;text-align:center">Response<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-positive" onclick="otSort('positive')" style="cursor:pointer;user-select:none;text-align:center">Positive<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-referred" onclick="otSort('referred')" style="cursor:pointer;user-select:none;text-align:center">Referred<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="ot-th-outcome" onclick="otSort('outcome')" style="cursor:pointer;user-select:none">Notes<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th></th>
-  </tr></thead><tbody id="outreach-tracker-body"></tbody></table>
-  <div id="ot-empty" style="display:none;padding:24px;text-align:center;color:var(--muted);font-size:13px">No outreach entries yet — click <strong>+ Add Entry</strong> to log your first email.</div>
-  </div>
-
   <div class="section-head">Outreach Rules</div>
   <div class="card" style="max-width:640px">
     <p style="font-size:12.5px;line-height:1.7;color:var(--text2);margin-bottom:8px"><strong style="color:var(--text)">Do reach out</strong> when you can name a specific paper of theirs and explain a concrete research connection. Target 8–12 emails total.</p>
@@ -569,14 +510,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div class="tile"><div class="tile-num" style="color:var(--green)">~$1,125</div><div class="tile-label">Scenario B (60%)</div></div>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th id="wai-th-name" onclick="waiSort('name')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="wai-th-loc" onclick="waiSort('location')" style="cursor:pointer;user-select:none">City<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="wai-th-fee" onclick="waiSort('fee')" style="cursor:pointer;user-select:none;color:var(--text)">Fee<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-    <th id="wai-th-type" onclick="waiSort('type')" style="cursor:pointer;user-select:none">Waiver Type<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="wai-th-status" onclick="waiSort('status')" style="cursor:pointer;user-select:none">Status<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th>How to Apply</th>
-    <th id="wai-th-dl" onclick="waiSort('dl')" style="cursor:pointer;user-select:none">Deadline<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="wai-th-savings" onclick="waiSort('savings')" style="cursor:pointer;user-select:none">Savings<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th>Program</th><th>City</th><th>Fee</th><th>Waiver Type</th><th>Status</th><th>How to Apply</th><th>Deadline</th><th>Savings</th>
   </tr></thead><tbody id="waiver-body"></tbody></table></div>
   <div class="section-head">International Applicant Note</div>
   <div class="card" style="max-width:640px">
@@ -615,13 +549,7 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
   <div class="section-head">Fee Breakdown by Program</div>
   <div class="table-wrap"><table><thead><tr>
-    <th id="bud-th-name" onclick="budSort('name')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="bud-th-loc" onclick="budSort('location')" style="cursor:pointer;user-select:none">City<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="bud-th-tier" onclick="budSort('tier')" style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="bud-th-fee" onclick="budSort('fee')" style="cursor:pointer;user-select:none;color:var(--text)">Fee<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-    <th>Source</th>
-    <th id="bud-th-waiver" onclick="budSort('waiver')" style="cursor:pointer;user-select:none">Waiver Available<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-    <th id="bud-th-priority" onclick="budSort('priority')" style="cursor:pointer;user-select:none">Priority<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+    <th>Program</th><th>City</th><th>Tier</th><th>Fee</th><th>Source</th><th>Waiver Available</th><th>Priority</th>
   </tr></thead><tbody id="budget-breakdown-body"></tbody></table></div>
 </div>
 
@@ -666,26 +594,31 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   </div>
 
   <div class="section-head">① Application Progress Tracker</div>
-  <div class="table-wrap">
+  <div class="table-wrap" style="overflow-y:auto;max-height:480px">
     <table>
-      <thead><tr>
-        <th id="apt-th-name" onclick="aptSort('name')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="apt-th-loc" onclick="aptSort('location')" style="cursor:pointer;user-select:none">City<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="apt-th-tier" onclick="aptSort('tier')" style="cursor:pointer;user-select:none">Tier<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="apt-th-dl" onclick="aptSort('deadline')" style="cursor:pointer;user-select:none;color:var(--text)">Deadline<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↑</span></th>
-        <th id="apt-th-fit" onclick="aptSort('fit')" style="cursor:pointer;user-select:none">My Fit<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+      <thead style="position:sticky;top:0;z-index:10"><tr>
+        <th>Program</th>
+        <th>City</th>
+        <th>Tier</th>
+        <th>Deadline</th>
+        <th>My Fit</th>
         <th>Login ID</th>
         <th>Written SOP</th>
         <th>Contacted Faculty</th>
         <th>Research Interest Doc</th>
         <th>Fee Waiver Applied</th>
-        <th id="apt-th-prog" onclick="aptSort('progress')" style="cursor:pointer;user-select:none">Progress<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+        <th>Progress</th>
       </tr></thead>
       <tbody id="app-tracker-body"></tbody>
     </table>
   </div>
 
-  <div class="section-head">② Recommendation Letter Tracker</div>
+  <div class="section-head">② Faculty Outreach Tracker</div>
+  <div class="table-wrap" style="overflow-y:auto;max-height:480px"><table><thead style="position:sticky;top:0;z-index:10"><tr>
+    <th>Faculty</th><th>Program</th><th>Email</th><th>Date Sent</th><th>Response</th><th>Follow-up</th><th>Outcome</th>
+  </tr></thead><tbody id="outreach-tracker-body"></tbody></table></div>
+
+  <div class="section-head">③ Recommendation Letter Tracker</div>
   <div class="table-wrap"><table><thead><tr>
     <th>Recommender</th><th>Relationship</th><th>Programs (#)</th><th>Asked</th><th>Confirmed</th><th>Submitted</th><th>Notes</th>
   </tr></thead><tbody>
@@ -754,12 +687,12 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   <div class="table-wrap">
     <table id="is-table">
       <thead><tr>
-        <th id="is-th-program" onclick="isSort('program')" style="cursor:pointer;user-select:none">Program<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="is-th-date" onclick="isSort('date')" style="cursor:pointer;user-select:none;color:var(--text)">Date &amp; Time<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ↓</span></th>
-        <th id="is-th-format" onclick="isSort('format')" style="cursor:pointer;user-select:none">Format<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="is-th-topic" onclick="isSort('topic')" style="cursor:pointer;user-select:none">Topic / Host<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="is-th-reg" onclick="isSort('registered')" style="cursor:pointer;user-select:none">Registered<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
-        <th id="is-th-status" onclick="isSort('status')" style="cursor:pointer;user-select:none">Status<span class="sort-arrow" style="font-size:10px;color:var(--muted);margin-left:3px"> ⇅</span></th>
+        <th>Program</th>
+        <th>Date &amp; Time</th>
+        <th>Format</th>
+        <th>Topic / Host</th>
+        <th>Registered</th>
+        <th>Status</th>
         <th>Notes</th>
         <th style="width:64px"></th>
       </tr></thead>
@@ -919,55 +852,6 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button onclick="closeSopModal()" style="padding:8px 20px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:13px;cursor:pointer">Cancel</button>
       <button onclick="saveSopModal()" style="padding:8px 20px;border-radius:7px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Save Draft</button>
-    </div>
-  </div>
-</div>
-
-<!-- Faculty Outreach Modal -->
-<div id="ot-modal" onclick="if(event.target===this)closeOutreachModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center">
-  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:min(520px,92vw);padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-size:15px;font-weight:700;color:var(--text)" id="ot-modal-title">Add Outreach Entry</div>
-      <button onclick="closeOutreachModal()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 6px">✕</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-      <div style="grid-column:1/-1">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Faculty Name *</label>
-        <input id="ot-f-faculty" placeholder="e.g. Prof. Akane Sano" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">University / Program</label>
-        <input id="ot-f-program" placeholder="e.g. Rice CS" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Department</label>
-        <input id="ot-f-dept" placeholder="e.g. Computer Science" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Email</label>
-        <input id="ot-f-email" placeholder="e.g. a.sano@rice.edu" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Date Sent</label>
-        <input id="ot-f-date" type="date" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-      <div style="grid-column:1/-1">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">Status</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-sent" style="accent-color:var(--accent);width:15px;height:15px"> Email Sent</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-responded" style="accent-color:var(--accent);width:15px;height:15px"> Got Response</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--text2)"><input type="checkbox" id="ot-f-positive" style="accent-color:var(--accent);width:15px;height:15px"> Positive</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:#818CF8"><input type="checkbox" id="ot-f-referred" style="accent-color:#818CF8;width:15px;height:15px"> Referred to Someone</label>
-        </div>
-      </div>
-      <div style="grid-column:1/-1">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notes</label>
-        <input id="ot-f-outcome" placeholder="e.g. Forwarded to PhD student, Zoom call scheduled..." style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
-      <button onclick="closeOutreachModal()" style="padding:8px 18px;border-radius:7px;border:1px solid var(--border2);background:none;color:var(--muted);font-size:13px;cursor:pointer">Cancel</button>
-      <button id="ot-save-btn" onclick="saveOutreachEntry()" style="padding:8px 20px;border-radius:7px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Save Entry</button>
     </div>
   </div>
 </div>
@@ -1296,7 +1180,7 @@ function exportToExcel() {
 /* In-memory cache — mirrors Firebase, makes all reads synchronous */
 let _cache = {
   prog: {}, custom: [], deleted: {}, overrides: {},
-  nextId: 1001, is: null, li: {}, resume: "", outreach: null
+  nextId: 1001, is: null, li: {}, resume: ""
 };
 
 /* Write helpers — update cache immediately, then sync to Firebase */
@@ -1332,16 +1216,12 @@ _fbRef("").on("value", snap => {
     _cache.is = Object.values(data.is);
   }
 
-  // Outreach tracker
-  _cache.outreach = data.outreach ? Object.values(data.outreach) : [];
-
   if (!_fbReady) {
     _fbReady = true;
     rebuildPortfolio();
     renderPortfolio();
     renderRequirements();
     renderOutreach();
-    renderOutreachTracker();
     renderWaivers();
     renderBudget();
     renderAppTracker();
@@ -1627,23 +1507,12 @@ function isIsUpcoming(s) {
 }
 
 function renderIS() {
-  const STATUS_O = {upcoming:0,registered:1,attended:2,missed:3};
-  const IS_VAL = {
-    program:    s => (s.program||"").toLowerCase(),
-    date:       s => s.date ? new Date(s.date).getTime() : 0,
-    format:     s => (s.format||"").toLowerCase(),
-    topic:      s => (s.topic||"").toLowerCase(),
-    registered: s => s.registered==="yes" ? 0 : 1,
-    status:     s => STATUS_O[s.status] ?? 9,
-  };
-  const arr = loadIS();
+  const arr = loadIS().sort(isDateSort);
   const tbody = document.getElementById("is-tbody");
   const empty = document.getElementById("is-empty");
   if (!tbody) return;
 
-  const filtered = arr.filter(s => isMatchesFilter(s, isActiveFilter))
-    .sort((a,b) => _cmp((IS_VAL[IS_S.col]||IS_VAL.date)(a),(IS_VAL[IS_S.col]||IS_VAL.date)(b),IS_S.dir));
-  _updateArrows(IS_S, {program:"is-th-program",date:"is-th-date",format:"is-th-format",topic:"is-th-topic",registered:"is-th-reg",status:"is-th-status"});
+  const filtered = arr.filter(s => isMatchesFilter(s, isActiveFilter));
 
   // counts
   const el = id => document.getElementById(id);
@@ -1669,8 +1538,8 @@ function renderIS() {
       <td>${isStatusChip(s.status)}</td>
       <td style="font-size:11.5px;color:var(--muted);max-width:200px">${s.notes || "—"}</td>
       <td style="white-space:nowrap">
-        <button onclick="editISEntry('${s.id}')" class="row-btn" title="Edit">✎</button>
-        <button onclick="deleteISEntry('${s.id}')" class="row-btn danger" title="Delete">✕</button>
+        <button onclick="editISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Edit">✎</button>
+        <button onclick="deleteISEntry('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;font-size:13px" title="Delete">✕</button>
       </td>
     </tr>`).join("");
 }
@@ -2103,22 +1972,11 @@ function fullChecklistHTML(id) {
    RENDER PORTFOLIO
 ──────────────────────────────────────────────────────────── */
 /* ── Portfolio filter state ── */
-const PF = { tier:"all", fit:"all", gre:"all", nynj:false, search:"" };
-const PS   = { col:"avs",      dir:-1 }; // col = sort key, dir = 1 asc / -1 desc
-/* ── Per-table sort states ───────────────────────────────── */
-const OT_S  = {col:"dateSent", dir:-1};  // Outreach Tracker
-const IS_S  = {col:"date",     dir:-1};  // Info Sessions
-const REQ_S = {col:"deadline", dir: 1};  // Requirements
-const APT_S = {col:"deadline", dir: 1};  // App Tracker
-const WAI_S = {col:"fee",      dir:-1};  // Fee Waivers
-const BUD_S = {col:"fee",      dir:-1};  // Budget Breakdown
-const ORP_S = {col:"pri",      dir: 1};  // Outreach Priority
-/* ── filter state for outreach tracker ───────────────────── */
-let otActiveFilter = "all";
+const PF = { tier:"all", fit:"all", gre:"all", nynj:false };
+const PS = { col:"avs", dir:-1 }; // col = sort key, dir = 1 asc / -1 desc
 
 /* Returns PORTFOLIO filtered by current PF state — used by all tabs */
 function filteredPortfolio() {
-  const q = (PF.search || "").toLowerCase().trim();
   return PORTFOLIO.filter(p => {
     if (PF.nynj && !p.nynj) return false;
     if (PF.tier !== "all" && getEffectiveTier(p.id) !== PF.tier) return false;
@@ -2130,22 +1988,8 @@ function filteredPortfolio() {
       const g = (p.gre || "").toLowerCase();
       if (g !== PF.gre.toLowerCase()) return false;
     }
-    if (q) {
-      const haystack = [
-        p.name, p.dept, p.location,
-        toArr(p.faculty).join(" "),
-        toArr(p.threads).join(" "),
-        p.notes || ""
-      ].join(" ").toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
     return true;
   });
-}
-
-function pfSearch(val) {
-  PF.search = val;
-  renderAllTabs();
 }
 
 /* Re-renders every data tab so filters apply everywhere */
@@ -2155,7 +1999,6 @@ function renderAllTabs() {
   renderWaivers();
   renderBudget();
   renderAppTracker();
-  renderOutreachTracker();
 }
 
 function pfFilter(dim, val, btn) {
@@ -2194,34 +2037,6 @@ function pfSortVal(p, col) {
   }
 }
 
-/* ── Shared sort utilities ───────────────────────────────── */
-function _sa(state, col) { return state.col===col?(state.dir===-1?" ↓":" ↑"):" ⇅"; }
-function _sc(state, col) { return state.col===col?"var(--text)":""; }
-function _mkSort(state, col, defDir) {
-  if (state.col===col) state.dir*=-1;
-  else { state.col=col; state.dir=defDir!==undefined?defDir:1; }
-}
-function _updateArrows(state, idMap) {
-  Object.entries(idMap).forEach(([col, elId]) => {
-    const el = document.getElementById(elId); if (!el) return;
-    const arr = el.querySelector(".sort-arrow");
-    if (arr) arr.textContent = _sa(state, col);
-    el.style.color = state.col===col?"var(--text)":"";
-  });
-}
-function _cmp(a, b, dir) {
-  if (a<b) return -dir; if (a>b) return dir; return 0;
-}
-
-/* ── Per-table sort dispatchers ─────────────────────────── */
-function otSort(col)  { _mkSort(OT_S,  col, -1); renderOutreachTracker(); }
-function isSort(col)  { _mkSort(IS_S,  col, -1); renderIS(); }
-function reqSort(col) { _mkSort(REQ_S, col,  1); renderRequirements(); }
-function aptSort(col) { _mkSort(APT_S, col,  1); renderAppTracker(); }
-function waiSort(col) { _mkSort(WAI_S, col, -1); renderWaivers(); }
-function budSort(col) { _mkSort(BUD_S, col, -1); renderBudget(); }
-function orpSort(col) { _mkSort(ORP_S, col,  1); renderOutreach(); }
-
 function saveFwLink(id, val) {
   const all = loadProg();
   if (!all[id]) all[id] = {};
@@ -2238,7 +2053,8 @@ function fwLinkHTML(id) {
     return `<span style="display:flex;align-items:center;gap:4px">
       <a href="${link}" target="_blank" rel="noopener" title="${tip}"
          style="font-size:11px;color:var(--accent);text-decoration:none;max-width:80px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle">🔗 Link</a>
-      <button onclick="editFwLink(${id})" title="Edit" class="row-btn" style="width:22px;height:22px;font-size:11px">✎</button>
+      <button onclick="editFwLink(${id})" title="Edit"
+        style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;padding:0 2px">✏️</button>
     </span>`;
   }
   return `<button onclick="editFwLink(${id})"
@@ -2360,7 +2176,7 @@ function renderPortfolio() {
 
   // All program cards
   document.getElementById("top-picks-cards").innerHTML = filteredPortfolio().map(p => `
-    <div class="card">
+    <div class="card" onclick="openCardDetail(${p.id})" style="cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 0 0 2px var(--accent)'" onmouseout="this.style.boxShadow=''">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div><div class="card-name">${p.name}</div><div class="card-dept">${p.dept}</div></div>
         ${tierBadge(getEffectiveTier(p.id), p.id)}
@@ -2371,6 +2187,89 @@ function renderPortfolio() {
       <div class="card-faculty">${toArr(p.faculty).join(", ")}</div>
       <div class="card-tags">${toArr(p.threads).map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     </div>`).join("");
+}
+
+/* ────────────────────────────────────────────────────────────
+   FLASHCARD DETAIL PANEL
+──────────────────────────────────────────────────────────── */
+function openCardDetail(id) {
+  const p = PORTFOLIO.find(x => x.id === id);
+  if (!p) return;
+  const prog = getProg(id);
+  const outreachRows = OUTREACH_DATA.filter(r => r.prog === p.name);
+  const sopDraft = getSopDraft(id);
+
+  // Progress section
+  const progressHTML = CHECKLIST.map(c => {
+    const done = prog[c.key];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+      <span style="width:16px;height:16px;border-radius:3px;border:1.5px solid ${done?'var(--accent)':'var(--border2)'};background:${done?'var(--accent-bg)':'none'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)">${done?'✓':''}</span>
+      <span style="font-size:12.5px;color:${done?'var(--text)':'var(--muted)'}">${c.label}</span>
+    </div>`;
+  }).join("");
+
+  // Outreach section
+  const outreachHTML = outreachRows.length ? outreachRows.map(r => `
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;font-size:12.5px;color:var(--text)">${r.faculty}</div>
+      <div style="font-size:11.5px;color:var(--muted);font-family:var(--mono);margin:2px 0">${r.email}</div>
+      <div style="font-size:11.5px;color:var(--text2)">Hook: ${r.hook}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">Contact window: ${r.when}</div>
+    </div>`).join("") : `<p style="font-size:12px;color:var(--muted)">No faculty outreach tracked for this program.</p>`;
+
+  // SOP
+  const sopHTML = sopDraft ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);white-space:pre-wrap;max-height:140px;overflow-y:auto">${sopDraft.replace(/</g,'&lt;')}</div>` : `<p style="font-size:12px;color:var(--muted)">No SOP draft saved yet.</p>`;
+
+  const fitLabel = {reach:"🔴 Reach",match:"🟡 Match",safety:"🟢 Safety"}[prog.fit] || "—";
+
+  document.getElementById("cdp-title").textContent = p.name;
+  document.getElementById("cdp-body").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- LEFT: Portfolio + Requirements -->
+      <div>
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Program Info</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <tr><td style="color:var(--muted);padding:3px 0;width:40%">Department</td><td style="color:var(--text)">${p.dept||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">Location</td><td style="color:var(--text)">${p.location||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">Deadline</td><td style="color:var(--text)">${p.deadline||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">App Fee</td><td style="color:var(--text)">${p.fee===0?"FREE":"$"+p.fee}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">Stipend</td><td style="color:var(--text)">~$${(p.stipend/1000).toFixed(0)}K/yr</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">GRE</td><td style="color:var(--text)">${p.gre||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">TOEFL Min</td><td style="color:var(--text)">${p.toefl||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">SOP Length</td><td style="color:var(--text)">${p.sopLen||"—"}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">LORs</td><td style="color:var(--text)">3</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">AVS</td><td style="color:var(--accent)">${p.avs}/100</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">Tier</td><td>${tierBadge(p.tier)}</td></tr>
+          <tr><td style="color:var(--muted);padding:3px 0">My Fit</td><td style="font-size:12px">${fitLabel}</td></tr>
+        </table>
+
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px">Key Faculty</div>
+        <div style="font-size:12.5px;color:var(--text2)">${toArr(p.faculty).join(", ")||"—"}</div>
+
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px">Research Threads</div>
+        <div>${toArr(p.threads).map(t=>`<span class="tag">${t}</span>`).join(" ")||"—"}</div>
+      </div>
+
+      <!-- RIGHT: Progress + Outreach + SOP -->
+      <div>
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Application Progress</div>
+        ${progressHTML}
+
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px">Faculty Outreach</div>
+        ${outreachHTML}
+
+        <div style="font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px">SOP Draft</div>
+        ${sopHTML}
+      </div>
+    </div>`;
+
+  const panel = document.getElementById("card-detail-panel");
+  panel.style.display = "block";
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function closeCardDetail() {
+  document.getElementById("card-detail-panel").style.display = "none";
 }
 
 /* Parent-side helpers so popup can piggyback on our authenticated Firebase connection */
@@ -2515,20 +2414,7 @@ function parseDeadline(dl) {
   try { return new Date(dl.replace(/,/, "")); } catch(e) { return new Date("2099-01-01"); }
 }
 function renderRequirements() {
-  const GRE_ORDER = {"Required":0,"Optional":1,"Not required":2,"Not considered":3};
-  const REQ_VAL = {
-    name:     p => p.name.toLowerCase(),
-    location: p => (p.location||"").toLowerCase(),
-    deadline: p => parseDeadline(p.deadline).getTime(),
-    fee:      p => p.fee,
-    gre:      p => GRE_ORDER[(p.gre||"Not required")] ?? 2,
-    toefl:    p => (p.toefl||"").toLowerCase(),
-  };
-  const sorted = [...filteredPortfolio()].sort((a,b) => {
-    const fn = REQ_VAL[REQ_S.col] || REQ_VAL.deadline;
-    return _cmp(fn(a), fn(b), REQ_S.dir);
-  });
-  _updateArrows(REQ_S, {name:"req-th-name",location:"req-th-loc",deadline:"req-th-dl",fee:"req-th-fee",gre:"req-th-gre",toefl:"req-th-toefl"});
+  const sorted = [...filteredPortfolio()].sort((a,b) => parseDeadline(a.deadline) - parseDeadline(b.deadline));
   document.getElementById("req-body").innerHTML = sorted.map(p => {
     const sopData = getSopDraft(p.id);
     const hasSop = sopData && sopData.trim().length > 0;
@@ -2571,8 +2457,7 @@ function saveSopModal() {
 /* ────────────────────────────────────────────────────────────
    RENDER FACULTY OUTREACH
 ──────────────────────────────────────────────────────────── */
-function renderOutreach() {
-  const data=[
+const OUTREACH_DATA=[
     {pri:1,faculty:"Akane Sano",          prog:"Rice CS",           tier:"green", email:"a.sano@rice.edu (est.)",             hook:"Physiological signal wearables + affective computing",         when:"Sept 1–15"},
     {pri:1,faculty:"Edison Thomaz",        prog:"UT Austin ECE",     tier:"yellow",email:"ethomaz@utexas.edu (est.)",          hook:"Wearable behavior sensing + daily life physiological signals",  when:"Sept 1–15"},
     {pri:1,faculty:"Rajesh Ranganath",     prog:"NYU Courant CS",    tier:"yellow",email:"rajeshr@cims.nyu.edu (est.)",        hook:"ECG deep learning + probabilistic models for health",           when:"Sept 1–15 (home institution)"},
@@ -2585,313 +2470,19 @@ function renderOutreach() {
     {pri:3,faculty:"Ismael Seañez",        prog:"WashU BME",         tier:"green", email:"iseanezmendivil@wustl.edu (est.)",   hook:"Neural interface + spinal BCI signal processing",             when:"Sept 15 – Oct 1"},
     {pri:3,faculty:"Rosalind Picard",      prog:"MIT Media Lab",     tier:"red",   email:"picard@media.mit.edu (est.)",        hook:"Affective computing + wearable physiological sensing",         when:"Oct 15 (vision-focused)"},
     {pri:4,faculty:"Thomas Ploetz",        prog:"Georgia Tech CS",   tier:"red",   email:"tploetz@gatech.edu (est.)",          hook:"HAR + wearable sensing — cite IMU/label noise work",          when:"Oct 15 – Nov 1"},
-  ];
-  const TIER_O = {green:0,yellow:1,red:2};
-  const ORP_VAL = {
-    pri:     r => r.pri,
-    faculty: r => r.faculty.toLowerCase(),
-    prog:    r => r.prog.toLowerCase(),
-    tier:    r => TIER_O[r.tier] ?? 3,
-  };
-  data.sort((a,b) => _cmp((ORP_VAL[ORP_S.col]||ORP_VAL.pri)(a),(ORP_VAL[ORP_S.col]||ORP_VAL.pri)(b),ORP_S.dir));
-  _updateArrows(ORP_S, {pri:"orp-th-pri",faculty:"orp-th-fac",prog:"orp-th-prog",tier:"orp-th-tier"});
-  const otData = loadOutreach();
-  function _otEntry(faculty, prog) {
-    return otData.find(e => e.faculty.toLowerCase()===faculty.toLowerCase() && e.program.toLowerCase()===prog.toLowerCase()) || {};
-  }
-  function _otTogBtn(faculty, prog, field, val, refStyle) {
-    const cls = refStyle ? (val?" tog-ref":"") : (val?" tog-on":" tog-no");
-    const sym = refStyle ? (val?"✓":"—") : (val?"✓":"✗");
-    return `<button onclick="toggleOTByKey('${faculty.replace(/'/g,"\\'")}','${prog.replace(/'/g,"\\'")}','${field}')" class="row-btn${cls}" style="font-size:14px;font-weight:700" title="${field}">${sym}</button>`;
-  }
-  document.getElementById("outreach-body").innerHTML = data.map(r=>{
-    const oe = _otEntry(r.faculty, r.prog);
-    return `<tr>
-    <td class="num" style="color:${r.pri===1?"var(--red)":r.pri===2?"var(--yellow)":"var(--muted)"}">${r.pri}</td>
-    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
-    <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
-    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"sent",!!oe.sent,false)}</td>
-    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"responded",!!oe.responded,false)}</td>
-    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"positive",!!oe.positive,false)}</td>
-    <td style="text-align:center">${_otTogBtn(r.faculty,r.prog,"referred",!!oe.referred,true)}</td>
-  </tr>`;}).join("");
+];
 
-  renderOutreachTracker();
-}
+function renderOutreach() {
+  const data = OUTREACH_DATA;
 
-/* ────────────────────────────────────────────────────────────
-   FACULTY OUTREACH TRACKER (Firebase-backed)
-──────────────────────────────────────────────────────────── */
-let otEditId = null;
-
-function loadOutreach() { return _cache.outreach || []; }
-function saveOutreach(arr) {
-  _cache.outreach = arr;
-  _fbSet("outreach", _arrToObj(arr));
-}
-
-function otResponseChip(r) {
-  const map = {
-    "No reply":          ["var(--surface2)",   "var(--muted)",   "No Reply"],
-    "Positive":          ["var(--green-bg)",   "var(--green)",   "Positive ✓"],
-    "Negative":          ["var(--red-bg)",     "var(--red)",     "Negative"],
-    "Meeting scheduled": ["var(--accent-bg)",  "var(--accent)",  "Meeting 📅"],
-  };
-  const [bg, col, lbl] = map[r] || map["No reply"];
-  return `<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:700;background:${bg};color:${col};white-space:nowrap">${lbl}</span>`;
-}
-
-function filterOT(f, btn) {
-  otActiveFilter = f;
-  document.querySelectorAll("#ot-filter-row .filter-btn").forEach(b => b.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-  renderOutreachTracker();
-}
-
-function renderOutreachTracker() {
-  const tbody = document.getElementById("outreach-tracker-body");
-  const empty = document.getElementById("ot-empty");
-  const countEl = document.getElementById("ot-count");
-  if (!tbody) return;
-
-  const all = loadOutreach();
-
-  // Stats — using boolean fields
-  const s = {total:all.length, notsent:0, noreply:0, positive:0, meeting:0, negative:0};
-  all.forEach(e => {
-    if (!e.sent)                              s.notsent++;
-    else if (e.sent && !e.responded)          s.noreply++;
-    else if (e.positive)                      s.positive++;
-    else if (e.referred)                      s.meeting++;
-    else                                      s.negative++;
-  });
-  const tid = id => document.getElementById(id);
-  if (tid("ot-stat-total"))    tid("ot-stat-total").textContent    = s.total;
-  if (tid("ot-stat-notsent"))  tid("ot-stat-notsent").textContent  = s.notsent;
-  if (tid("ot-stat-noreply"))  tid("ot-stat-noreply").textContent  = s.noreply;
-  if (tid("ot-stat-positive")) tid("ot-stat-positive").textContent = s.positive;
-  if (tid("ot-stat-meeting"))  tid("ot-stat-meeting").textContent  = s.meeting;
-  if (tid("ot-stat-negative")) tid("ot-stat-negative").textContent = s.negative;
-
-  // Filter
-  const FILTER_MATCH = {
-    "all":      () => true,
-    "not-sent": e => !e.sent,
-    "no-reply": e => e.sent && !e.responded,
-    "positive": e => !!e.positive,
-    "referred": e => !!e.referred,
-    "negative": e => e.responded && !e.positive && !e.referred,
-  };
-  const matchFn = FILTER_MATCH[otActiveFilter] || FILTER_MATCH.all;
-  let arr = all.filter(matchFn);
-
-  // Sort
-  const OT_VAL = {
-    faculty:   e => (e.faculty||"").toLowerCase(),
-    program:   e => (e.program||"").toLowerCase(),
-    dept:      e => (e.dept||"").toLowerCase(),
-    email:     e => (e.email||"").toLowerCase(),
-    dateSent:  e => e.dateSent || "",
-    sent:      e => e.sent ? 0 : 1,
-    responded: e => e.responded ? 0 : 1,
-    positive:  e => e.positive ? 0 : 1,
-    referred:  e => e.referred ? 0 : 1,
-    outcome:   e => (e.outcome||"").toLowerCase(),
-  };
-  arr = arr.slice().sort((a,b) => {
-    const fn = OT_VAL[OT_S.col] || OT_VAL.dateSent;
-    return _cmp(fn(a), fn(b), OT_S.dir);
-  });
-  _updateArrows(OT_S, {faculty:"ot-th-faculty",program:"ot-th-program",dept:"ot-th-dept",email:"ot-th-email",dateSent:"ot-th-date",sent:"ot-th-sent",responded:"ot-th-responded",positive:"ot-th-positive",referred:"ot-th-referred",outcome:"ot-th-outcome"});
-
-  if (countEl) countEl.textContent = arr.length !== all.length
-    ? `${arr.length} of ${all.length} shown`
-    : (all.length ? `${all.length} entr${all.length===1?"y":"ies"}` : "");
-
-  if (!arr.length) {
-    tbody.innerHTML = "";
-    if (empty) { empty.style.display = "block"; empty.textContent = all.length ? "No entries match this filter." : "No outreach entries yet — click + Add Entry to log your first email."; }
-    return;
-  }
-  if (empty) empty.style.display = "none";
-
-  tbody.innerHTML = arr.map(e => `
-    <tr>
-      <td style="font-weight:600;color:var(--text);white-space:nowrap">${e.faculty || "—"}</td>
-      <td style="font-size:12px;color:var(--text2);white-space:nowrap">${e.program || "—"}</td>
-      <td style="font-size:11px;color:var(--muted)">${e.dept || "—"}</td>
-      <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${e.email || "—"}</td>
-      <td style="font-family:var(--mono);font-size:11.5px;white-space:nowrap;color:var(--text2)">${e.dateSent || "—"}</td>
-      <td style="text-align:center"><button onclick="toggleOT('${e.id}','sent')" class="row-btn${e.sent?' tog-on':' tog-no'}" title="Toggle sent" style="font-size:15px;font-weight:700">${e.sent?'✓':'✗'}</button></td>
-      <td style="text-align:center"><button onclick="toggleOT('${e.id}','responded')" class="row-btn${e.responded?' tog-on':' tog-no'}" title="Toggle response received" style="font-size:15px;font-weight:700">${e.responded?'✓':'✗'}</button></td>
-      <td style="text-align:center"><button onclick="toggleOT('${e.id}','positive')" class="row-btn${e.positive?' tog-on':' tog-no'}" title="Toggle positive response" style="font-size:15px;font-weight:700">${e.positive?'✓':'✗'}</button></td>
-      <td style="text-align:center"><button onclick="toggleOT('${e.id}','referred')" class="row-btn${e.referred?' tog-ref':''}" title="Toggle referred to someone" style="font-size:15px;font-weight:700">${e.referred?'✓':'—'}</button></td>
-      <td style="font-size:12px;color:var(--text2)">${e.outcome || "—"}</td>
-      <td style="white-space:nowrap">
-        <button onclick="editOutreachEntry('${e.id}')" class="row-btn" title="Edit">✎</button>
-        <button onclick="deleteOutreachEntry('${e.id}')" class="row-btn danger" title="Delete">✕</button>
-      </td>
-    </tr>`).join("");
-}
-
-function openOutreachModal(editId) {
-  otEditId = editId || null;
-  const modal = document.getElementById("ot-modal");
-  const title = document.getElementById("ot-modal-title");
-  const btn   = document.getElementById("ot-save-btn");
-
-  if (editId) {
-    title.textContent = "Edit Outreach Entry";
-    btn.textContent = "Save Changes";
-    const e = loadOutreach().find(x => x.id === editId);
-    if (e) {
-      document.getElementById("ot-f-faculty").value  = e.faculty  || "";
-      document.getElementById("ot-f-program").value  = e.program  || "";
-      document.getElementById("ot-f-dept").value     = e.dept     || "";
-      document.getElementById("ot-f-email").value    = e.email    || "";
-      document.getElementById("ot-f-date").value     = e.dateSent || "";
-      document.getElementById("ot-f-sent").checked      = !!e.sent;
-      document.getElementById("ot-f-responded").checked = !!e.responded;
-      document.getElementById("ot-f-positive").checked  = !!e.positive;
-      document.getElementById("ot-f-referred").checked  = !!e.referred;
-      document.getElementById("ot-f-outcome").value     = e.outcome || "";
-    }
-  } else {
-    title.textContent = "Add Outreach Entry";
-    btn.textContent = "Save Entry";
-    document.getElementById("ot-f-faculty").value  = "";
-    document.getElementById("ot-f-program").value  = "";
-    document.getElementById("ot-f-dept").value     = "";
-    document.getElementById("ot-f-email").value    = "";
-    document.getElementById("ot-f-date").value     = new Date().toISOString().slice(0,10);
-    document.getElementById("ot-f-sent").checked      = false;
-    document.getElementById("ot-f-responded").checked = false;
-    document.getElementById("ot-f-positive").checked  = false;
-    document.getElementById("ot-f-referred").checked  = false;
-    document.getElementById("ot-f-outcome").value     = "";
-  }
-  modal.style.display = "flex";
-  setTimeout(() => { const f = document.getElementById("ot-f-faculty"); if (f) f.focus(); }, 60);
-}
-
-function closeOutreachModal() {
-  document.getElementById("ot-modal").style.display = "none";
-  otEditId = null;
-}
-
-function saveOutreachEntry() {
-  const faculty = document.getElementById("ot-f-faculty").value.trim();
-  if (!faculty) { alert("Faculty name is required."); return; }
-
-  const entry = {
-    id:       otEditId || ("ot_" + Date.now()),
-    faculty:  faculty,
-    program:  document.getElementById("ot-f-program").value.trim(),
-    dept:     document.getElementById("ot-f-dept").value.trim(),
-    email:    document.getElementById("ot-f-email").value.trim(),
-    dateSent: document.getElementById("ot-f-date").value,
-    sent:      document.getElementById("ot-f-sent").checked,
-    responded: document.getElementById("ot-f-responded").checked,
-    positive:  document.getElementById("ot-f-positive").checked,
-    referred:  document.getElementById("ot-f-referred").checked,
-    outcome:   document.getElementById("ot-f-outcome").value.trim(),
-  };
-
-  const arr = loadOutreach();
-  if (otEditId) {
-    const idx = arr.findIndex(x => x.id === otEditId);
-    if (idx >= 0) arr[idx] = entry; else arr.push(entry);
-  } else {
-    arr.push(entry);
-  }
-  saveOutreach(arr);
-  closeOutreachModal();
-  renderOutreachTracker();
-}
-
-function toggleOT(id, field) {
-  const arr = loadOutreach();
-  const idx = arr.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  arr[idx][field] = !arr[idx][field];
-  // Auto-stamp date when marking as sent
-  if (field === "sent" && arr[idx].sent && !arr[idx].dateSent)
-    arr[idx].dateSent = new Date().toISOString().slice(0,10);
-  saveOutreach(arr);
-  renderOutreachTracker();
-  renderOutreach(); // keep priority list in sync
-}
-
-function toggleOTByKey(faculty, prog, field) {
-  const arr = loadOutreach();
-  let idx = arr.findIndex(e =>
-    e.faculty.toLowerCase() === faculty.toLowerCase() &&
-    e.program.toLowerCase() === prog.toLowerCase()
-  );
-  if (idx < 0) {
-    // Create entry on the fly
-    arr.push({
-      id: "ot_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
-      faculty, program: prog, dept: "", email: "", dateSent: "",
-      sent: false, responded: false, positive: false, referred: false, outcome: ""
-    });
-    idx = arr.length - 1;
-  }
-  arr[idx][field] = !arr[idx][field];
-  if (field === "sent" && arr[idx].sent && !arr[idx].dateSent)
-    arr[idx].dateSent = new Date().toISOString().slice(0,10);
-  saveOutreach(arr);
-  renderOutreachTracker();
-  renderOutreach();
-}
-
-function editOutreachEntry(id) { openOutreachModal(id); }
-
-function deleteOutreachEntry(id) {
-  if (!confirm("Delete this outreach entry?")) return;
-  saveOutreach(loadOutreach().filter(x => x.id !== id));
-  renderOutreachTracker();
-}
-
-function seedOutreachFromPortfolio() {
-  const existing = loadOutreach();
-  // Build a set of "faculty|program" keys already in tracker
-  const existingKeys = new Set(existing.map(e => (e.faculty + "|" + e.program).toLowerCase()));
-
-  const toAdd = [];
-  PORTFOLIO.forEach(p => {
-    toArr(p.faculty).forEach(f => {
-      const key = (f + "|" + p.name).toLowerCase();
-      if (!existingKeys.has(key)) {
-        toAdd.push({
-          id:       "ot_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
-          faculty:  f,
-          program:  p.name,
-          dept:     p.dept || "",
-          email:    "",
-          dateSent:  "",
-          sent:      false,
-          responded: false,
-          positive:  false,
-          referred:  false,
-          outcome:   "",
-        });
-      }
-    });
-  });
-
-  if (!toAdd.length) {
-    alert("All portfolio faculty are already in the tracker.");
-    return;
-  }
-
-  const msg = existing.length
-    ? `Add ${toAdd.length} new faculty row(s) from your portfolio? (${existing.length} existing entries will be kept.)`
-    : `Pre-fill ${toAdd.length} rows from your portfolio faculty?`;
-  if (!confirm(msg)) return;
-
-  saveOutreach([...existing, ...toAdd]);
-  renderOutreachTracker();
+  document.getElementById("outreach-tracker-body").innerHTML = data.map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td>
+    <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.email}</td>
+    <td class="mono" style="color:var(--muted)">—</td>
+    <td><span class="status-chip chip-not-started">Not Sent</span></td>
+    <td class="mono" style="color:var(--muted)">—</td>
+    <td><span class="status-chip chip-not-started">Pending</span></td>
+  </tr>`).join("");
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -2900,20 +2491,8 @@ function seedOutreachFromPortfolio() {
 function getWaiverHow(id){const m={1:"Automatically free — no action needed",2:"Apply via UCSD Graduate Division international waiver portal",5:"Submit financial hardship waiver form with application",6:"Attend WashU BME recruitment event for waiver code",7:"Attend CMU HCII virtual info session for waiver code"};return m[id]||"Check program website";}
 function getWaiverDl(id){const m={1:"N/A",2:"With application (Jan 5)",5:"With application (Jan 3)",6:"Oct–Nov (before event)",7:"Oct–Nov (before session)"};return m[id]||"Check program website";}
 function renderWaivers() {
-  const WAI_STATUS_O = {confirmed:0,offered:1,unknown:2,"not available":3};
-  const WAI_VAL = {
-    name:     r => r.name.toLowerCase(),
-    location: r => r.location.toLowerCase(),
-    fee:      r => r.fee,
-    type:     r => r.type.toLowerCase(),
-    status:   r => WAI_STATUS_O[r.status] ?? 9,
-    dl:       r => r.dl||"",
-    savings:  r => r.avail ? r.fee : 0,
-  };
   const rows = filteredPortfolio().map(p=>({name:p.name,location:p.location||"—",tier:p.tier,fee:p.fee,feeSrc:p.feeSrc,avail:p.fw,type:p.wt||"None confirmed",status:p.ws,how:getWaiverHow(p.id),dl:getWaiverDl(p.id)}));
-  const sorted = [...rows].sort((a,b)=>_cmp((WAI_VAL[WAI_S.col]||WAI_VAL.fee)(a),(WAI_VAL[WAI_S.col]||WAI_VAL.fee)(b),WAI_S.dir));
-  _updateArrows(WAI_S, {name:"wai-th-name",location:"wai-th-loc",fee:"wai-th-fee",type:"wai-th-type",status:"wai-th-status",dl:"wai-th-dl",savings:"wai-th-savings"});
-  document.getElementById("waiver-body").innerHTML = sorted.map(r=>`<tr>
+  document.getElementById("waiver-body").innerHTML = rows.sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.name}</td>
     <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${r.location}</td>
     <td>${fmtFee(r.fee)} ${srcBadge(r.feeSrc)}</td>
@@ -2923,7 +2502,7 @@ function renderWaivers() {
     <td style="font-size:11.5px;color:var(--muted)">${r.dl}</td>
     <td>${r.avail?`<span class="savings-badge">-$${r.fee}</span>`:`<span style="color:var(--muted)">—</span>`}</td>
   </tr>`).join("");
-  document.getElementById("waiver-tracker-body").innerHTML = sorted.filter(r=>r.avail).map(r=>`<tr>
+  document.getElementById("waiver-tracker-body").innerHTML = rows.filter(r=>r.avail).sort((a,b)=>b.fee-a.fee).map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.name}</td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${r.location}</td><td>${fmtFee(r.fee)}</td>
     <td style="font-size:11.5px">${r.type}</td>
     <td><span class="status-chip chip-not-started">Not Applied</span></td>
@@ -2936,18 +2515,7 @@ function renderWaivers() {
    RENDER BUDGET BREAKDOWN
 ──────────────────────────────────────────────────────────── */
 function renderBudget() {
-  const TIER_BUD_O = {reach:0,target:1,safety:2};
-  const BUD_VAL = {
-    name:     p => p.name.toLowerCase(),
-    location: p => (p.location||"").toLowerCase(),
-    tier:     p => TIER_BUD_O[p.tier] ?? 9,
-    fee:      p => p.fee,
-    waiver:   p => p.fw ? 0 : 1,
-    priority: p => p.fw ? (p.ws==="confirmed" ? 0 : 1) : 2,
-  };
-  const sorted = [...filteredPortfolio()].sort((a,b)=>_cmp((BUD_VAL[BUD_S.col]||BUD_VAL.fee)(a),(BUD_VAL[BUD_S.col]||BUD_VAL.fee)(b),BUD_S.dir));
-  _updateArrows(BUD_S, {name:"bud-th-name",location:"bud-th-loc",tier:"bud-th-tier",fee:"bud-th-fee",waiver:"bud-th-waiver",priority:"bud-th-priority"});
-  document.getElementById("budget-breakdown-body").innerHTML = sorted.map(p=>`<tr>
+  document.getElementById("budget-breakdown-body").innerHTML = [...filteredPortfolio()].sort((a,b)=>b.fee-a.fee).map(p=>`<tr>
     <td style="font-weight:600;color:var(--text)">${p.name}</td><td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${p.location||"—"}</td><td>${tierBadge(p.tier)}</td>
     <td>${fmtFee(p.fee)} ${srcBadge(p.feeSrc)}</td>
     <td style="font-size:11.5px">${p.feeSrc}</td>
@@ -2960,20 +2528,7 @@ function renderBudget() {
    RENDER APPLICATION TRACKER (with full checkboxes)
 ──────────────────────────────────────────────────────────── */
 function renderAppTracker() {
-  const TIER_APT_O = {reach:0,target:1,safety:2};
-  const APT_VAL = {
-    name:     p => p.name.toLowerCase(),
-    location: p => (p.location||"").toLowerCase(),
-    tier:     p => TIER_APT_O[p.tier] ?? 9,
-    deadline: p => parseDeadline(p.deadline).getTime(),
-    fit:      p => p.avs ?? 0,
-    progress: p => {
-      const checks = _cache.checks?.[p.id] || {};
-      return ["loginId","sop","faculty","researchDoc","feeWaiver"].filter(k=>checks[k]).length;
-    },
-  };
-  const sorted = [...filteredPortfolio()].sort((a,b)=>_cmp((APT_VAL[APT_S.col]||APT_VAL.deadline)(a),(APT_VAL[APT_S.col]||APT_VAL.deadline)(b),APT_S.dir));
-  _updateArrows(APT_S, {name:"apt-th-name",location:"apt-th-loc",tier:"apt-th-tier",deadline:"apt-th-dl",fit:"apt-th-fit",progress:"apt-th-prog"});
+  const sorted = [...filteredPortfolio()].sort((a,b) => new Date(a.deadline.replace(/,/,"")) - new Date(b.deadline.replace(/,/,"")));
   document.getElementById("app-tracker-body").innerHTML = sorted.map(p => {
     return `<tr>
       <td class="tracker-prog-cell">
@@ -2996,6 +2551,8 @@ function renderAppTracker() {
       </td>
     </tr>`;
   }).join("");
+  // Restore checkbox states after DOM rebuild
+  sorted.forEach(p => refreshProgUI(p.id));
 }
 
 /* ────────────────────────────────────────────────────────────
