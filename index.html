@@ -2477,22 +2477,38 @@ const OUTREACH_DATA=[
 ];
 
 function renderOutreach() {
-  const data = OUTREACH_DATA;
+  // Build rows from portfolio faculty arrays; augment with OUTREACH_DATA details when name matches
+  const rows = [];
+  filteredPortfolio().forEach(p => {
+    toArr(p.faculty).forEach(name => {
+      const name_trim = name.trim();
+      if (!name_trim) return;
+      const extra = OUTREACH_DATA.find(r => r.faculty.toLowerCase() === name_trim.toLowerCase()) || {};
+      rows.push({
+        faculty: name_trim,
+        prog: p.name,
+        tier: p.tier,
+        email: extra.email || "—",
+        hook: extra.hook || "—",
+        when: extra.when || "—",
+      });
+    });
+  });
 
-  document.getElementById("outreach-body").innerHTML = data.map(r=>`<tr>
+  document.getElementById("outreach-body").innerHTML = rows.length ? rows.map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td><td>${tierBadge(r.tier)}</td>
     <td style="font-size:11px;font-family:var(--mono);color:var(--muted)">${r.email}</td>
     <td style="font-size:11.5px">${r.hook}</td><td style="font-size:11.5px">${r.when}</td>
-  </tr>`).join("");
+  </tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet.</td></tr>`;
 
-  document.getElementById("outreach-tracker-body").innerHTML = data.map(r=>`<tr>
+  document.getElementById("outreach-tracker-body").innerHTML = rows.length ? rows.map(r=>`<tr>
     <td style="font-weight:600;color:var(--text)">${r.faculty}</td><td>${r.prog}</td>
     <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.email}</td>
     <td class="mono" style="color:var(--muted)">—</td>
     <td><span class="status-chip chip-not-started">Not Sent</span></td>
     <td class="mono" style="color:var(--muted)">—</td>
     <td><span class="status-chip chip-not-started">Pending</span></td>
-  </tr>`).join("");
+  </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet.</td></tr>`;
 }
 
 /* ────────────────────────────────────────────────────────────
