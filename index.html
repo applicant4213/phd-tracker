@@ -490,9 +490,9 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     <span class="field">[Your name]</span>
   </div>
   <div class="section-head">Faculty Contacts</div>
-  <div class="table-wrap" style="overflow-x:auto">
+  <div class="table-wrap" style="overflow-x:auto;overflow-y:auto;max-height:520px">
   <table id="outreach-contact-table">
-    <thead><tr>
+    <thead style="position:sticky;top:0;z-index:10"><tr>
       <th onclick="sortOutreach('faculty')"  style="cursor:pointer;white-space:nowrap">Faculty <span style="font-size:9px;color:var(--muted)" id="oc-sort-faculty">↕</span></th>
       <th onclick="sortOutreach('prog')"     style="cursor:pointer;white-space:nowrap">University <span style="font-size:9px;color:var(--muted)" id="oc-sort-prog">↕</span></th>
       <th>Dept</th>
