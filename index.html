@@ -2525,20 +2525,23 @@ function facDeleteRow(progId, name) {
   renderOutreach();
 }
 
+// Escape name for use inside a double-quoted onclick attribute
+function _facEsc(name) { return name.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
 // Binary toggle button: true=✓ green, anything else=✗ red
 function _facBtn(progId, name, field, val) {
-  const pj = JSON.stringify(progId), nj = JSON.stringify(name), fj = JSON.stringify(field);
+  const call = `facCycleField(${progId},'${_facEsc(name)}','${field}')`;
   if (val === true)
-    return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,.12)">✓</div>`;
-  return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--red);color:var(--red);background:rgba(239,68,68,.12)">✗</div>`;
+    return `<div onclick="${call}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,.12)">✓</div>`;
+  return `<div onclick="${call}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--red);color:var(--red);background:rgba(239,68,68,.12)">✗</div>`;
 }
 
 // Referred button: true=✓ green, otherwise dash (—)
 function _facReferredBtn(progId, name, val) {
-  const pj = JSON.stringify(progId), nj = JSON.stringify(name), fj = JSON.stringify('referred');
+  const call = `facCycleField(${progId},'${_facEsc(name)}','referred')`;
   if (val === true)
-    return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,.12)">✓</div>`;
-  return `<div onclick="facCycleField(${pj},${nj},${fj})" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;border:2px solid var(--border2);color:var(--muted)">—</div>`;
+    return `<div onclick="${call}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:800;border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,.12)">✓</div>`;
+  return `<div onclick="${call}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;border:2px solid var(--border2);color:var(--muted)">—</div>`;
 }
 
 let _ocSort = {key:'faculty', dir:1};
@@ -2588,7 +2591,7 @@ function renderOutreach() {
   });
 
   document.getElementById("outreach-body").innerHTML = rows.length ? rows.map(r => {
-    const pj = JSON.stringify(r.progId), nj = JSON.stringify(r.faculty);
+    const ne = _facEsc(r.faculty);
     return `<tr>
     <td style="font-weight:600;color:var(--text);white-space:nowrap">${r.faculty}</td>
     <td style="font-size:12px;color:var(--accent)">${r.prog}</td>
@@ -2599,9 +2602,9 @@ function renderOutreach() {
     <td style="text-align:center">${_facBtn(r.progId,r.faculty,'response',r.response)}</td>
     <td style="text-align:center">${_facBtn(r.progId,r.faculty,'positive',r.positive)}</td>
     <td style="text-align:center">${_facReferredBtn(r.progId,r.faculty,r.referred)}</td>
-    <td><span contenteditable="true" style="font-size:11.5px;color:var(--text2);outline:none;display:block;min-width:100px;padding:3px 6px;border-radius:4px;border:1px solid transparent" onfocus="this.style.border='1px solid var(--border2)'" onblur="this.style.border='1px solid transparent';facSetField(${pj},${nj},'notes',this.textContent.trim())">${r.notes === '—' ? '' : r.notes}</span></td>
+    <td><span contenteditable="true" style="font-size:11.5px;color:var(--text2);outline:none;display:block;min-width:100px;padding:3px 6px;border-radius:4px;border:1px solid transparent" onfocus="this.style.border='1px solid var(--border2)'" onblur="this.style.border='1px solid transparent';facSetField(${r.progId},'${ne}','notes',this.textContent.trim())">${r.notes}</span></td>
     <td style="white-space:nowrap;text-align:right">
-      <span onclick="facDeleteRow(${pj},${nj})" title="Remove from list" style="cursor:pointer;color:var(--muted);font-size:14px;padding:2px 5px;border-radius:4px;border:1px solid var(--border2)">✕</span>
+      <span onclick="facDeleteRow(${r.progId},'${ne}')" title="Remove from list" style="cursor:pointer;color:var(--muted);font-size:14px;padding:2px 5px;border-radius:4px;border:1px solid var(--border2)">✕</span>
     </td>
   </tr>`;
   }).join("") : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:14px">No faculty in portfolio yet. Add faculty names to programs in the Portfolio tab.</td></tr>`;
